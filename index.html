@@ -20,6 +20,8 @@
   html, body {
     margin: 0;
     height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
     background: #0c0a09;
     font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -133,18 +135,56 @@
     color: #f3ede4;
   }
   .dial-sep {
-    width: 13px;
+    min-width: 12px;
     height: 38px;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0 1px;
     font-family: 'Space Mono', monospace;
     font-weight: 700;
-    font-size: 20px;
+    font-size: 17px;
     color: rgba(243,237,228,.4);
   }
   @keyframes dialSpin {
     from { transform: translateY(0); }
+  }
+
+  @keyframes swipeHint {
+    0%, 100% { transform: translateY(0); opacity: .55; }
+    50%      { transform: translateY(-6px); opacity: 1; }
+  }
+
+  .plot-map-bg {
+    background-image:
+      repeating-linear-gradient(0deg, rgba(243,237,228,.07) 0, rgba(243,237,228,.07) 1px, transparent 1px, transparent 46px),
+      repeating-linear-gradient(90deg, rgba(243,237,228,.07) 0, rgba(243,237,228,.07) 1px, transparent 1px, transparent 46px);
+  }
+
+  .plot-pin {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    transform: translate(-50%, -50%);
+  }
+  .plot-pin-ring {
+    position: absolute;
+    top: 0; left: 0;
+    width: 30px;
+    height: 30px;
+    margin: -15px 0 0 -15px;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+    animation: ripple 2.6s ease-out infinite;
+  }
+  .plot-pin-dot {
+    position: absolute;
+    top: 0; left: 0;
+    width: 6px;
+    height: 6px;
+    margin: -3px 0 0 -3px;
+    border-radius: 50%;
+    background: var(--accent);
   }
 
   button { font: inherit; }
@@ -209,58 +249,93 @@
     </div>
   </div>
 
-  <!-- Step 2 — coordinate dial -->
-  <div class="screen" data-step="2" style="background:#0c0a09; color:#f3ede4; cursor:pointer; align-items:center; justify-content:center; padding:32px;">
-    <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:13px; letter-spacing:.06em; color:rgba(243,237,228,.55);">당신의 섬이 이 순간, 분양되었습니다</div>
-    <div style="margin-top:44px; font-size:11px; letter-spacing:.18em; color:rgba(243,237,228,.4);">PLOT &middot; DATE</div>
-    <div id="dial-date" style="display:flex; margin-top:8px;"></div>
-    <div style="margin-top:30px; font-size:11px; letter-spacing:.18em; color:rgba(243,237,228,.4);">PLOT &middot; TIME</div>
-    <div id="dial-time" style="display:flex; margin-top:8px;"></div>
-  </div>
-
-  <!-- Step 3 — story -->
-  <div class="screen" data-step="3" style="cursor:pointer; background:#d9d6d1;">
-    <img src="story-hero.jpg" alt="iLanD Lonely" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
-    <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,.28) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 72%, rgba(0,0,0,.22) 100%);"></div>
-  </div>
-
-  <!-- Step 4 — detail -->
-  <div class="screen" data-step="4" style="background:#eeece7; color:#2b2622; cursor:pointer; overflow-y:auto; padding:28px 26px 110px;">
-    <div style="border-radius:18px; overflow:hidden; box-shadow:0 18px 30px -18px rgba(20,16,12,.35);">
-      <img src="tray-detail.jpg" alt="iLanD tray detail" style="display:block; width:100%; height:220px; object-fit:cover;">
+  <!-- Step 2 — coordinate dial (swipe up to continue) -->
+  <div class="screen plot-map-bg" data-step="2" style="background-color:#0c0a09; color:#f3ede4; padding:0;">
+    <div id="dial-pin" class="plot-pin" style="left:50%; top:50%;">
+      <span class="plot-pin-ring"></span>
+      <span class="plot-pin-ring" style="animation-delay:.7s;"></span>
+      <span class="plot-pin-dot"></span>
     </div>
-    <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:12px; letter-spacing:.1em; color:#8a8074; margin-top:24px;">82부동산 &middot; 섬 분양 컬렉션</div>
-    <div style="font-family:'Playfair Display', serif; font-weight:600; font-style:italic; font-size:32px; margin-top:6px;">Lonely</div>
-    <div style="font-size:13.5px; line-height:1.7; color:#4a433c; margin-top:12px;">
-      Solitude is not sadness, but a moment of profound quiet where you can finally face your true self. The calm ivory candle paired with the dark charcoal tray provides visual tranquility, offering gentle comfort as you rely on a single flame during your time alone.
-    </div>
-    <div style="margin-top:28px; display:flex; flex-direction:column;">
-      <div style="display:flex; justify-content:space-between; padding:13px 0; border-top:1px solid rgba(43,38,34,.14);">
-        <span style="font-size:11.5px; letter-spacing:.12em; color:#8a8074;">SCENT</span>
-        <span style="font-size:13px; color:#8a8074;">[향 노트를 입력하세요]</span>
-      </div>
-      <div style="display:flex; justify-content:space-between; padding:13px 0; border-top:1px solid rgba(43,38,34,.14);">
-        <span style="font-size:11.5px; letter-spacing:.12em; color:#8a8074;">BURN TIME</span>
-        <span style="font-size:13px; color:#8a8074;">[연소 시간을 입력하세요]</span>
-      </div>
-      <div style="display:flex; justify-content:space-between; padding:13px 0; border-top:1px solid rgba(43,38,34,.14); border-bottom:1px solid rgba(43,38,34,.14);">
-        <span style="font-size:11.5px; letter-spacing:.12em; color:#8a8074;">MATERIAL</span>
-        <span style="font-size:13px; color:#8a8074;">[소재를 입력하세요]</span>
+
+    <div id="dial-drag" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; padding:32px; touch-action:none; cursor:grab;">
+      <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:13px; letter-spacing:.06em; color:rgba(243,237,228,.55);">당신의 섬이 이 순간, 분양되었습니다</div>
+      <div style="margin-top:34px; font-size:11px; letter-spacing:.18em; color:rgba(243,237,228,.4);">LAT</div>
+      <div id="dial-lat" style="display:flex; margin-top:6px;"></div>
+      <div style="margin-top:20px; font-size:11px; letter-spacing:.18em; color:rgba(243,237,228,.4);">LNG</div>
+      <div id="dial-lng" style="display:flex; margin-top:6px;"></div>
+      <div style="margin-top:20px; font-size:11px; letter-spacing:.18em; color:rgba(243,237,228,.4);">ISLAND NO.</div>
+      <div id="dial-serial" style="display:flex; margin-top:6px;"></div>
+
+      <div style="margin-top:40px; display:flex; flex-direction:column; align-items:center; gap:7px; color:rgba(243,237,228,.4); animation: swipeHint 1.8s ease-in-out infinite;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M12 5L6 11M12 5L18 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="font-size:11px; letter-spacing:.08em;">위로 드래그하여 계속</span>
       </div>
     </div>
-    <div class="tap-hint" style="margin-top:22px; color:#9b9184;">탭하여 계속하기</div>
   </div>
 
-  <!-- Step 5 — closing -->
-  <div class="screen" data-step="5" style="background:#0c0a09; color:#f3ede4; align-items:center; justify-content:center; text-align:center; padding:40px;">
-    <div style="font-family:'Playfair Display', serif; font-weight:600; font-size:14px; letter-spacing:.3em; color:rgba(243,237,228,.7);">iLanD</div>
-    <div style="font-size:10.5px; letter-spacing:.12em; color:rgba(243,237,228,.4); margin-top:8px;">by 82부동산</div>
-    <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:22px; margin-top:22px; line-height:1.5;">나만의 섬을 만들고,<br>타인과 나누세요</div>
-    <div style="font-size:12.5px; letter-spacing:.04em; color:rgba(243,237,228,.5); margin-top:14px;">2026 Seoul Design Festival · 영디자인 프로모션</div>
-    <div style="margin-top:26px; font-size:12.5px; color:rgba(243,237,228,.42); line-height:1.8;">
-      [전시 부스 위치 및 일정을 입력하세요]<br>[SNS 또는 문의 링크를 입력하세요]
+  <!-- Step 3 — main page (home / community tabs) -->
+  <div class="screen" data-step="3" style="background:#eeece7; padding:0;">
+
+    <div id="tab-home" class="tab-panel" style="flex:1; min-height:0; overflow-y:auto; padding:calc(20px + env(safe-area-inset-top)) 22px 28px; color:#2b2622;">
+      <div style="border-radius:18px; overflow:hidden; box-shadow:0 18px 30px -18px rgba(20,16,12,.35);">
+        <img src="story-hero.jpg" alt="iLanD Lonely" style="display:block; width:100%; height:240px; object-fit:cover;">
+      </div>
+      <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:12px; letter-spacing:.1em; color:#8a8074; margin-top:24px;">82부동산 &middot; 섬 분양 컬렉션</div>
+      <div style="font-family:'Playfair Display', serif; font-weight:600; font-style:italic; font-size:32px; margin-top:6px;">Lonely</div>
+      <div style="font-size:13.5px; line-height:1.7; color:#4a433c; margin-top:12px;">
+        Solitude is not sadness, but a moment of profound quiet where you can finally face your true self. The calm ivory candle paired with the dark charcoal tray provides visual tranquility, offering gentle comfort as you rely on a single flame during your time alone.
+      </div>
+      <div style="margin-top:28px; display:flex; flex-direction:column;">
+        <div style="display:flex; justify-content:space-between; padding:13px 0; border-top:1px solid rgba(43,38,34,.14);">
+          <span style="font-size:11.5px; letter-spacing:.12em; color:#8a8074;">SCENT</span>
+          <span style="font-size:13px; color:#8a8074;">[향 노트를 입력하세요]</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:13px 0; border-top:1px solid rgba(43,38,34,.14);">
+          <span style="font-size:11.5px; letter-spacing:.12em; color:#8a8074;">BURN TIME</span>
+          <span style="font-size:13px; color:#8a8074;">[연소 시간을 입력하세요]</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:13px 0; border-top:1px solid rgba(43,38,34,.14); border-bottom:1px solid rgba(43,38,34,.14);">
+          <span style="font-size:11.5px; letter-spacing:.12em; color:#8a8074;">MATERIAL</span>
+          <span style="font-size:13px; color:#8a8074;">[소재를 입력하세요]</span>
+        </div>
+      </div>
+
+      <div style="margin-top:44px; padding-top:32px; border-top:1px solid rgba(43,38,34,.14); text-align:center;">
+        <div style="font-family:'Playfair Display', serif; font-weight:600; font-size:13px; letter-spacing:.3em; color:#2b2622;">iLanD</div>
+        <div style="font-size:10px; letter-spacing:.12em; color:#8a8074; margin-top:8px;">by 82부동산</div>
+        <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:18px; margin-top:18px; line-height:1.5; color:#2b2622;">나만의 섬을 만들고,<br>타인과 나누세요</div>
+        <div style="font-size:11.5px; letter-spacing:.04em; color:#8a8074; margin-top:12px;">2026 Seoul Design Festival &middot; 영디자인 프로모션</div>
+        <div style="margin-top:18px; font-size:11.5px; color:#a39a8d; line-height:1.8;">
+          [전시 부스 위치 및 일정을 입력하세요]<br>[SNS 또는 문의 링크를 입력하세요]
+        </div>
+        <button id="restart-btn" style="margin-top:26px; border:1px solid rgba(43,38,34,.25); background:transparent; color:#2b2622; font-family:'Noto Sans KR', sans-serif; font-size:12.5px; letter-spacing:.06em; padding:11px 24px; border-radius:999px; cursor:pointer;">처음으로 다시보기</button>
+      </div>
     </div>
-    <button id="restart-btn" style="margin-top:40px; border:1px solid rgba(243,237,228,.35); background:transparent; color:#f3ede4; font-family:'Noto Sans KR', sans-serif; font-size:13px; letter-spacing:.06em; padding:12px 26px; border-radius:999px; cursor:pointer;">처음으로 다시보기</button>
+
+    <div id="tab-chat" class="tab-panel" style="display:none; flex:1; min-height:0; flex-direction:column; background:#15120f; color:#f3ede4;">
+      <div style="flex:none; padding:calc(16px + env(safe-area-inset-top)) 20px 12px; border-bottom:1px solid rgba(243,237,228,.08);">
+        <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:11px; letter-spacing:.1em; color:rgba(243,237,228,.45);">iLanD 커뮤니티</div>
+        <div style="font-size:13.5px; font-weight:600; margin-top:2px;">당신의 섬 · 이야기</div>
+      </div>
+      <div id="chat-thread" style="flex:1; overflow-y:auto; padding:18px 18px 10px; display:flex; flex-direction:column; gap:14px;"></div>
+      <div style="flex:none; display:flex; align-items:center; gap:8px; padding:12px 16px calc(14px + env(safe-area-inset-bottom));">
+        <input id="chat-input" type="text" placeholder="당신의 섬 이야기를 남겨보세요" style="flex:1; min-width:0; background:rgba(243,237,228,.07); border:1px solid rgba(243,237,228,.16); color:#f3ede4; font-family:'Noto Sans KR', sans-serif; font-size:16px; padding:11px 14px; border-radius:999px; outline:none;">
+        <button id="chat-send" aria-label="보내기" style="flex:none; width:38px; height:38px; border-radius:50%; border:none; background:var(--accent); display:flex; align-items:center; justify-content:center; cursor:pointer;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 12L20 4L13 20L11 13L4 12Z" fill="#15120f"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div style="flex:none; display:flex; background:#15120f; padding-bottom:env(safe-area-inset-bottom); border-top:1px solid rgba(243,237,228,.08);">
+      <button class="tab-btn active" data-tab="home" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:11px 0 9px; border:none; background:transparent; cursor:pointer; color:#f3ede4;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 11.5L12 4L20 11.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10V20H18V10" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span style="font-size:10.5px; letter-spacing:.04em;">홈</span>
+      </button>
+      <button class="tab-btn" data-tab="chat" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:11px 0 9px; border:none; background:transparent; cursor:pointer; color:rgba(243,237,228,.4);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 5.5H20V16H9L5 19.5V16H4V5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span style="font-size:10.5px; letter-spacing:.04em;">커뮤니티</span>
+      </button>
+    </div>
   </div>
 
   <div class="dots-pill" id="dots"></div>
@@ -268,14 +343,15 @@
 
 <script>
 (function () {
-  var TOTAL_STEPS = 5; // steps 1..5 show dots
+  var TOTAL_STEPS = 3; // step 3 is the main page (home / community tabs)
+  var DOT_STEPS = 2;   // dots only track the two intro animations
   var frame = document.getElementById('frame');
   var screens = Array.prototype.slice.call(document.querySelectorAll('.screen'));
   var dotsEl = document.getElementById('dots');
   var timer = null;
   var step = 0;
 
-  for (var i = 1; i <= TOTAL_STEPS; i++) {
+  for (var i = 1; i <= DOT_STEPS; i++) {
     var d = document.createElement('div');
     d.className = 'dot';
     d.dataset.n = i;
@@ -286,7 +362,7 @@
     screens.forEach(function (s) {
       s.classList.toggle('active', Number(s.dataset.step) === step);
     });
-    dotsEl.classList.toggle('show', step > 0);
+    dotsEl.classList.toggle('show', step > 0 && step <= DOT_STEPS);
     Array.prototype.forEach.call(dotsEl.children, function (dot) {
       dot.classList.toggle('active', Number(dot.dataset.n) === step);
     });
@@ -311,15 +387,41 @@
   function scheduleAuto() {
     if (step === 1) {
       timer = setTimeout(function () { if (step === 1) goTo(2); }, 2700);
-    } else if (step === 2) {
-      timer = setTimeout(function () { if (step === 2) goTo(3); }, 2500);
     }
+    // step 2 (coordinate dial) advances only via swipe-up gesture, no auto timer
   }
 
   var D10 = ['0','1','2','3','4','5','6','7','8','9'];
   var digits20 = D10.concat(D10);
 
-  function pad(n) { return String(n).padStart(2, '0'); }
+  function pad(n, width) { return String(n).padStart(width || 2, '0'); }
+
+  function toDMS(value, isLat, degWidth) {
+    var hemi = isLat ? (value >= 0 ? 'N' : 'S') : (value >= 0 ? 'E' : 'W');
+    var abs = Math.abs(value);
+    var d = Math.floor(abs);
+    var minFloat = (abs - d) * 60;
+    var m = Math.floor(minFloat);
+    var s = Math.round((minFloat - m) * 60);
+    if (s >= 60) { s -= 60; m += 1; }
+    if (m >= 60) { m -= 60; d += 1; }
+    return pad(d, degWidth) + '°' + pad(m, 2) + '\'' + pad(s, 2) + '"' + hemi;
+  }
+
+  function getPlot() {
+    var KEY = 'iland_plot_v1';
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    var plot = {
+      lat: Math.random() * 180 - 90,
+      lng: Math.random() * 360 - 180,
+      serial: Math.floor(100000 + Math.random() * 900000),
+    };
+    try { localStorage.setItem(KEY, JSON.stringify(plot)); } catch (e) {}
+    return plot;
+  }
 
   function buildDialGroup(container, str) {
     container.innerHTML = '';
@@ -351,23 +453,188 @@
   }
 
   function buildDial() {
-    var now = new Date();
-    var dateStr = now.getFullYear() + '.' + pad(now.getMonth() + 1) + '.' + pad(now.getDate());
-    var timeStr = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
-    buildDialGroup(document.getElementById('dial-date'), dateStr);
-    buildDialGroup(document.getElementById('dial-time'), timeStr);
+    var plot = getPlot();
+    var latStr = toDMS(plot.lat, true, 2);
+    var lngStr = toDMS(plot.lng, false, 3);
+    var serialStr = pad(plot.serial, 6);
+    buildDialGroup(document.getElementById('dial-lat'), latStr);
+    buildDialGroup(document.getElementById('dial-lng'), lngStr);
+    buildDialGroup(document.getElementById('dial-serial'), serialStr);
+
+    var pin = document.getElementById('dial-pin');
+    var px = (plot.lng + 180) / 360 * 100;
+    var py = (90 - plot.lat) / 180 * 100;
+    pin.style.left = px + '%';
+    pin.style.top = py + '%';
   }
 
   screens.forEach(function (s) {
     var n = Number(s.dataset.step);
-    if (n === 5) return; // closing screen has its own button, no whole-screen tap
+    if (n === 2 || n === 3) return; // step 2 uses swipe-up; main page has its own tab bar
     s.addEventListener('click', function () { advance(); });
   });
+
+  // --- Step 2: swipe up to continue ---
+  (function initSwipeUp() {
+    var wrap = document.getElementById('dial-drag');
+    var startY = null;
+    var dragging = false;
+    var THRESHOLD = 70;
+    var MAX_PULL = 140;
+
+    function onMove(clientY) {
+      if (!dragging) return;
+      var dy = clientY - startY;
+      if (dy > 0) dy *= 0.2;
+      dy = Math.max(dy, -MAX_PULL);
+      wrap.style.transform = 'translateY(' + dy + 'px)';
+      wrap.style.opacity = String(1 - Math.min(-dy, MAX_PULL) / (MAX_PULL + 60));
+    }
+
+    function onEnd(clientY) {
+      if (!dragging) return;
+      dragging = false;
+      var dy = (clientY == null ? startY : clientY) - startY;
+      wrap.style.transition = 'transform .28s ease, opacity .28s ease';
+      if (dy < -THRESHOLD && step === 2) {
+        wrap.style.transform = 'translateY(-160px)';
+        wrap.style.opacity = '0';
+        setTimeout(function () {
+          wrap.style.transition = 'none';
+          wrap.style.transform = '';
+          wrap.style.opacity = '';
+          advance();
+        }, 240);
+      } else {
+        wrap.style.transform = '';
+        wrap.style.opacity = '';
+      }
+      setTimeout(function () { wrap.style.transition = ''; }, 300);
+    }
+
+    wrap.addEventListener('pointerdown', function (e) {
+      dragging = true;
+      startY = e.clientY;
+      wrap.style.transition = 'none';
+      try { wrap.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+    wrap.addEventListener('pointermove', function (e) { onMove(e.clientY); });
+    wrap.addEventListener('pointerup', function (e) { onEnd(e.clientY); });
+    wrap.addEventListener('pointercancel', function () { onEnd(null); });
+  })();
 
   document.getElementById('restart-btn').addEventListener('click', function (e) {
     e.stopPropagation();
     goTo(0);
   });
+
+  // --- Main page tab bar (Home / Community) ---
+  var tabHome = document.getElementById('tab-home');
+  var tabChat = document.getElementById('tab-chat');
+  var tabBtns = Array.prototype.slice.call(document.querySelectorAll('.tab-btn'));
+
+  tabBtns.forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var target = btn.dataset.tab;
+      tabBtns.forEach(function (b) {
+        var active = b === btn;
+        b.classList.toggle('active', active);
+        b.style.color = active ? '#f3ede4' : 'rgba(243,237,228,.4)';
+      });
+      tabHome.style.display = target === 'home' ? 'block' : 'none';
+      tabChat.style.display = target === 'chat' ? 'flex' : 'none';
+    });
+  });
+
+  // --- Community chat (simulated, this device only) ---
+  var PERSONAS = ['고요섬 · 리아', '물결섬 · 준'];
+  var REPLIES = [
+    '당신의 섬 이야기, 저도 듣고 싶어요.',
+    '오늘 하루도 고요히 지나가고 있네요.',
+    '그 마음, 저도 알아요.',
+    '당신의 섬에도 작은 불빛이 켜지길.',
+    '혼자 있는 시간도, 나쁘지 않죠.',
+  ];
+  var seedMessages = [
+    { from: PERSONAS[0], text: '당신의 섬도 오늘 밤 고요한가요?' },
+    { from: PERSONAS[1], text: '이 시간, 저도 혼자만의 촛불을 밝혔어요.' },
+  ];
+
+  var thread = document.getElementById('chat-thread');
+  var chatInput = document.getElementById('chat-input');
+  var chatSend = document.getElementById('chat-send');
+
+  function addBubble(msg, mine) {
+    var row = document.createElement('div');
+    row.style.display = 'flex';
+    row.style.flexDirection = 'column';
+    row.style.alignItems = mine ? 'flex-end' : 'flex-start';
+
+    if (!mine) {
+      var name = document.createElement('div');
+      name.textContent = msg.from;
+      name.style.cssText = 'font-size:11px; letter-spacing:.04em; color:rgba(243,237,228,.4); margin:0 2px 4px;';
+      row.appendChild(name);
+    }
+
+    var bubble = document.createElement('div');
+    bubble.textContent = msg.text;
+    bubble.style.cssText = 'max-width:78%; font-size:13.5px; line-height:1.55; padding:10px 14px; border-radius:16px;' +
+      (mine
+        ? 'background:var(--accent); color:#15120f; border-bottom-right-radius:5px;'
+        : 'background:rgba(243,237,228,.08); color:#f3ede4; border-bottom-left-radius:5px;');
+    row.appendChild(bubble);
+
+    thread.appendChild(row);
+    thread.scrollTop = thread.scrollHeight;
+  }
+
+  function showTyping(from) {
+    var row = document.createElement('div');
+    row.id = 'chat-typing';
+    row.style.cssText = 'display:flex; flex-direction:column; align-items:flex-start;';
+    var name = document.createElement('div');
+    name.textContent = from;
+    name.style.cssText = 'font-size:11px; letter-spacing:.04em; color:rgba(243,237,228,.4); margin:0 2px 4px;';
+    var bubble = document.createElement('div');
+    bubble.textContent = '...';
+    bubble.style.cssText = 'font-size:13.5px; padding:10px 14px; border-radius:16px; border-bottom-left-radius:5px; background:rgba(243,237,228,.08); color:rgba(243,237,228,.5);';
+    row.appendChild(name);
+    row.appendChild(bubble);
+    thread.appendChild(row);
+    thread.scrollTop = thread.scrollHeight;
+  }
+
+  function removeTyping() {
+    var el = document.getElementById('chat-typing');
+    if (el) el.remove();
+  }
+
+  var replyIndex = 0;
+  function sendMessage() {
+    var text = chatInput.value.trim();
+    if (!text) return;
+    addBubble({ text: text }, true);
+    chatInput.value = '';
+
+    var persona = PERSONAS[Math.floor(Math.random() * PERSONAS.length)];
+    setTimeout(function () { showTyping(persona); }, 400);
+    setTimeout(function () {
+      removeTyping();
+      var reply = REPLIES[replyIndex % REPLIES.length];
+      replyIndex++;
+      addBubble({ from: persona, text: reply }, false);
+    }, 1300);
+  }
+
+  chatSend.addEventListener('click', function (e) { e.stopPropagation(); sendMessage(); });
+  chatInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') sendMessage();
+  });
+  chatInput.addEventListener('click', function (e) { e.stopPropagation(); });
+
+  seedMessages.forEach(function (m) { addBubble(m, false); });
 
   render();
 
