@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>iLanD · Lonely</title>
+
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0c0a09">
+<link rel="icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="iLanD">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Petit+Formal+Script&family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #0c0a09;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+
+  .frame {
+    position: relative;
+    width: 100%;
+    height: 100dvh;
+    max-width: 560px;
+    margin: 0 auto;
+    overflow: hidden;
+    background: #0c0a09;
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    animation: riseIn .6s cubic-bezier(.2,.7,.2,1) both;
+  }
+  .screen.active { display: flex; }
+
+  @keyframes riseIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes ripple {
+    0%   { transform: scale(.6); opacity: .55; }
+    100% { transform: scale(1.9); opacity: 0; }
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .tap-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    letter-spacing: .08em;
+  }
+
+  .dots-pill {
+    position: absolute;
+    left: 50%;
+    bottom: max(28px, env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    display: none;
+    gap: 7px;
+    align-items: center;
+    padding: 9px 13px;
+    border-radius: 999px;
+    background: rgba(10,9,8,.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 5;
+  }
+  .dots-pill.show { display: flex; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.35); }
+  .dot.active { background: var(--accent); }
+
+  .write-on {
+    display: inline-block;
+    clip-path: inset(0 100% 0 0);
+    animation: writeReveal 1.5s cubic-bezier(.65,0,.35,1) .4s forwards;
+  }
+  .write-nib {
+    position: absolute;
+    left: 0;
+    bottom: 8px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+    animation: nibMove 1.5s cubic-bezier(.65,0,.35,1) .4s forwards;
+  }
+  @keyframes writeReveal {
+    from { clip-path: inset(0 100% 0 0); }
+    to   { clip-path: inset(0 0% 0 0); }
+  }
+  @keyframes nibMove {
+    0%   { left: 0%; opacity: 1; }
+    92%  { opacity: 1; }
+    100% { left: 100%; opacity: 0; }
+  }
+
+  .dial-window { width: 21px; height: 38px; overflow: hidden; position: relative; }
+  .dial-col {
+    display: flex;
+    flex-direction: column;
+    animation: dialSpin 1.05s cubic-bezier(.2,.8,.2,1) both;
+    transform: translateY(calc(-38px * (10 + var(--target))));
+  }
+  .dial-cell {
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 25px;
+    color: #f3ede4;
+  }
+  .dial-sep {
+    width: 13px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 20px;
+    color: rgba(243,237,228,.4);
+  }
+  @keyframes dialSpin {
+    from { transform: translateY(0); }
+  }
+
+  button { font: inherit; }
+</style>
+</head>
+<body>
+
+<div class="frame" id="frame" style="--accent:#c98a4b;">
+
+  <!-- Step 0 — NFC tap -->
+  <div class="screen active" data-step="0" style="background: radial-gradient(120% 90% at 50% 18%, #1c1815 0%, #0c0a09 62%); color:#f3ede4; cursor:pointer; align-items:center; justify-content:flex-start; padding:96px 28px 40px;">
+    <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:15px; letter-spacing:.14em; color:rgba(243,237,228,.55);">iLanD &middot; Lonely</div>
+
+    <div style="position:relative; width:168px; height:168px; margin-top:74px; display:flex; align-items:center; justify-content:center;">
+      <div style="position:absolute; inset:0; border-radius:50%; border:1px solid var(--accent); animation: ripple 2.6s ease-out infinite;"></div>
+      <div style="position:absolute; inset:18px; border-radius:50%; border:1px solid var(--accent); animation: ripple 2.6s ease-out infinite; animation-delay:.65s;"></div>
+      <div style="position:absolute; inset:36px; border-radius:50%; border:1px solid var(--accent); animation: ripple 2.6s ease-out infinite; animation-delay:1.3s;"></div>
+      <div style="position:relative; width:64px; height:64px; border-radius:50%; background:rgba(243,237,228,.06); border:1px solid rgba(243,237,228,.25); display:flex; align-items:center; justify-content:center;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+          <path d="M6 16.5C6 13 8.7 10 12 10s6 3 6 6.5" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M3.5 18.7C3.5 13.3 7.3 9 12 9s8.5 4.3 8.5 9.7" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+          <circle cx="12" cy="16.5" r="1.6" fill="var(--accent)"/>
+        </svg>
+      </div>
+    </div>
+
+    <div style="margin-top:56px; width:100%; max-width:320px; display:flex; align-items:center; gap:12px; background:rgba(243,237,228,.07); border:1px solid rgba(243,237,228,.14); border-radius:16px; padding:14px 16px; animation: slideDown .7s ease .2s both;">
+      <div style="width:34px; height:34px; border-radius:9px; background:rgba(243,237,228,.1); display:flex; align-items:center; justify-content:center; flex:none;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+          <path d="M6 16.5C6 13 8.7 10 12 10s6 3 6 6.5" stroke="#f3ede4" stroke-width="1.6" stroke-linecap="round"/>
+          <circle cx="12" cy="16.5" r="1.5" fill="#f3ede4"/>
+        </svg>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:2px;">
+        <div style="font-size:13.5px; font-weight:600;">iLanD 향초가 감지되었습니다</div>
+        <div style="font-size:12px; color:rgba(243,237,228,.55);">탭하여 iLanD 앱 열기</div>
+      </div>
+    </div>
+
+    <div id="a2hs-banner" style="display:none; margin-top:16px; width:100%; max-width:320px; align-items:flex-start; gap:10px; background:rgba(201,138,75,.1); border:1px solid rgba(201,138,75,.28); border-radius:14px; padding:12px 14px;">
+      <div style="flex:1; font-size:12px; line-height:1.6; color:rgba(243,237,228,.75); text-align:left;" id="a2hs-text"></div>
+      <button id="a2hs-close" aria-label="닫기" style="flex:none; border:none; background:transparent; color:rgba(243,237,228,.45); font-size:16px; line-height:1; padding:2px; cursor:pointer;">&times;</button>
+    </div>
+
+    <div style="flex:1;"></div>
+    <div class="tap-hint" style="color:rgba(243,237,228,.45);">오브제에 휴대폰을 가까이 대면 이 화면이 나타납니다 · 탭하여 계속</div>
+  </div>
+
+  <!-- Step 1 — welcome -->
+  <div class="screen" data-step="1" style="background:#0c0a09; color:#f3ede4; cursor:pointer; align-items:center; justify-content:center; text-align:center; padding:32px;">
+    <div style="font-family:'Playfair Display', serif; font-weight:600; font-size:15px; letter-spacing:.32em; text-transform:uppercase; color:rgba(243,237,228,.75); animation: fadeUp .6s ease both;">iLanD</div>
+    <div style="position:relative; margin-top:22px; height:64px; display:flex; align-items:center;">
+      <span class="write-on" style="font-family:'Petit Formal Script', cursive; font-size:46px; color:#f3ede4; white-space:nowrap;">welcome</span>
+      <span class="write-nib"></span>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px; margin-top:36px; animation: fadeUp .7s ease 1.9s both;">
+      <span style="font-size:11.5px; letter-spacing:.16em; color:rgba(243,237,228,.6);">STILLNESS</span>
+      <span style="width:3px; height:3px; border-radius:50%; background:var(--accent);"></span>
+      <span style="font-size:11.5px; letter-spacing:.16em; color:rgba(243,237,228,.6);">SOLITUDE</span>
+      <span style="width:3px; height:3px; border-radius:50%; background:var(--accent);"></span>
+      <span style="font-size:11.5px; letter-spacing:.16em; color:rgba(243,237,228,.6);">COMFORT</span>
+    </div>
+  </div>
+
+  <!-- Step 2 — coordinate dial -->
+  <div class="screen" data-step="2" style="background:#0c0a09; color:#f3ede4; cursor:pointer; align-items:center; justify-content:center; padding:32px;">
+    <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:13px; letter-spacing:.06em; color:rgba(243,237,228,.55);">당신의 섬이 이 순간, 분양되었습니다</div>
+    <div style="margin-top:44px; font-size:11px; letter-spacing:.18em; color:rgba(243,237,228,.4);">PLOT &middot; DATE</div>
+    <div id="dial-date" style="display:flex; margin-top:8px;"></div>
+    <div style="margin-top:30px; font-size:11px; letter-spacing:.18em; color:rgba(243,237,228,.4);">PLOT &middot; TIME</div>
+    <div id="dial-time" style="display:flex; margin-top:8px;"></div>
+  </div>
+
+  <!-- Step 3 — story -->
+  <div class="screen" data-step="3" style="cursor:pointer; background:#d9d6d1;">
+    <img src="story-hero.jpg" alt="iLanD Lonely" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+    <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,.28) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 72%, rgba(0,0,0,.22) 100%);"></div>
+  </div>
+
+  <!-- Step 4 — detail -->
+  <div class="screen" data-step="4" style="background:#eeece7; color:#2b2622; cursor:pointer; overflow-y:auto; padding:28px 26px 110px;">
+    <div style="border-radius:18px; overflow:hidden; box-shadow:0 18px 30px -18px rgba(20,16,12,.35);">
+      <img src="tray-detail.jpg" alt="iLanD tray detail" style="display:block; width:100%; height:220px; object-fit:cover;">
+    </div>
+    <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:12px; letter-spacing:.1em; color:#8a8074; margin-top:24px;">82부동산 &middot; 섬 분양 컬렉션</div>
+    <div style="font-family:'Playfair Display', serif; font-weight:600; font-style:italic; font-size:32px; margin-top:6px;">Lonely</div>
+    <div style="font-size:13.5px; line-height:1.7; color:#4a433c; margin-top:12px;">
+      Solitude is not sadness, but a moment of profound quiet where you can finally face your true self. The calm ivory candle paired with the dark charcoal tray provides visual tranquility, offering gentle comfort as you rely on a single flame during your time alone.
+    </div>
+    <div style="margin-top:28px; display:flex; flex-direction:column;">
+      <div style="display:flex; justify-content:space-between; padding:13px 0; border-top:1px solid rgba(43,38,34,.14);">
+        <span style="font-size:11.5px; letter-spacing:.12em; color:#8a8074;">SCENT</span>
+        <span style="font-size:13px; color:#8a8074;">[향 노트를 입력하세요]</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; padding:13px 0; border-top:1px solid rgba(43,38,34,.14);">
+        <span style="font-size:11.5px; letter-spacing:.12em; color:#8a8074;">BURN TIME</span>
+        <span style="font-size:13px; color:#8a8074;">[연소 시간을 입력하세요]</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; padding:13px 0; border-top:1px solid rgba(43,38,34,.14); border-bottom:1px solid rgba(43,38,34,.14);">
+        <span style="font-size:11.5px; letter-spacing:.12em; color:#8a8074;">MATERIAL</span>
+        <span style="font-size:13px; color:#8a8074;">[소재를 입력하세요]</span>
+      </div>
+    </div>
+    <div class="tap-hint" style="margin-top:22px; color:#9b9184;">탭하여 계속하기</div>
+  </div>
+
+  <!-- Step 5 — closing -->
+  <div class="screen" data-step="5" style="background:#0c0a09; color:#f3ede4; align-items:center; justify-content:center; text-align:center; padding:40px;">
+    <div style="font-family:'Playfair Display', serif; font-weight:600; font-size:14px; letter-spacing:.3em; color:rgba(243,237,228,.7);">iLanD</div>
+    <div style="font-size:10.5px; letter-spacing:.12em; color:rgba(243,237,228,.4); margin-top:8px;">by 82부동산</div>
+    <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:22px; margin-top:22px; line-height:1.5;">나만의 섬을 만들고,<br>타인과 나누세요</div>
+    <div style="font-size:12.5px; letter-spacing:.04em; color:rgba(243,237,228,.5); margin-top:14px;">2026 Seoul Design Festival · 영디자인 프로모션</div>
+    <div style="margin-top:26px; font-size:12.5px; color:rgba(243,237,228,.42); line-height:1.8;">
+      [전시 부스 위치 및 일정을 입력하세요]<br>[SNS 또는 문의 링크를 입력하세요]
+    </div>
+    <button id="restart-btn" style="margin-top:40px; border:1px solid rgba(243,237,228,.35); background:transparent; color:#f3ede4; font-family:'Noto Sans KR', sans-serif; font-size:13px; letter-spacing:.06em; padding:12px 26px; border-radius:999px; cursor:pointer;">처음으로 다시보기</button>
+  </div>
+
+  <div class="dots-pill" id="dots"></div>
+</div>
+
+<script>
+(function () {
+  var TOTAL_STEPS = 5; // steps 1..5 show dots
+  var frame = document.getElementById('frame');
+  var screens = Array.prototype.slice.call(document.querySelectorAll('.screen'));
+  var dotsEl = document.getElementById('dots');
+  var timer = null;
+  var step = 0;
+
+  for (var i = 1; i <= TOTAL_STEPS; i++) {
+    var d = document.createElement('div');
+    d.className = 'dot';
+    d.dataset.n = i;
+    dotsEl.appendChild(d);
+  }
+
+  function render() {
+    screens.forEach(function (s) {
+      s.classList.toggle('active', Number(s.dataset.step) === step);
+    });
+    dotsEl.classList.toggle('show', step > 0);
+    Array.prototype.forEach.call(dotsEl.children, function (dot) {
+      dot.classList.toggle('active', Number(dot.dataset.n) === step);
+    });
+  }
+
+  function clearAutoTimer() {
+    if (timer) { clearTimeout(timer); timer = null; }
+  }
+
+  function goTo(n) {
+    step = Math.max(0, Math.min(TOTAL_STEPS, n));
+    clearAutoTimer();
+    render();
+    if (step === 1) buildDial();
+    scheduleAuto();
+  }
+
+  function advance() {
+    goTo(step + 1);
+  }
+
+  function scheduleAuto() {
+    if (step === 1) {
+      timer = setTimeout(function () { if (step === 1) goTo(2); }, 2700);
+    } else if (step === 2) {
+      timer = setTimeout(function () { if (step === 2) goTo(3); }, 2500);
+    }
+  }
+
+  var D10 = ['0','1','2','3','4','5','6','7','8','9'];
+  var digits20 = D10.concat(D10);
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function buildDialGroup(container, str) {
+    container.innerHTML = '';
+    var digitIndex = 0;
+    str.split('').forEach(function (ch) {
+      if (ch >= '0' && ch <= '9') {
+        var win = document.createElement('div');
+        win.className = 'dial-window';
+        var col = document.createElement('div');
+        col.className = 'dial-col';
+        col.style.setProperty('--target', ch);
+        col.style.animationDelay = (digitIndex * 0.06).toFixed(3) + 's';
+        digits20.forEach(function (n) {
+          var cell = document.createElement('div');
+          cell.className = 'dial-cell';
+          cell.textContent = n;
+          col.appendChild(cell);
+        });
+        win.appendChild(col);
+        container.appendChild(win);
+        digitIndex++;
+      } else {
+        var sep = document.createElement('div');
+        sep.className = 'dial-sep';
+        sep.textContent = ch;
+        container.appendChild(sep);
+      }
+    });
+  }
+
+  function buildDial() {
+    var now = new Date();
+    var dateStr = now.getFullYear() + '.' + pad(now.getMonth() + 1) + '.' + pad(now.getDate());
+    var timeStr = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+    buildDialGroup(document.getElementById('dial-date'), dateStr);
+    buildDialGroup(document.getElementById('dial-time'), timeStr);
+  }
+
+  screens.forEach(function (s) {
+    var n = Number(s.dataset.step);
+    if (n === 5) return; // closing screen has its own button, no whole-screen tap
+    s.addEventListener('click', function () { advance(); });
+  });
+
+  document.getElementById('restart-btn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    goTo(0);
+  });
+
+  render();
+
+  (function initA2HS() {
+    var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (isStandalone) return;
+    if (localStorage.getItem('iland_hide_a2hs') === '1') return;
+
+    var ua = navigator.userAgent || '';
+    var isIOS = /iP(hone|od|ad)/.test(navigator.platform || '') || (/Mac/.test(ua) && 'ontouchend' in document);
+    var isAndroid = /Android/.test(ua);
+
+    var text = isIOS
+      ? '하단 공유 버튼을 누르고 "홈 화면에 추가"를 선택하면 전체화면 앱으로 열립니다'
+      : isAndroid
+        ? '우측 상단 메뉴(⋮)에서 "앱 설치" 또는 "홈 화면에 추가"를 누르면 전체화면 앱으로 열립니다'
+        : '브라우저 메뉴에서 "홈 화면에 추가"를 선택하면 전체화면 앱으로 열립니다';
+
+    var banner = document.getElementById('a2hs-banner');
+    document.getElementById('a2hs-text').textContent = text;
+    banner.style.display = 'flex';
+
+    document.getElementById('a2hs-close').addEventListener('click', function (e) {
+      e.stopPropagation();
+      banner.style.display = 'none';
+      localStorage.setItem('iland_hide_a2hs', '1');
+    });
+  })();
+})();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('/sw.js');
+  });
+}
+</script>
+</body>
+</html>
