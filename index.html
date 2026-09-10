@@ -345,7 +345,7 @@
         <div id="emotion-chips" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
       </div>
 
-      <div style="border-radius:18px; overflow:hidden; margin-top:26px; background:#e4e0d8; position:relative; height:260px;">
+      <div style="margin-top:26px; position:relative; height:260px;">
         <canvas id="island-canvas" style="display:block; width:100%; height:100%; touch-action:none; cursor:grab;"></canvas>
       </div>
       <div style="text-align:center; font-size:10.5px; letter-spacing:.06em; color:#a39a8d; margin-top:8px;">드래그해서 섬을 360&deg;로 돌려보세요</div>
@@ -1021,12 +1021,14 @@
 
     islandRenderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
     islandRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    islandRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+    islandRenderer.toneMappingExposure = 0.85;
 
-    islandScene.add(new THREE.HemisphereLight(0xffffff, 0x8a8074, 0.95));
-    var dir = new THREE.DirectionalLight(0xfff2df, 1.1);
+    islandScene.add(new THREE.HemisphereLight(0xcfd6dc, 0x4a4038, 0.55));
+    var dir = new THREE.DirectionalLight(0xf2e6cf, 0.7);
     dir.position.set(2.5, 3.5, 2);
     islandScene.add(dir);
-    var fill = new THREE.DirectionalLight(0xbcd4ea, 0.45);
+    var fill = new THREE.DirectionalLight(0x8fa7ba, 0.25);
     fill.position.set(-2, 1, -2);
     islandScene.add(fill);
 
@@ -1039,6 +1041,7 @@
       objLoader.setPath('assets/island-model/');
       objLoader.load('island.obj', function (obj) {
         obj.position.set(0.002, -0.033, 0.002);
+        obj.scale.setScalar(0.72);
         islandScene.add(obj);
       });
     });
