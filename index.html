@@ -345,9 +345,10 @@
         <div id="emotion-chips" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
       </div>
 
-      <div style="border-radius:18px; overflow:hidden; margin-top:26px; background:#e4e0d8; display:flex; align-items:center; justify-content:center;">
-        <img src="glacier-icon-poster-1.png" alt="iLanD Lonely" style="display:block; width:78%; height:240px; object-fit:contain;">
+      <div style="border-radius:18px; overflow:hidden; margin-top:26px; background:#e4e0d8; position:relative; height:260px;">
+        <canvas id="island-canvas" style="display:block; width:100%; height:100%; touch-action:none; cursor:grab;"></canvas>
       </div>
+      <div style="text-align:center; font-size:10.5px; letter-spacing:.06em; color:#a39a8d; margin-top:8px;">드래그해서 섬을 360&deg;로 돌려보세요</div>
       <div style="margin-top:28px; display:flex; flex-direction:column;">
         <div style="display:flex; justify-content:space-between; padding:13px 0; border-top:1px solid rgba(43,38,34,.14);">
           <span style="font-size:11.5px; letter-spacing:.12em; color:#8a8074;">SCENT</span>
@@ -457,6 +458,9 @@
   <div class="dots-pill" id="dots"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/MTLLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
 <script>
 (function () {
   var TOTAL_STEPS = 4; // step 3 is basic-info input, step 4 is the main page (tab bar)
@@ -494,7 +498,7 @@
     render();
     if (step === 1) buildDial();
     if (step === 3) prefillProfileForm();
-    if (step === 4) { showTab('home'); renderProfileTab(); }
+    if (step === 4) { showTab('home'); renderProfileTab(); initIslandViewer(); }
     scheduleAuto();
   }
 
@@ -716,6 +720,7 @@
       tabPanels[key].style.display = key === target ? tabDisplay[key] : 'none';
     });
     if (target === 'chat') closeChatThread();
+    islandRenderActive = (target === 'home');
   }
 
   tabBtns.forEach(function (btn) {
@@ -997,6 +1002,98 @@
   chatInput.addEventListener('click', function (e) { e.stopPropagation(); });
 
   render();
+
+  // --- 3D island viewer (drag to rotate 360°) ---
+  var islandViewerReady = false;
+  var islandRenderActive = true;
+  var islandRenderer, islandScene, islandCamera;
+  var camYaw = 0.5, camPitch = 0.18;
+  var isDraggingIsland = false, dragLastX = 0, dragLastY = 0;
+
+  function initIslandViewer() {
+    if (islandViewerReady || typeof THREE === 'undefined') return;
+    var canvas = document.getElementById('island-canvas');
+    if (!canvas) return;
+    islandViewerReady = true;
+
+    islandScene = new THREE.Scene();
+    islandCamera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+
+    islandRenderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+    islandRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+    islandScene.add(new THREE.HemisphereLight(0xffffff, 0x8a8074, 0.95));
+    var dir = new THREE.DirectionalLight(0xfff2df, 1.1);
+    dir.position.set(2.5, 3.5, 2);
+    islandScene.add(dir);
+    var fill = new THREE.DirectionalLight(0xbcd4ea, 0.45);
+    fill.position.set(-2, 1, -2);
+    islandScene.add(fill);
+
+    var mtlLoader = new THREE.MTLLoader();
+    mtlLoader.setPath('assets/island-model/');
+    mtlLoader.load('island.mtl', function (materials) {
+      materials.preload();
+      var objLoader = new THREE.OBJLoader();
+      objLoader.setMaterials(materials);
+      objLoader.setPath('assets/island-model/');
+      objLoader.load('island.obj', function (obj) {
+        obj.position.set(0.002, -0.033, 0.002);
+        islandScene.add(obj);
+      });
+    });
+
+    resizeIslandViewer();
+    window.addEventListener('resize', resizeIslandViewer);
+
+    canvas.addEventListener('pointerdown', function (e) {
+      isDraggingIsland = true;
+      dragLastX = e.clientX; dragLastY = e.clientY;
+      canvas.setPointerCapture(e.pointerId);
+      canvas.style.cursor = 'grabbing';
+    });
+    canvas.addEventListener('pointermove', function (e) {
+      if (!isDraggingIsland) return;
+      var dx = e.clientX - dragLastX;
+      var dy = e.clientY - dragLastY;
+      dragLastX = e.clientX; dragLastY = e.clientY;
+      camYaw += dx * 0.008;
+      camPitch = Math.max(-0.5, Math.min(0.6, camPitch + dy * 0.006));
+    });
+    function endIslandDrag() {
+      isDraggingIsland = false;
+      canvas.style.cursor = 'grab';
+    }
+    canvas.addEventListener('pointerup', endIslandDrag);
+    canvas.addEventListener('pointercancel', endIslandDrag);
+    canvas.addEventListener('pointerleave', endIslandDrag);
+
+    requestAnimationFrame(renderIslandLoop);
+  }
+
+  function resizeIslandViewer() {
+    if (!islandRenderer) return;
+    var canvas = islandRenderer.domElement;
+    var w = canvas.clientWidth, h = canvas.clientHeight;
+    if (!w || !h) return;
+    islandRenderer.setSize(w, h, false);
+    islandCamera.aspect = w / h;
+    islandCamera.updateProjectionMatrix();
+  }
+
+  function renderIslandLoop() {
+    requestAnimationFrame(renderIslandLoop);
+    if (!islandRenderActive || !islandRenderer) return;
+    resizeIslandViewer();
+    var dist = 3.1;
+    islandCamera.position.set(
+      dist * Math.cos(camPitch) * Math.sin(camYaw),
+      dist * Math.sin(camPitch) + 0.2,
+      dist * Math.cos(camPitch) * Math.cos(camYaw)
+    );
+    islandCamera.lookAt(0, 0, 0);
+    islandRenderer.render(islandScene, islandCamera);
+  }
 
   (function initA2HS() {
     var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
