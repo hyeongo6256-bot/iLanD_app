@@ -187,6 +187,47 @@
     background: var(--accent);
   }
 
+  .field {
+    width: 100%;
+    background: rgba(243,237,228,.06);
+    border: 1px solid rgba(243,237,228,.18);
+    color: #f3ede4;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 16px;
+    padding: 13px 16px;
+    border-radius: 12px;
+    outline: none;
+  }
+  .field::placeholder { color: rgba(243,237,228,.32); }
+
+  .primary-btn {
+    width: 100%;
+    border: none;
+    background: var(--accent);
+    color: #15120f;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 14px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .primary-btn:disabled { opacity: .35; cursor: default; }
+
+  .deed-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 11px 0;
+    border-top: 1px solid rgba(43,38,34,.18);
+    font-size: 12px;
+  }
+  .deed-row span:first-child {
+    color: #8a8074;
+    letter-spacing: .08em;
+    font-size: 10.5px;
+    text-transform: uppercase;
+  }
+
   button { font: inherit; }
 </style>
 </head>
@@ -273,17 +314,39 @@
     </div>
   </div>
 
-  <!-- Step 3 — main page (home / community tabs) -->
-  <div class="screen" data-step="3" style="background:#eeece7; padding:0;">
+  <!-- Step 3 — basic info input -->
+  <div class="screen" data-step="3" style="background:#0c0a09; color:#f3ede4; align-items:center; justify-content:center; padding:40px 30px;">
+    <div style="width:100%; max-width:320px;">
+      <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:12px; letter-spacing:.1em; color:rgba(243,237,228,.5); text-align:center;">이 섬의 주인은 누구인가요?</div>
+      <input id="profile-nickname" class="field" type="text" placeholder="닉네임" maxlength="16" style="margin-top:22px;">
+
+      <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:12px; letter-spacing:.1em; color:rgba(243,237,228,.5); text-align:center; margin-top:30px;">당신의 섬에 이름을 붙여주세요</div>
+      <div style="font-size:11px; color:rgba(243,237,228,.35); text-align:center; margin-top:4px;">예: 고요섬, 물결섬</div>
+      <input id="profile-island" class="field" type="text" placeholder="섬 이름" maxlength="12" style="margin-top:14px;">
+
+      <button id="profile-confirm" class="primary-btn" disabled style="margin-top:32px;">나의 섬으로 이동</button>
+    </div>
+  </div>
+
+  <!-- Step 4 — main page (my island / explore / community tabs) -->
+  <div class="screen" data-step="4" style="background:#eeece7; padding:0;">
 
     <div id="tab-home" class="tab-panel" style="flex:1; min-height:0; overflow-y:auto; padding:calc(20px + env(safe-area-inset-top)) 22px 28px; color:#2b2622;">
-      <div style="border-radius:18px; overflow:hidden; box-shadow:0 18px 30px -18px rgba(20,16,12,.35);">
-        <img src="story-hero.jpg" alt="iLanD Lonely" style="display:block; width:100%; height:240px; object-fit:cover;">
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+        <div>
+          <div id="profile-owner" style="font-family:'Playfair Display', serif; font-style:italic; font-size:11px; letter-spacing:.1em; color:#8a8074;">이름 없는 소유주의 섬</div>
+          <div id="profile-islandname" style="font-family:'Playfair Display', serif; font-weight:600; font-style:italic; font-size:26px; margin-top:4px; color:#2b2622;">나의 섬</div>
+        </div>
+        <button id="deed-btn" style="flex:none; border:1px solid rgba(43,38,34,.25); background:transparent; color:#2b2622; font-size:11.5px; letter-spacing:.03em; padding:9px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;">등기부증서</button>
       </div>
-      <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:12px; letter-spacing:.1em; color:#8a8074; margin-top:24px;">82부동산 &middot; 섬 분양 컬렉션</div>
-      <div style="font-family:'Playfair Display', serif; font-weight:600; font-style:italic; font-size:32px; margin-top:6px;">Lonely</div>
-      <div style="font-size:13.5px; line-height:1.7; color:#4a433c; margin-top:12px;">
-        Solitude is not sadness, but a moment of profound quiet where you can finally face your true self. The calm ivory candle paired with the dark charcoal tray provides visual tranquility, offering gentle comfort as you rely on a single flame during your time alone.
+
+      <div style="margin-top:20px;">
+        <div style="font-size:11px; letter-spacing:.1em; color:#8a8074; margin-bottom:8px;">지금 이 섬은</div>
+        <div id="emotion-chips" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+      </div>
+
+      <div style="border-radius:18px; overflow:hidden; margin-top:26px; background:#e4e0d8; display:flex; align-items:center; justify-content:center;">
+        <img src="glacier-icon-poster-1.png" alt="iLanD Lonely" style="display:block; width:78%; height:240px; object-fit:contain;">
       </div>
       <div style="margin-top:28px; display:flex; flex-direction:column;">
         <div style="display:flex; justify-content:space-between; padding:13px 0; border-top:1px solid rgba(43,38,34,.14);">
@@ -312,24 +375,58 @@
       </div>
     </div>
 
+    <div id="tab-explore" class="tab-panel plot-map-bg" style="display:none; flex:1; min-height:0; position:relative; background-color:#15120f; color:#f3ede4;">
+      <div style="position:absolute; top:calc(16px + env(safe-area-inset-top)); left:20px; right:20px;">
+        <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:11px; letter-spacing:.1em; color:rgba(243,237,228,.45);">iLanD &middot; 분양된 섬들</div>
+        <div style="font-size:13.5px; font-weight:600; margin-top:2px;">다른 섬 둘러보기</div>
+      </div>
+      <div id="explore-pins" style="position:absolute; inset:0;"></div>
+      <div id="explore-card" style="display:none; position:absolute; left:20px; right:20px; bottom:calc(20px + env(safe-area-inset-bottom)); background:rgba(21,18,15,.92); border:1px solid rgba(243,237,228,.14); border-radius:16px; padding:16px 18px; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);">
+        <div id="explore-card-name" style="font-family:'Playfair Display', serif; font-style:italic; font-weight:600; font-size:15px;"></div>
+        <div id="explore-card-text" style="font-size:12.5px; color:rgba(243,237,228,.6); margin-top:6px; line-height:1.6;"></div>
+        <button id="explore-chat-btn" style="margin-top:12px; border:none; background:var(--accent); color:#15120f; font-family:'Noto Sans KR', sans-serif; font-weight:600; font-size:12px; padding:9px 16px; border-radius:999px; cursor:pointer;">채팅하기</button>
+      </div>
+    </div>
+
     <div id="tab-chat" class="tab-panel" style="display:none; flex:1; min-height:0; flex-direction:column; background:#15120f; color:#f3ede4;">
-      <div style="flex:none; padding:calc(16px + env(safe-area-inset-top)) 20px 12px; border-bottom:1px solid rgba(243,237,228,.08);">
-        <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:11px; letter-spacing:.1em; color:rgba(243,237,228,.45);">iLanD 커뮤니티</div>
-        <div style="font-size:13.5px; font-weight:600; margin-top:2px;">당신의 섬 · 이야기</div>
+
+      <div id="chat-list-view" style="flex:1; min-height:0; display:flex; flex-direction:column;">
+        <div style="flex:none; padding:calc(16px + env(safe-area-inset-top)) 20px 12px; border-bottom:1px solid rgba(243,237,228,.08);">
+          <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:11px; letter-spacing:.1em; color:rgba(243,237,228,.45);">iLanD 커뮤니티</div>
+          <div style="font-size:13.5px; font-weight:600; margin-top:2px;">채팅을 나눈 섬들</div>
+        </div>
+        <div id="chat-list" style="flex:1; overflow-y:auto;"></div>
       </div>
-      <div id="chat-thread" style="flex:1; overflow-y:auto; padding:18px 18px 10px; display:flex; flex-direction:column; gap:14px;"></div>
-      <div style="flex:none; display:flex; align-items:center; gap:8px; padding:12px 16px calc(14px + env(safe-area-inset-bottom));">
-        <input id="chat-input" type="text" placeholder="당신의 섬 이야기를 남겨보세요" style="flex:1; min-width:0; background:rgba(243,237,228,.07); border:1px solid rgba(243,237,228,.16); color:#f3ede4; font-family:'Noto Sans KR', sans-serif; font-size:16px; padding:11px 14px; border-radius:999px; outline:none;">
-        <button id="chat-send" aria-label="보내기" style="flex:none; width:38px; height:38px; border-radius:50%; border:none; background:var(--accent); display:flex; align-items:center; justify-content:center; cursor:pointer;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 12L20 4L13 20L11 13L4 12Z" fill="#15120f"/></svg>
-        </button>
+
+      <div id="chat-thread-view" style="display:none; flex:1; min-height:0; flex-direction:column;">
+        <div style="flex:none; display:flex; align-items:center; gap:10px; padding:calc(16px + env(safe-area-inset-top)) 20px 12px; border-bottom:1px solid rgba(243,237,228,.08);">
+          <button id="chat-back" aria-label="목록으로" style="flex:none; border:none; background:transparent; color:#f3ede4; padding:2px; display:flex; cursor:pointer;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5L8 12L15 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div>
+            <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:11px; letter-spacing:.1em; color:rgba(243,237,228,.45);">iLanD 커뮤니티</div>
+            <div id="chat-thread-name" style="font-size:13.5px; font-weight:600; margin-top:2px;"></div>
+          </div>
+        </div>
+        <div id="chat-thread" style="flex:1; overflow-y:auto; padding:18px 18px 10px; display:flex; flex-direction:column; gap:14px;"></div>
+        <div style="flex:none; display:flex; align-items:center; gap:8px; padding:12px 16px calc(14px + env(safe-area-inset-bottom));">
+          <input id="chat-input" type="text" placeholder="당신의 섬 이야기를 남겨보세요" style="flex:1; min-width:0; background:rgba(243,237,228,.07); border:1px solid rgba(243,237,228,.16); color:#f3ede4; font-family:'Noto Sans KR', sans-serif; font-size:16px; padding:11px 14px; border-radius:999px; outline:none;">
+          <button id="chat-send" aria-label="보내기" style="flex:none; width:38px; height:38px; border-radius:50%; border:none; background:var(--accent); display:flex; align-items:center; justify-content:center; cursor:pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 12L20 4L13 20L11 13L4 12Z" fill="#15120f"/></svg>
+          </button>
+        </div>
       </div>
+
     </div>
 
     <div style="flex:none; display:flex; background:#15120f; padding-bottom:env(safe-area-inset-bottom); border-top:1px solid rgba(243,237,228,.08);">
       <button class="tab-btn active" data-tab="home" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:11px 0 9px; border:none; background:transparent; cursor:pointer; color:#f3ede4;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 11.5L12 4L20 11.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10V20H18V10" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-        <span style="font-size:10.5px; letter-spacing:.04em;">홈</span>
+        <span style="font-size:10.5px; letter-spacing:.04em;">나의 섬</span>
+      </button>
+      <button class="tab-btn" data-tab="explore" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:11px 0 9px; border:none; background:transparent; cursor:pointer; color:rgba(243,237,228,.4);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="10" r="6.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5V16.5M5.5 10H18.5" stroke="currentColor" stroke-width="1.2" opacity=".6"/><path d="M12 16.5C13.5 19 15 20.5 15 20.5H9C9 20.5 10.5 19 12 16.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span style="font-size:10.5px; letter-spacing:.04em;">둘러보기</span>
       </button>
       <button class="tab-btn" data-tab="chat" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:11px 0 9px; border:none; background:transparent; cursor:pointer; color:rgba(243,237,228,.4);">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 5.5H20V16H9L5 19.5V16H4V5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
@@ -338,12 +435,31 @@
     </div>
   </div>
 
+  <div id="deed-modal" style="display:none; position:absolute; inset:0; z-index:20; background:rgba(10,9,8,.72); align-items:center; justify-content:center; padding:28px;">
+    <div style="width:100%; max-width:320px; background:#f3ede4; color:#2b2622; border-radius:4px; padding:28px 26px; position:relative; box-shadow:0 30px 60px -20px rgba(0,0,0,.5);">
+      <button id="deed-close" aria-label="닫기" style="position:absolute; top:14px; right:14px; border:none; background:transparent; font-size:18px; line-height:1; color:#8a8074; cursor:pointer;">&times;</button>
+      <div style="text-align:center; font-family:'Playfair Display', serif; font-style:italic; font-size:11px; letter-spacing:.16em; color:#8a8074;">82부동산</div>
+      <div style="text-align:center; font-family:'Playfair Display', serif; font-weight:700; font-size:17px; letter-spacing:.06em; margin-top:6px;">섬 등기부증서</div>
+      <div style="text-align:center; font-family:'Space Mono', monospace; font-size:10px; letter-spacing:.1em; color:#a39a8d; margin-top:2px;">ISLAND DEED</div>
+
+      <div style="margin-top:22px;">
+        <div class="deed-row"><span>소유주</span><span id="deed-owner"></span></div>
+        <div class="deed-row"><span>섬 이름</span><span id="deed-islandname"></span></div>
+        <div class="deed-row"><span>LAT</span><span id="deed-lat" style="font-family:'Space Mono', monospace;"></span></div>
+        <div class="deed-row"><span>LNG</span><span id="deed-lng" style="font-family:'Space Mono', monospace;"></span></div>
+        <div class="deed-row"><span>ISLAND NO.</span><span id="deed-serial" style="font-family:'Space Mono', monospace;"></span></div>
+        <div class="deed-row" style="border-bottom:1px solid rgba(43,38,34,.18);"><span>분양일시</span><span id="deed-date" style="font-family:'Space Mono', monospace; font-size:11px;"></span></div>
+      </div>
+      <div style="text-align:center; margin-top:20px; font-size:10px; letter-spacing:.08em; color:#a39a8d;">이 문서는 iLanD 커뮤니티 내에서만 유효합니다</div>
+    </div>
+  </div>
+
   <div class="dots-pill" id="dots"></div>
 </div>
 
 <script>
 (function () {
-  var TOTAL_STEPS = 3; // step 3 is the main page (home / community tabs)
+  var TOTAL_STEPS = 4; // step 3 is basic-info input, step 4 is the main page (tab bar)
   var DOT_STEPS = 2;   // dots only track the two intro animations
   var frame = document.getElementById('frame');
   var screens = Array.prototype.slice.call(document.querySelectorAll('.screen'));
@@ -377,6 +493,8 @@
     clearAutoTimer();
     render();
     if (step === 1) buildDial();
+    if (step === 3) prefillProfileForm();
+    if (step === 4) { showTab('home'); renderProfileTab(); }
     scheduleAuto();
   }
 
@@ -412,15 +530,40 @@
     var KEY = 'iland_plot_v1';
     try {
       var raw = localStorage.getItem(KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (!parsed.allocatedAt) {
+          parsed.allocatedAt = Date.now();
+          try { localStorage.setItem(KEY, JSON.stringify(parsed)); } catch (e) {}
+        }
+        return parsed;
+      }
     } catch (e) {}
     var plot = {
       lat: Math.random() * 180 - 90,
       lng: Math.random() * 360 - 180,
       serial: Math.floor(100000 + Math.random() * 900000),
+      allocatedAt: Date.now(),
     };
     try { localStorage.setItem(KEY, JSON.stringify(plot)); } catch (e) {}
     return plot;
+  }
+
+  function formatDate(ts) {
+    var d = new Date(ts);
+    return d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
+  function getProfile() {
+    try {
+      var raw = localStorage.getItem('iland_profile_v1');
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return { nickname: '', islandName: '', emotion: null };
+  }
+
+  function saveProfile(profile) {
+    try { localStorage.setItem('iland_profile_v1', JSON.stringify(profile)); } catch (e) {}
   }
 
   function buildDialGroup(container, str) {
@@ -470,8 +613,35 @@
 
   screens.forEach(function (s) {
     var n = Number(s.dataset.step);
-    if (n === 2 || n === 3) return; // step 2 uses swipe-up; main page has its own tab bar
+    if (n === 2 || n === 3 || n === 4) return; // step 2 uses swipe-up; step 3 is a form; step 4 has its own tab bar
     s.addEventListener('click', function () { advance(); });
+  });
+
+  // --- Step 3: basic info input ---
+  var nicknameInput = document.getElementById('profile-nickname');
+  var islandInput = document.getElementById('profile-island');
+  var confirmBtn = document.getElementById('profile-confirm');
+
+  function updateConfirmState() {
+    confirmBtn.disabled = !(nicknameInput.value.trim() && islandInput.value.trim());
+  }
+
+  function prefillProfileForm() {
+    var profile = getProfile();
+    nicknameInput.value = profile.nickname || '';
+    islandInput.value = profile.islandName || '';
+    updateConfirmState();
+  }
+
+  nicknameInput.addEventListener('input', updateConfirmState);
+  islandInput.addEventListener('input', updateConfirmState);
+
+  confirmBtn.addEventListener('click', function () {
+    var profile = getProfile();
+    profile.nickname = nicknameInput.value.trim();
+    profile.islandName = islandInput.value.trim();
+    saveProfile(profile);
+    goTo(4);
   });
 
   // --- Step 2: swipe up to continue ---
@@ -528,27 +698,123 @@
     goTo(0);
   });
 
-  // --- Main page tab bar (Home / Community) ---
+  // --- Main page tab bar (나의 섬 / 둘러보기 / 커뮤니티) ---
   var tabHome = document.getElementById('tab-home');
+  var tabExplore = document.getElementById('tab-explore');
   var tabChat = document.getElementById('tab-chat');
+  var tabPanels = { home: tabHome, explore: tabExplore, chat: tabChat };
+  var tabDisplay = { home: 'block', explore: 'flex', chat: 'flex' };
   var tabBtns = Array.prototype.slice.call(document.querySelectorAll('.tab-btn'));
+
+  function showTab(target) {
+    tabBtns.forEach(function (b) {
+      var active = b.dataset.tab === target;
+      b.classList.toggle('active', active);
+      b.style.color = active ? '#f3ede4' : 'rgba(243,237,228,.4)';
+    });
+    Object.keys(tabPanels).forEach(function (key) {
+      tabPanels[key].style.display = key === target ? tabDisplay[key] : 'none';
+    });
+    if (target === 'chat') closeChatThread();
+  }
 
   tabBtns.forEach(function (btn) {
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
-      var target = btn.dataset.tab;
-      tabBtns.forEach(function (b) {
-        var active = b === btn;
-        b.classList.toggle('active', active);
-        b.style.color = active ? '#f3ede4' : 'rgba(243,237,228,.4)';
-      });
-      tabHome.style.display = target === 'home' ? 'block' : 'none';
-      tabChat.style.display = target === 'chat' ? 'flex' : 'none';
+      showTab(btn.dataset.tab);
     });
   });
 
+  // --- 나의 섬: 감정상태 ---
+  var EMOTIONS = ['고요', '그리움', '위로', '설렘'];
+  var emotionChipsEl = document.getElementById('emotion-chips');
+
+  EMOTIONS.forEach(function (label) {
+    var chip = document.createElement('button');
+    chip.type = 'button';
+    chip.textContent = label;
+    chip.dataset.emotion = label;
+    chip.style.cssText = 'font-size:12px; letter-spacing:.02em; padding:8px 14px; border-radius:999px; border:1px solid rgba(43,38,34,.22); background:transparent; color:#8a8074; cursor:pointer;';
+    chip.addEventListener('click', function () {
+      var profile = getProfile();
+      profile.emotion = label;
+      saveProfile(profile);
+      renderProfileTab();
+    });
+    emotionChipsEl.appendChild(chip);
+  });
+
+  function renderProfileTab() {
+    var profile = getProfile();
+    document.getElementById('profile-owner').textContent = (profile.nickname || '이름 없는 소유주') + '의 섬';
+    document.getElementById('profile-islandname').textContent = profile.islandName || '나의 섬';
+    Array.prototype.forEach.call(emotionChipsEl.children, function (chip) {
+      var active = chip.dataset.emotion === profile.emotion;
+      chip.style.borderColor = active ? 'var(--accent)' : 'rgba(43,38,34,.22)';
+      chip.style.color = active ? '#2b2622' : '#8a8074';
+      chip.style.background = active ? 'rgba(201,138,75,.16)' : 'transparent';
+    });
+  }
+
+  // --- 나의 섬: 등기부증서 (Island Deed) ---
+  var deedModal = document.getElementById('deed-modal');
+
+  document.getElementById('deed-btn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    var profile = getProfile();
+    var plot = getPlot();
+    document.getElementById('deed-owner').textContent = profile.nickname || '-';
+    document.getElementById('deed-islandname').textContent = profile.islandName || '-';
+    document.getElementById('deed-lat').textContent = toDMS(plot.lat, true, 2);
+    document.getElementById('deed-lng').textContent = toDMS(plot.lng, false, 3);
+    document.getElementById('deed-serial').textContent = pad(plot.serial, 6);
+    document.getElementById('deed-date').textContent = formatDate(plot.allocatedAt);
+    deedModal.style.display = 'flex';
+  });
+
+  document.getElementById('deed-close').addEventListener('click', function (e) {
+    e.stopPropagation();
+    deedModal.style.display = 'none';
+  });
+
+  // --- 둘러보기: 다른 섬 핀 (mock) ---
+  var MOCK_ISLANDS = [
+    { name: '고요섬 · 리아', quote: '오늘 밤도 파도 소리만 남았어요.', left: 22, top: 30 },
+    { name: '물결섬 · 준', quote: '멀리서도 등대 불빛이 보이길.', left: 68, top: 22 },
+    { name: '별빛섬 · 하늘', quote: '혼자여도 춥지 않은 밤이에요.', left: 45, top: 55 },
+    { name: '바람섬 · 노아', quote: '내일은 조금 더 밝을 것 같아요.', left: 78, top: 68 },
+    { name: '안개섬 · 유', quote: '천천히, 이 순간을 지나가는 중.', left: 30, top: 74 },
+  ];
+  var explorePinsEl = document.getElementById('explore-pins');
+  var exploreCard = document.getElementById('explore-card');
+  var currentExploreIsland = null;
+
+  MOCK_ISLANDS.forEach(function (isl) {
+    var pin = document.createElement('div');
+    pin.className = 'plot-pin';
+    pin.style.left = isl.left + '%';
+    pin.style.top = isl.top + '%';
+    pin.style.cursor = 'pointer';
+    pin.innerHTML = '<span class="plot-pin-ring"></span><span class="plot-pin-dot"></span>';
+    pin.addEventListener('click', function (e) {
+      e.stopPropagation();
+      currentExploreIsland = isl;
+      document.getElementById('explore-card-name').textContent = isl.name;
+      document.getElementById('explore-card-text').textContent = isl.quote;
+      exploreCard.style.display = 'block';
+    });
+    explorePinsEl.appendChild(pin);
+  });
+
+  document.getElementById('explore-chat-btn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (!currentExploreIsland) return;
+    ensureChat(currentExploreIsland.name, currentExploreIsland.quote);
+    showTab('chat');
+    openChatThread(currentExploreIsland.name);
+  });
+
   // --- Community chat (simulated, this device only) ---
-  var PERSONAS = ['고요섬 · 리아', '물결섬 · 준'];
   var REPLIES = [
     '당신의 섬 이야기, 저도 듣고 싶어요.',
     '오늘 하루도 고요히 지나가고 있네요.',
@@ -556,14 +822,108 @@
     '당신의 섬에도 작은 불빛이 켜지길.',
     '혼자 있는 시간도, 나쁘지 않죠.',
   ];
-  var seedMessages = [
-    { from: PERSONAS[0], text: '당신의 섬도 오늘 밤 고요한가요?' },
-    { from: PERSONAS[1], text: '이 시간, 저도 혼자만의 촛불을 밝혔어요.' },
-  ];
 
+  function getChats() {
+    try {
+      var raw = localStorage.getItem('iland_chats_v1');
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    var seed = {
+      '고요섬 · 리아': { messages: [{ from: 'them', text: '당신의 섬도 오늘 밤 고요한가요?' }] },
+      '물결섬 · 준': { messages: [{ from: 'them', text: '이 시간, 저도 혼자만의 촛불을 밝혔어요.' }] },
+    };
+    saveChats(seed);
+    return seed;
+  }
+
+  function saveChats(chats) {
+    try { localStorage.setItem('iland_chats_v1', JSON.stringify(chats)); } catch (e) {}
+  }
+
+  function ensureChat(name, seedText) {
+    var chats = getChats();
+    if (!chats[name]) {
+      chats[name] = { messages: seedText ? [{ from: 'them', text: seedText }] : [] };
+      saveChats(chats);
+    }
+    return chats;
+  }
+
+  function pushMessage(name, from, text) {
+    var chats = getChats();
+    if (!chats[name]) chats[name] = { messages: [] };
+    chats[name].messages.push({ from: from, text: text });
+    saveChats(chats);
+  }
+
+  var chatListEl = document.getElementById('chat-list');
+  var chatListView = document.getElementById('chat-list-view');
+  var chatThreadView = document.getElementById('chat-thread-view');
+  var chatThreadNameEl = document.getElementById('chat-thread-name');
   var thread = document.getElementById('chat-thread');
   var chatInput = document.getElementById('chat-input');
   var chatSend = document.getElementById('chat-send');
+  var currentPartner = null;
+
+  function renderChatList() {
+    var chats = getChats();
+    var names = Object.keys(chats);
+    chatListEl.innerHTML = '';
+    if (!names.length) {
+      var empty = document.createElement('div');
+      empty.textContent = '아직 나눈 대화가 없어요. 둘러보기에서 다른 섬에게 말을 걸어보세요.';
+      empty.style.cssText = 'padding:24px 20px; font-size:12.5px; line-height:1.6; color:rgba(243,237,228,.4);';
+      chatListEl.appendChild(empty);
+      return;
+    }
+    names.forEach(function (name) {
+      var msgs = chats[name].messages;
+      var last = msgs[msgs.length - 1];
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex; flex-direction:column; gap:3px; padding:14px 20px; border-bottom:1px solid rgba(243,237,228,.06); cursor:pointer;';
+      var nameEl = document.createElement('div');
+      nameEl.textContent = name;
+      nameEl.style.cssText = 'font-size:13.5px; font-weight:600;';
+      var previewEl = document.createElement('div');
+      previewEl.textContent = last ? (last.from === 'me' ? '나: ' : '') + last.text : '';
+      previewEl.style.cssText = 'font-size:12px; color:rgba(243,237,228,.45); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;';
+      row.appendChild(nameEl);
+      row.appendChild(previewEl);
+      row.addEventListener('click', function () { openChatThread(name); });
+      chatListEl.appendChild(row);
+    });
+  }
+
+  function openChatThread(name) {
+    ensureChat(name);
+    currentPartner = name;
+    chatThreadNameEl.textContent = name;
+    chatListView.style.display = 'none';
+    chatThreadView.style.display = 'flex';
+    renderThread();
+  }
+
+  function closeChatThread() {
+    currentPartner = null;
+    chatThreadView.style.display = 'none';
+    chatListView.style.display = 'flex';
+    renderChatList();
+  }
+
+  function renderThread() {
+    thread.innerHTML = '';
+    var chats = getChats();
+    var convo = chats[currentPartner];
+    if (!convo) return;
+    convo.messages.forEach(function (msg) {
+      addBubble(msg.from === 'me' ? { text: msg.text } : { from: currentPartner, text: msg.text }, msg.from === 'me');
+    });
+  }
+
+  document.getElementById('chat-back').addEventListener('click', function (e) {
+    e.stopPropagation();
+    closeChatThread();
+  });
 
   function addBubble(msg, mine) {
     var row = document.createElement('div');
@@ -614,17 +974,19 @@
   var replyIndex = 0;
   function sendMessage() {
     var text = chatInput.value.trim();
-    if (!text) return;
+    if (!text || !currentPartner) return;
+    var partner = currentPartner;
+    pushMessage(partner, 'me', text);
     addBubble({ text: text }, true);
     chatInput.value = '';
 
-    var persona = PERSONAS[Math.floor(Math.random() * PERSONAS.length)];
-    setTimeout(function () { showTyping(persona); }, 400);
+    setTimeout(function () { showTyping(partner); }, 400);
     setTimeout(function () {
       removeTyping();
       var reply = REPLIES[replyIndex % REPLIES.length];
       replyIndex++;
-      addBubble({ from: persona, text: reply }, false);
+      pushMessage(partner, 'them', reply);
+      if (currentPartner === partner) addBubble({ from: partner, text: reply }, false);
     }, 1300);
   }
 
@@ -633,8 +995,6 @@
     if (e.key === 'Enter') sendMessage();
   });
   chatInput.addEventListener('click', function (e) { e.stopPropagation(); });
-
-  seedMessages.forEach(function (m) { addBubble(m, false); });
 
   render();
 
