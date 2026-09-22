@@ -72,25 +72,6 @@
     letter-spacing: .08em;
   }
 
-  .dots-pill {
-    position: absolute;
-    left: 50%;
-    bottom: max(28px, env(safe-area-inset-bottom));
-    transform: translateX(-50%);
-    display: none;
-    gap: 7px;
-    align-items: center;
-    padding: 9px 13px;
-    border-radius: 999px;
-    background: rgba(10,9,8,.4);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    z-index: 5;
-  }
-  .dots-pill.show { display: flex; }
-  .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.35); }
-  .dot.active { background: var(--accent); }
-
   .write-on {
     display: inline-block;
     clip-path: inset(0 100% 0 0);
@@ -153,6 +134,14 @@
   @keyframes swipeHint {
     0%, 100% { transform: translateY(0); opacity: .55; }
     50%      { transform: translateY(-6px); opacity: 1; }
+  }
+
+  @keyframes mapDrift {
+    from { background-position: 30% center; }
+    to   { background-position: 78% center; }
+  }
+  .coord-map-drift {
+    animation: mapDrift 26s ease-in-out infinite alternate;
   }
 
   .plot-map-bg {
@@ -281,6 +270,7 @@
 
   <!-- Step 2 — coordinate dial (swipe up to continue) -->
   <div class="screen plot-map-bg" data-step="2" style="background-color:#0c0a09; color:#f3ede4; padding:0;">
+    <div class="coord-map-drift" style="position:absolute; inset:0; background-image:url('assets/world-map.png'); background-size:cover; background-repeat:no-repeat; opacity:.16;"></div>
     <div id="dial-pin" class="plot-pin" style="left:50%; top:50%;">
       <span class="plot-pin-ring"></span>
       <span class="plot-pin-ring" style="animation-delay:.7s;"></span>
@@ -444,7 +434,7 @@
     </div>
   </div>
 
-  <div class="dots-pill" id="dots"></div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
@@ -453,27 +443,14 @@
 <script>
 (function () {
   var TOTAL_STEPS = 4; // step 3 is basic-info input, step 4 is the main page (tab bar)
-  var DOT_STEPS = 2;   // dots only track the two intro animations
   var frame = document.getElementById('frame');
   var screens = Array.prototype.slice.call(document.querySelectorAll('.screen'));
-  var dotsEl = document.getElementById('dots');
   var timer = null;
   var step = 0;
-
-  for (var i = 1; i <= DOT_STEPS; i++) {
-    var d = document.createElement('div');
-    d.className = 'dot';
-    d.dataset.n = i;
-    dotsEl.appendChild(d);
-  }
 
   function render() {
     screens.forEach(function (s) {
       s.classList.toggle('active', Number(s.dataset.step) === step);
-    });
-    dotsEl.classList.toggle('show', step > 0 && step <= DOT_STEPS);
-    Array.prototype.forEach.call(dotsEl.children, function (dot) {
-      dot.classList.toggle('active', Number(dot.dataset.n) === step);
     });
   }
 
