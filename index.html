@@ -275,19 +275,8 @@
   </div>
 
   <!-- Step 1 — welcome -->
-  <div class="screen" data-step="1" style="background:#0c0a09; color:#f3ede4; cursor:pointer; align-items:center; justify-content:center; text-align:center; padding:32px;">
-    <div style="font-family:'Playfair Display', serif; font-weight:600; font-size:15px; letter-spacing:.32em; text-transform:uppercase; color:rgba(243,237,228,.75); animation: fadeUp .6s ease both;">iLanD</div>
-    <div style="position:relative; margin-top:22px; height:64px; display:flex; align-items:center;">
-      <span class="write-on" style="font-family:'Petit Formal Script', cursive; font-size:46px; color:#f3ede4; white-space:nowrap;">welcome</span>
-      <span class="write-nib"></span>
-    </div>
-    <div style="display:flex; align-items:center; gap:10px; margin-top:36px; animation: fadeUp .7s ease 1.9s both;">
-      <span style="font-size:11.5px; letter-spacing:.16em; color:rgba(243,237,228,.6);">STILLNESS</span>
-      <span style="width:3px; height:3px; border-radius:50%; background:var(--accent);"></span>
-      <span style="font-size:11.5px; letter-spacing:.16em; color:rgba(243,237,228,.6);">SOLITUDE</span>
-      <span style="width:3px; height:3px; border-radius:50%; background:var(--accent);"></span>
-      <span style="font-size:11.5px; letter-spacing:.16em; color:rgba(243,237,228,.6);">COMFORT</span>
-    </div>
+  <div class="screen" data-step="1" style="background:#0c0a09; color:#f3ede4; cursor:pointer; padding:0; overflow:hidden;">
+    <video id="welcome-video" src="assets/iland-intro.mp4" muted playsinline style="display:block; width:100%; height:100%; object-fit:cover;"></video>
   </div>
 
   <!-- Step 2 — coordinate dial (swipe up to continue) -->
@@ -496,7 +485,14 @@
     step = Math.max(0, Math.min(TOTAL_STEPS, n));
     clearAutoTimer();
     render();
-    if (step === 1) buildDial();
+    if (step === 1) {
+      buildDial();
+      welcomeVideo.currentTime = 0;
+      welcomeVideo.playbackRate = 1.35;
+      welcomeVideo.play().catch(function () {});
+    } else {
+      welcomeVideo.pause();
+    }
     if (step === 3) prefillProfileForm();
     if (step === 4) { showTab('home'); renderProfileTab(); initIslandViewer(); }
     scheduleAuto();
@@ -507,11 +503,12 @@
   }
 
   function scheduleAuto() {
-    if (step === 1) {
-      timer = setTimeout(function () { if (step === 1) goTo(2); }, 2700);
-    }
-    // step 2 (coordinate dial) advances only via swipe-up gesture, no auto timer
+    // step 1 (welcome video) and step 2 (coordinate dial) both wait for
+    // the user (tap / swipe-up) — no auto-advance timers.
   }
+
+  var welcomeVideo = document.getElementById('welcome-video');
+  welcomeVideo.playbackRate = 1.35;
 
   var D10 = ['0','1','2','3','4','5','6','7','8','9'];
   var digits20 = D10.concat(D10);
