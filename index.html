@@ -274,7 +274,7 @@
   <!-- Step 2 — coordinate dial (swipe up to continue) -->
   <div class="screen plot-map-bg" data-step="2" style="background-color:#0c0a09; color:#f3ede4; padding:0;">
     <div class="coord-map-drift" style="position:absolute; inset:0; background-image:url('assets/world-map.png'); opacity:.5;"></div>
-    <video id="dial-video" src="assets/intro-dial.mp4" muted playsinline preload="auto" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center bottom; opacity:1; filter:brightness(1.5); mix-blend-mode:screen; pointer-events:none;"></video>
+    <video id="dial-video" src="assets/intro-dial.mp4" muted playsinline preload="auto" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center bottom; opacity:0; transition:opacity .25s ease; filter:brightness(1.5); mix-blend-mode:screen; pointer-events:none;"></video>
 
     <div id="dial-drag" style="position:relative; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; width:100%; padding:32px 32px calc(56px + env(safe-area-inset-bottom)); touch-action:none; cursor:grab;">
       <div style="display:flex; flex-direction:column; align-items:center; gap:7px; color:rgba(243,237,228,.4); animation: swipeHint 1.8s ease-in-out infinite;">
@@ -315,7 +315,7 @@
         <div id="emotion-chips" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
       </div>
 
-      <div style="margin-top:26px; position:relative; height:260px;">
+      <div style="margin-top:26px; position:relative; height:340px;">
         <canvas id="island-canvas" style="display:block; width:100%; height:100%; touch-action:none; cursor:grab;"></canvas>
       </div>
       <div style="text-align:center; font-size:10.5px; letter-spacing:.06em; color:#a39a8d; margin-top:8px;">드래그해서 섬을 360&deg;로 돌려보세요</div>
@@ -450,10 +450,12 @@
       welcomeVideo.pause();
     }
     if (step === 2) {
+      dialVideo.style.opacity = '0';
       dialVideo.currentTime = 0;
       dialVideo.play().catch(function () {});
     } else {
       dialVideo.pause();
+      dialVideo.style.opacity = '0';
     }
     if (step === 3) prefillProfileForm();
     if (step === 4) { showTab('home'); renderProfileTab(); initIslandViewer(); }
@@ -474,6 +476,9 @@
 
   var dialVideo = document.getElementById('dial-video');
   dialVideo.load(); // start buffering immediately so it's ready before step 2
+  dialVideo.addEventListener('playing', function () {
+    dialVideo.style.opacity = '1';
+  });
 
   function pad(n, width) { return String(n).padStart(width || 2, '0'); }
 
@@ -945,7 +950,7 @@
     islandRenderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
     islandRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     islandRenderer.toneMapping = THREE.ACESFilmicToneMapping;
-    islandRenderer.toneMappingExposure = 0.95;
+    islandRenderer.toneMappingExposure = 1;
 
     islandScene.add(new THREE.HemisphereLight(0xcfd6dc, 0x4a4038, 0.55));
     var dir = new THREE.DirectionalLight(0xf2e6cf, 0.7);
@@ -956,7 +961,7 @@
     islandScene.add(fill);
 
     var gltfLoader = new THREE.GLTFLoader();
-    gltfLoader.load('assets/island-beach.glb', function (gltf) {
+    gltfLoader.load('assets/island-sample.glb', function (gltf) {
       var obj = gltf.scene;
       obj.position.set(0.0017, 0.0054, 0.001);
       obj.scale.setScalar(0.85);
