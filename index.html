@@ -319,19 +319,9 @@
         <canvas id="island-canvas" style="display:block; width:100%; height:100%; touch-action:none; cursor:grab;"></canvas>
       </div>
       <div style="text-align:center; font-size:10.5px; letter-spacing:.06em; color:#a39a8d; margin-top:8px;">드래그해서 섬을 360&deg;로 돌려보세요</div>
-      <div style="margin-top:28px; display:flex; flex-direction:column;">
-        <div style="display:flex; justify-content:space-between; padding:13px 0; border-top:1px solid rgba(43,38,34,.14);">
-          <span style="font-size:11.5px; letter-spacing:.12em; color:#8a8074;">SCENT</span>
-          <span style="font-size:13px; color:#8a8074;">[향 노트를 입력하세요]</span>
-        </div>
-        <div style="display:flex; justify-content:space-between; padding:13px 0; border-top:1px solid rgba(43,38,34,.14);">
-          <span style="font-size:11.5px; letter-spacing:.12em; color:#8a8074;">BURN TIME</span>
-          <span style="font-size:13px; color:#8a8074;">[연소 시간을 입력하세요]</span>
-        </div>
-        <div style="display:flex; justify-content:space-between; padding:13px 0; border-top:1px solid rgba(43,38,34,.14); border-bottom:1px solid rgba(43,38,34,.14);">
-          <span style="font-size:11.5px; letter-spacing:.12em; color:#8a8074;">MATERIAL</span>
-          <span style="font-size:13px; color:#8a8074;">[소재를 입력하세요]</span>
-        </div>
+      <div style="margin-top:32px; padding-top:24px; border-top:1px solid rgba(43,38,34,.14); border-bottom:1px solid rgba(43,38,34,.14); padding-bottom:22px;">
+        <div style="font-size:11px; letter-spacing:.12em; color:#8a8074;">오늘의 한 줄</div>
+        <input id="diary-line" type="text" maxlength="60" placeholder="오늘 이 섬에 남기고 싶은 감정을 한 줄로 적어보세요" style="width:100%; border:none; background:transparent; outline:none; font-family:'Playfair Display', serif; font-style:italic; font-size:15px; color:#2b2622; margin-top:10px; padding:0;">
       </div>
 
       <div style="margin-top:44px; padding-top:32px; border-top:1px solid rgba(43,38,34,.14); text-align:center;">
@@ -429,8 +419,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/MTLLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script>
 (function () {
   var TOTAL_STEPS = 4; // step 3 is basic-info input, step 4 is the main page (tab bar)
@@ -533,7 +522,7 @@
       var raw = localStorage.getItem('iland_profile_v1');
       if (raw) return JSON.parse(raw);
     } catch (e) {}
-    return { nickname: '', islandName: '', emotion: null };
+    return { nickname: '', islandName: '', emotion: null, diary: '' };
   }
 
   function saveProfile(profile) {
@@ -684,7 +673,16 @@
       chip.style.color = active ? '#2b2622' : '#8a8074';
       chip.style.background = active ? 'rgba(201,138,75,.16)' : 'transparent';
     });
+    diaryInput.value = profile.diary || '';
   }
+
+  var diaryInput = document.getElementById('diary-line');
+  diaryInput.addEventListener('input', function () {
+    var profile = getProfile();
+    profile.diary = diaryInput.value;
+    saveProfile(profile);
+  });
+  diaryInput.addEventListener('click', function (e) { e.stopPropagation(); });
 
   // --- 나의 섬: 등기부증서 (Island Deed) ---
   var deedModal = document.getElementById('deed-modal');
@@ -947,7 +945,7 @@
     islandRenderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
     islandRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     islandRenderer.toneMapping = THREE.ACESFilmicToneMapping;
-    islandRenderer.toneMappingExposure = 0.85;
+    islandRenderer.toneMappingExposure = 0.95;
 
     islandScene.add(new THREE.HemisphereLight(0xcfd6dc, 0x4a4038, 0.55));
     var dir = new THREE.DirectionalLight(0xf2e6cf, 0.7);
@@ -957,18 +955,12 @@
     fill.position.set(-2, 1, -2);
     islandScene.add(fill);
 
-    var mtlLoader = new THREE.MTLLoader();
-    mtlLoader.setPath('assets/island-model/');
-    mtlLoader.load('island.mtl', function (materials) {
-      materials.preload();
-      var objLoader = new THREE.OBJLoader();
-      objLoader.setMaterials(materials);
-      objLoader.setPath('assets/island-model/');
-      objLoader.load('island.obj', function (obj) {
-        obj.position.set(0.002, -0.033, 0.002);
-        obj.scale.setScalar(0.72);
-        islandScene.add(obj);
-      });
+    var gltfLoader = new THREE.GLTFLoader();
+    gltfLoader.load('assets/island-beach.glb', function (gltf) {
+      var obj = gltf.scene;
+      obj.position.set(0.0017, 0.0054, 0.001);
+      obj.scale.setScalar(0.85);
+      islandScene.add(obj);
     });
 
     resizeIslandViewer();
@@ -985,7 +977,7 @@
       var dx = e.clientX - dragLastX;
       var dy = e.clientY - dragLastY;
       dragLastX = e.clientX; dragLastY = e.clientY;
-      camYaw += dx * 0.008;
+      camYaw -= dx * 0.008;
       camPitch = Math.max(-0.5, Math.min(0.6, camPitch + dy * 0.006));
     });
     function endIslandDrag() {
@@ -999,11 +991,13 @@
     requestAnimationFrame(renderIslandLoop);
   }
 
+  var islandLastW = 0, islandLastH = 0;
   function resizeIslandViewer() {
     if (!islandRenderer) return;
     var canvas = islandRenderer.domElement;
     var w = canvas.clientWidth, h = canvas.clientHeight;
-    if (!w || !h) return;
+    if (!w || !h || (w === islandLastW && h === islandLastH)) return;
+    islandLastW = w; islandLastH = h;
     islandRenderer.setSize(w, h, false);
     islandCamera.aspect = w / h;
     islandCamera.updateProjectionMatrix();
