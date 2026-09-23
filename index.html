@@ -136,12 +136,15 @@
     50%      { transform: translateY(-6px); opacity: 1; }
   }
 
-  @keyframes mapDrift {
-    from { background-position: 30% center; }
-    to   { background-position: 78% center; }
+  @keyframes mapDriftFromKorea {
+    from { background-position-x: -1257px; }
+    to   { background-position-x: 443px; }
   }
   .coord-map-drift {
-    animation: mapDrift 26s ease-in-out infinite alternate;
+    background-size: 1700px 945px;
+    background-position-y: 138px;
+    background-repeat: repeat-x;
+    animation: mapDriftFromKorea 60s linear infinite;
   }
 
   .plot-map-bg {
@@ -270,23 +273,11 @@
 
   <!-- Step 2 — coordinate dial (swipe up to continue) -->
   <div class="screen plot-map-bg" data-step="2" style="background-color:#0c0a09; color:#f3ede4; padding:0;">
-    <div class="coord-map-drift" style="position:absolute; inset:0; background-image:url('assets/world-map.png'); background-size:cover; background-repeat:no-repeat; opacity:.16;"></div>
-    <div id="dial-pin" class="plot-pin" style="left:50%; top:50%;">
-      <span class="plot-pin-ring"></span>
-      <span class="plot-pin-ring" style="animation-delay:.7s;"></span>
-      <span class="plot-pin-dot"></span>
-    </div>
+    <div class="coord-map-drift" style="position:absolute; inset:0; background-image:url('assets/world-map.png'); opacity:.5;"></div>
+    <video id="dial-video" src="assets/intro-dial.mp4" muted playsinline style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center bottom; opacity:1; filter:brightness(1.5); mix-blend-mode:screen; pointer-events:none;"></video>
 
-    <div id="dial-drag" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; padding:32px; touch-action:none; cursor:grab;">
-      <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:13px; letter-spacing:.06em; color:rgba(243,237,228,.55);">당신의 섬이 이 순간, 분양되었습니다</div>
-      <div style="margin-top:34px; font-size:11px; letter-spacing:.18em; color:rgba(243,237,228,.4);">LAT</div>
-      <div id="dial-lat" style="display:flex; margin-top:6px;"></div>
-      <div style="margin-top:20px; font-size:11px; letter-spacing:.18em; color:rgba(243,237,228,.4);">LNG</div>
-      <div id="dial-lng" style="display:flex; margin-top:6px;"></div>
-      <div style="margin-top:20px; font-size:11px; letter-spacing:.18em; color:rgba(243,237,228,.4);">ISLAND NO.</div>
-      <div id="dial-serial" style="display:flex; margin-top:6px;"></div>
-
-      <div style="margin-top:40px; display:flex; flex-direction:column; align-items:center; gap:7px; color:rgba(243,237,228,.4); animation: swipeHint 1.8s ease-in-out infinite;">
+    <div id="dial-drag" style="position:relative; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; width:100%; padding:32px 32px calc(56px + env(safe-area-inset-bottom)); touch-action:none; cursor:grab;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:7px; color:rgba(243,237,228,.4); animation: swipeHint 1.8s ease-in-out infinite;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M12 5L6 11M12 5L18 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span style="font-size:11px; letter-spacing:.08em;">위로 드래그하여 계속</span>
       </div>
@@ -463,12 +454,17 @@
     clearAutoTimer();
     render();
     if (step === 1) {
-      buildDial();
       welcomeVideo.currentTime = 0;
       welcomeVideo.playbackRate = 1.35;
       welcomeVideo.play().catch(function () {});
     } else {
       welcomeVideo.pause();
+    }
+    if (step === 2) {
+      dialVideo.currentTime = 0;
+      dialVideo.play().catch(function () {});
+    } else {
+      dialVideo.pause();
     }
     if (step === 3) prefillProfileForm();
     if (step === 4) { showTab('home'); renderProfileTab(); initIslandViewer(); }
@@ -487,8 +483,7 @@
   var welcomeVideo = document.getElementById('welcome-video');
   welcomeVideo.playbackRate = 1.35;
 
-  var D10 = ['0','1','2','3','4','5','6','7','8','9'];
-  var digits20 = D10.concat(D10);
+  var dialVideo = document.getElementById('dial-video');
 
   function pad(n, width) { return String(n).padStart(width || 2, '0'); }
 
@@ -542,51 +537,6 @@
 
   function saveProfile(profile) {
     try { localStorage.setItem('iland_profile_v1', JSON.stringify(profile)); } catch (e) {}
-  }
-
-  function buildDialGroup(container, str) {
-    container.innerHTML = '';
-    var digitIndex = 0;
-    str.split('').forEach(function (ch) {
-      if (ch >= '0' && ch <= '9') {
-        var win = document.createElement('div');
-        win.className = 'dial-window';
-        var col = document.createElement('div');
-        col.className = 'dial-col';
-        col.style.setProperty('--target', ch);
-        col.style.animationDelay = (digitIndex * 0.06).toFixed(3) + 's';
-        digits20.forEach(function (n) {
-          var cell = document.createElement('div');
-          cell.className = 'dial-cell';
-          cell.textContent = n;
-          col.appendChild(cell);
-        });
-        win.appendChild(col);
-        container.appendChild(win);
-        digitIndex++;
-      } else {
-        var sep = document.createElement('div');
-        sep.className = 'dial-sep';
-        sep.textContent = ch;
-        container.appendChild(sep);
-      }
-    });
-  }
-
-  function buildDial() {
-    var plot = getPlot();
-    var latStr = toDMS(plot.lat, true, 2);
-    var lngStr = toDMS(plot.lng, false, 3);
-    var serialStr = pad(plot.serial, 6);
-    buildDialGroup(document.getElementById('dial-lat'), latStr);
-    buildDialGroup(document.getElementById('dial-lng'), lngStr);
-    buildDialGroup(document.getElementById('dial-serial'), serialStr);
-
-    var pin = document.getElementById('dial-pin');
-    var px = (plot.lng + 180) / 360 * 100;
-    var py = (90 - plot.lat) / 180 * 100;
-    pin.style.left = px + '%';
-    pin.style.top = py + '%';
   }
 
   screens.forEach(function (s) {
