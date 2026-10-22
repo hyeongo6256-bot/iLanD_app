@@ -179,32 +179,120 @@
     background: var(--accent);
   }
 
-  .field {
-    width: 100%;
-    background: rgba(243,237,228,.06);
-    border: 1px solid rgba(243,237,228,.18);
+  .onb-field {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 58px;
+    padding: 0 18px;
+    margin-top: 12px;
+    border-radius: 18px;
+    background: #2a201d;
+    border: 1px solid rgba(255,255,255,.12);
+  }
+  .onb-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
     color: #f3ede4;
     font-family: 'Noto Sans KR', sans-serif;
-    font-size: 16px;
-    padding: 13px 16px;
-    border-radius: 12px;
-    outline: none;
+    font-size: 15px;
   }
-  .field::placeholder { color: rgba(243,237,228,.32); }
+  .onb-input::placeholder { color: #8d7f7c; }
 
-  .primary-btn {
+  .onb-cta {
     width: 100%;
+    height: 56px;
+    margin-top: 34px;
     border: none;
-    background: var(--accent);
-    color: #15120f;
-    font-family: 'Noto Sans KR', sans-serif;
-    font-weight: 600;
-    font-size: 14px;
-    padding: 14px;
     border-radius: 999px;
+    background: #e8aab7;
+    color: #1d1714;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
     cursor: pointer;
   }
-  .primary-btn:disabled { opacity: .35; cursor: default; }
+  .onb-cta:disabled { opacity: .35; cursor: default; }
+
+  @property --notch-x {
+    syntax: '<percentage>';
+    inherits: true;
+    initial-value: 12.5%;
+  }
+  .tab-bar {
+    --notch-x: 12.5%;
+    position: relative;
+    flex: none;
+    display: flex;
+  }
+  .tab-bar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #e8aab7;
+    -webkit-mask-image: radial-gradient(circle 42px at var(--notch-x) 7px, transparent 41px, #000 42px);
+    mask-image: radial-gradient(circle 42px at var(--notch-x) 7px, transparent 41px, #000 42px);
+    transition: --notch-x .55s cubic-bezier(.34, 1.45, .5, 1);
+  }
+  .tab-bubble {
+    position: absolute;
+    top: -26px;
+    left: 0;
+    width: 25%;
+    height: 66px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transition: transform .55s cubic-bezier(.34, 1.45, .5, 1);
+  }
+  .tab-bubble::before {
+    content: '';
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #e8aab7;
+  }
+  .tab-btn {
+    flex: 1;
+    height: calc(35px + env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+  }
+  .tab-icon {
+    --lift: 0px;
+    width: 28px;
+    height: 28px;
+    opacity: .85;
+    transform: translateY(var(--lift));
+    transition: transform .55s cubic-bezier(.34, 1.45, .5, 1), opacity .3s;
+  }
+  .tab-icon * { stroke: currentColor; stroke-width: 3; stroke-linejoin: round; }
+  .tab-btn[data-tab="home"] .tab-icon,
+  .tab-btn[data-tab="explore"] .tab-icon,
+  .tab-btn[data-tab="chat"] .tab-icon { width: 31px; height: 31px; }
+  .tab-btn.active .tab-icon {
+    --lift: calc(7px - 17.5px - env(safe-area-inset-bottom) / 2);
+    opacity: 1;
+  }
+  .tab-btn:active .tab-icon {
+    transform: translateY(var(--lift)) scale(.82);
+    transition-duration: .08s;
+  }
+  .tab-icon.pop { animation: tabPop .45s cubic-bezier(.34, 1.45, .5, 1); }
+  @keyframes tabPop {
+    0%   { transform: translateY(var(--lift)) scale(1); }
+    35%  { transform: translateY(calc(var(--lift) - 4px)) scale(1.18); }
+    100% { transform: translateY(var(--lift)) scale(1); }
+  }
 
   .deed-row {
     display: flex;
@@ -225,6 +313,16 @@
 </head>
 <body>
 
+<svg width="0" height="0" style="position:absolute">
+  <filter id="pinkDuo" color-interpolation-filters="sRGB">
+    <feColorMatrix type="matrix" values="0.299 0.587 0.114 0 0  0.299 0.587 0.114 0 0  0.299 0.587 0.114 0 0  0 0 0 1 0"/>
+    <feComponentTransfer>
+      <feFuncR type="table" tableValues="0 1.113"></feFuncR>
+      <feFuncG type="table" tableValues="0 0.825"></feFuncG>
+      <feFuncB type="table" tableValues="0 0.930"></feFuncB>
+    </feComponentTransfer>
+  </filter>
+</svg>
 <div class="frame" id="frame" style="--accent:#c98a4b;">
 
   <!-- Step 0 — NFC tap -->
@@ -272,9 +370,9 @@
   </div>
 
   <!-- Step 2 — coordinate dial (swipe up to continue) -->
-  <div class="screen plot-map-bg" data-step="2" style="background-color:#0c0a09; color:#f3ede4; padding:0;">
+  <div class="screen plot-map-bg" data-step="2" style="background-color:#4a3024; color:#f3ede4; padding:0;">
     <div class="coord-map-drift" style="position:absolute; inset:0; background-image:url('assets/world-map.png'); opacity:.5;"></div>
-    <video id="dial-video" src="assets/intro-dial.mp4" muted playsinline preload="auto" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center bottom; opacity:0; transition:opacity .25s ease; filter:brightness(1.5); mix-blend-mode:screen; pointer-events:none;"></video>
+    <video id="dial-video" src="assets/intro-dial.mp4" muted playsinline preload="auto" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center bottom; opacity:0; transition:opacity .25s ease; filter:url(#pinkDuo); mix-blend-mode:screen; pointer-events:none;"></video>
 
     <div id="dial-drag" style="position:relative; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; width:100%; padding:32px 32px calc(56px + env(safe-area-inset-bottom)); touch-action:none; cursor:grab;">
       <div style="display:flex; flex-direction:column; align-items:center; gap:7px; color:rgba(243,237,228,.4); animation: swipeHint 1.8s ease-in-out infinite;">
@@ -285,16 +383,32 @@
   </div>
 
   <!-- Step 3 — basic info input -->
-  <div class="screen" data-step="3" style="background:#0c0a09; color:#f3ede4; align-items:center; justify-content:center; padding:40px 30px;">
-    <div style="width:100%; max-width:320px;">
-      <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:12px; letter-spacing:.1em; color:rgba(243,237,228,.5); text-align:center;">이 섬의 주인은 누구인가요?</div>
-      <input id="profile-nickname" class="field" type="text" placeholder="닉네임" maxlength="16" style="margin-top:22px;">
+  <div class="screen" data-step="3" style="background:#1d1714; color:#f3ede4; padding:0; overflow-y:auto;">
+    <div style="position:relative; flex:none; height:min(44dvh, 380px); overflow:hidden;">
+      <img src="assets/onboarding-hero.jpg" alt="" style="display:block; width:100%; height:100%; object-fit:cover; object-position:center 40%;">
+      <div style="position:absolute; left:0; right:0; bottom:0; height:40%; background:linear-gradient(to bottom, rgba(29,23,20,0), #1d1714);"></div>
+      <button id="onb-back" aria-label="이전으로" style="position:absolute; left:0; top:calc(40px + env(safe-area-inset-top)); width:48px; height:48px; border:none; background:transparent; cursor:pointer;"></button>
+    </div>
 
-      <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:12px; letter-spacing:.1em; color:rgba(243,237,228,.5); text-align:center; margin-top:30px;">당신의 섬에 이름을 붙여주세요</div>
-      <div style="font-size:11px; color:rgba(243,237,228,.35); text-align:center; margin-top:4px;">예: 고요섬, 물결섬</div>
-      <input id="profile-island" class="field" type="text" placeholder="섬 이름" maxlength="12" style="margin-top:14px;">
+    <div style="flex:none; padding:0 30px calc(28px + env(safe-area-inset-bottom));">
+      <div style="text-align:center;">
+        <div style="font-size:23px; font-weight:700;">당신의 섬이 기다리고 있어요</div>
+        <div style="font-size:13.5px; color:rgba(243,237,228,.6); margin-top:8px;">이름을 정하고, 나만의 공간으로 떠나보세요.</div>
+      </div>
 
-      <button id="profile-confirm" class="primary-btn" disabled style="margin-top:32px;">나의 섬으로 이동</button>
+      <div style="margin-top:30px; font-size:14px;">이 섬의 주인은 누구인가요?</div>
+      <label class="onb-field">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4.5" fill="#e8aab7"/><path d="M4 21c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5z" fill="#e8aab7"/></svg>
+        <input id="profile-nickname" class="onb-input" type="text" placeholder="닉네임을 입력해주세요" maxlength="16">
+      </label>
+
+      <div style="margin-top:22px; font-size:14px;">당신의 섬에 이름을 붙여주세요</div>
+      <label class="onb-field">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 20.5c3-1.6 6-1.6 9 0 3-1.6 6-1.6 9 0z" fill="#e8aab7"/><path d="M12 19.5c-.3-3.5.2-7 1.4-10.5" stroke="#e8aab7" stroke-width="1.8" stroke-linecap="round"/><path d="M13.4 9c-2-2.5-4.6-3.2-7.2-2.4M13.4 9c1.6-2.8 4.2-3.7 7-2.6M13.4 9c-.4-2.6.4-4.6 2.2-5.8M13.4 9c-1.4-2-.9-4.4.2-5.8" stroke="#e8aab7" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input id="profile-island" class="onb-input" type="text" placeholder="섬 이름을 입력해주세요" maxlength="12">
+      </label>
+
+      <button id="profile-confirm" class="onb-cta" disabled>나의 섬으로 이동</button>
     </div>
   </div>
 
@@ -380,19 +494,14 @@
 
     </div>
 
-    <div style="flex:none; display:flex; background:#15120f; padding-bottom:env(safe-area-inset-bottom); border-top:1px solid rgba(243,237,228,.08);">
-      <button class="tab-btn active" data-tab="home" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:11px 0 9px; border:none; background:transparent; cursor:pointer; color:#f3ede4;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 11.5L12 4L20 11.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10V20H18V10" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-        <span style="font-size:10.5px; letter-spacing:.04em;">나의 섬</span>
-      </button>
-      <button class="tab-btn" data-tab="explore" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:11px 0 9px; border:none; background:transparent; cursor:pointer; color:rgba(243,237,228,.4);">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="10" r="6.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5V16.5M5.5 10H18.5" stroke="currentColor" stroke-width="1.2" opacity=".6"/><path d="M12 16.5C13.5 19 15 20.5 15 20.5H9C9 20.5 10.5 19 12 16.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-        <span style="font-size:10.5px; letter-spacing:.04em;">둘러보기</span>
-      </button>
-      <button class="tab-btn" data-tab="chat" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:11px 0 9px; border:none; background:transparent; cursor:pointer; color:rgba(243,237,228,.4);">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 5.5H20V16H9L5 19.5V16H4V5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-        <span style="font-size:10.5px; letter-spacing:.04em;">커뮤니티</span>
-      </button>
+    <div id="tab-menu" class="tab-panel" style="display:none; flex:1; min-height:0; align-items:center; justify-content:center; background:#1d1714; color:rgba(243,237,228,.5); font-size:13px;">준비 중이에요</div>
+
+    <div class="tab-bar">
+      <div id="tab-bubble" class="tab-bubble"></div>
+      <button class="tab-btn active" data-tab="home" aria-label="나의 섬"><svg class="tab-icon" viewBox="46.3 238.5 124.4 118.9" fill="currentColor" aria-hidden="true"><path d="M83.54,336.61c-.47,0-.94-.02-1.42-.05-2.99-.22-5.82-1.13-8.54-2.02-2.85-.92-5.79-1.88-8.94-2.04-.45-.03-1.68.05-2.88.12-5.67.34-7.06.31-7.8-.71-1.06-1.46.22-3.44,2.95-6.56l.07-.08c3.07-3.52,7.69-8.14,12.37-12.38,13.98-12.66,26.51-17.98,40.42-17.15,2.63-9.5,6.43-17.6,11.33-24.12-6.31-1.27-12.37-1.16-19.35.34-.27.06-.85.24-1.46.44-3.83,1.23-6.43,1.92-7.6.26-2.1-2.99,3.21-8.62,3.82-9.25,5.65-5.83,13.92-8.52,21.64-7.31l-.06-.08c-2.73-2.11-5.44-4.09-8.46-5.34-.44-.18-1.45-.47-2.44-.75-2.41-.69-3.45-1.02-3.99-1.46-1.41-1.15-1.38-2.35-1.24-2.97.54-2.35,4.35-3.59,6.57-4.12,7.45-1.78,13.97-.87,18.88,2.62,4,2.85,6.63,7.29,7.69,12.92.15-.13.31-.26.46-.4,1.08-.93,2.2-1.9,3.54-2.67,8.16-4.7,17.32-3.72,23.89,2.56,2.19,2.09,4.31,4.51,3.4,6.56-.99,2.23-4.37,1.97-8.27,1.68-1.43-.11-2.78-.21-3.76-.16-1.65.09-4.25.51-5.81.86-.23.05-.87.24-1.61.47,9.63,3.72,15.12,10.55,15.95,19.89,0,.09.31,9.3-1.82,10.67-.81.52-1.99.32-2.33.25-1.35-.29-2.65-2.01-5.1-5.6-.58-.84-1.12-1.64-1.44-2.03-5.22-6.31-12.15-11.25-19.59-13.99-2.8,4.31-5.03,9.44-6.65,15.28-1.56,5.64-1.81,7.84-1.83,8.61.47.18,1.22.42,1.76.59,1.03.33,2.01.64,2.66.95,5.35,2.56,9.1,5.85,13.07,9.33,1.76,1.54,3.58,3.14,5.55,4.67,2.24,1.74,5,2.83,7.91,3.98,4.93,1.95,10.03,3.96,12.63,9.35.73,1.52,1.57,3.72.3,5.23-1.57,1.86-4.8.94-8.21-.05-1.23-.35-2.38-.68-3.19-.79-4.32-.57-8.15-.42-12.04.48-1.53.35-3,.94-4.56,1.56-1.7.68-3.47,1.38-5.33,1.76-6.11,1.25-11.26-.34-16.24-1.88-3.78-1.17-7.7-2.37-12.05-2.33-3.93.04-7.64,1.24-11.23,2.4-3.7,1.2-7.51,2.43-11.6,2.43ZM64.44,329.51c.13,0,.24,0,.35,0,3.55.18,6.68,1.19,9.72,2.18,2.68.87,5.2,1.69,7.83,1.88,4.05.29,7.86-.94,11.88-2.24,3.81-1.23,7.74-2.51,12.13-2.55,4.83-.05,8.97,1.23,12.96,2.47,4.83,1.49,9.39,2.9,14.75,1.81,1.6-.33,3.16-.95,4.82-1.61,1.6-.64,3.25-1.29,5-1.7,4.25-.98,8.42-1.15,13.11-.53,1.03.14,2.29.5,3.63.88,1.48.43,4.18,1.2,5.04.98,0-.23-.09-.81-.65-1.97-2.09-4.33-6.43-6.05-11.03-7.87-2.98-1.18-6.07-2.4-8.65-4.39-2.04-1.58-3.9-3.21-5.69-4.78-3.81-3.34-7.4-6.5-12.38-8.88-.46-.22-1.43-.53-2.28-.8-1.54-.49-2.44-.79-2.97-1.16-.86-.6-1.83-1.29,1.06-11.7,1.83-6.6,4.42-12.36,7.71-17.13l.64-.93,1.07.36c8.38,2.83,16.2,8.27,22.02,15.3.4.49.96,1.3,1.61,2.24.82,1.2,2.45,3.58,3.23,4.27.42-1.72.68-6.28.56-7.63-.8-9.03-6.41-15.18-16.68-18.26l-.12-.03c-.37-.08-1.36-.29-1.65-1.3-.14-.46-.14-1.17.61-1.91.68-.67,5.78-2.05,5.83-2.06,1.66-.37,4.42-.82,6.29-.93,1.18-.07,2.63.04,4.16.16,1.51.11,4.21.32,5.18.03-.18-.4-.76-1.34-2.61-3.1-5.66-5.41-13.26-6.2-20.32-2.13-1.09.63-2.05,1.46-3.07,2.34-.85.73-1.72,1.49-2.71,2.15l-2.09,1.41-.24-2.5c-.59-6-2.94-10.64-6.82-13.4-4.17-2.98-9.86-3.72-16.44-2.15-1.95.47-3.69,1.25-4.23,1.76.01.01.03.02.04.04.42.21,2.01.67,2.97.94,1.16.33,2.16.62,2.76.87,3.42,1.42,6.35,3.58,9.31,5.86l.16.12,5.9,7.86-4.75-1.74c-7.69-2.81-16.83-.61-22.73,5.48-1.61,1.66-3.17,4.03-3.44,5.13,1.09-.1,3.25-.8,4.15-1.09.74-.24,1.33-.43,1.75-.52,8.29-1.78,15.38-1.72,22.99.2l2.3.58-1.51,1.83c-5.56,6.74-9.78,15.51-12.55,26.07l-.32,1.22-1.26-.11c-13.52-1.15-25.68,3.87-39.41,16.3-4.6,4.16-9.13,8.69-12.13,12.12l-.07.08c-1.01,1.15-1.62,1.95-2,2.49,1.31,0,3.21-.12,4.41-.19,1.21-.07,2.21-.13,2.86-.13ZM105.1,246.16s0,0,0,0c0,0,0,0,0,0Z"></path><path d="M83.87,355.38c-.66,0-1.36-.02-2.09-.07-3.58-.24-6.84-1.47-9.98-2.67-4.21-1.59-8.19-3.1-12.4-1.96-.46.12-1.08.41-1.74.7-1.85.84-4.15,1.88-6.25,1.04-1.17-.47-2.06-1.44-2.64-2.89-.86-2.14-.64-4.2.64-5.94,3.1-4.2,11.67-5.43,15.36-5.12,3.56.29,6.62,1.49,9.59,2.64,3.59,1.39,6.98,2.71,11.09,2.45,2.84-.18,5.54-1.31,8.4-2.51,2.97-1.25,6.05-2.53,9.56-2.88h0c7.14-.7,10.66.69,14.74,2.3,1.8.71,3.66,1.44,6.09,2.13,5.94,1.68,10.58,0,15.48-1.77,4.47-1.62,9.09-3.29,15.05-2.76,3.3.3,11.18,2.38,13.08,6.63.55,1.23.85,3.17-.85,5.45-2.79,3.75-6.16,2.16-8.39,1.11-.65-.31-1.27-.6-1.84-.78-5.46-1.7-10.03.05-14.87,1.91-3.74,1.43-7.6,2.92-12.1,2.96-.07,0-.14,0-.21,0-4.82,0-8.68-1.49-12.42-2.93-4.73-1.82-9.19-3.54-15.22-1.96-2.4.63-4.38,1.43-6.29,2.19-3.46,1.4-6.76,2.73-11.79,2.73ZM62.45,347.28c3.66,0,7.08,1.29,10.41,2.56,2.94,1.11,5.98,2.27,9.12,2.48,5.57.38,8.81-.93,12.56-2.44,1.99-.8,4.06-1.64,6.65-2.31,6.97-1.83,12.1.15,17.06,2.06,3.64,1.4,7.08,2.73,11.34,2.73.06,0,.12,0,.18,0,3.96-.04,7.57-1.42,11.06-2.76,5.11-1.96,10.39-3.99,16.84-1.97.77.24,1.51.59,2.23.93,2.55,1.2,3.48,1.45,4.7-.18.9-1.21.73-1.97.52-2.43-1.1-2.45-7.11-4.55-10.61-4.86-5.29-.48-9.6,1.08-13.76,2.59-5.13,1.86-10.44,3.78-17.32,1.84-2.57-.72-4.59-1.52-6.37-2.22-4.02-1.58-6.93-2.73-13.35-2.1h0c-3.06.3-5.92,1.5-8.69,2.66-2.96,1.24-6.03,2.52-9.37,2.74-4.77.31-8.64-1.19-12.37-2.65-2.89-1.12-5.63-2.19-8.75-2.44-3.14-.25-10.47.89-12.7,3.91-.66.9-.75,1.86-.27,3.04.27.66.6,1.08.98,1.23.91.36,2.56-.38,3.89-.99.77-.35,1.5-.68,2.2-.87,1.31-.35,2.58-.5,3.83-.5Z"></path></svg></button>
+      <button class="tab-btn" data-tab="explore" aria-label="둘러보기"><svg class="tab-icon" viewBox="307.3 249.6 119.6 105.1" fill="currentColor" aria-hidden="true"><path d="M367.83,352.74c-.38,0-.63,0-.72,0-1.06,0-26.41.08-36.03-2.14-10.33-2.38-18.29-13.64-20.89-20.18-1.09-2.74-1.14-4.97-.14-6.62,1.16-1.92,3.21-2.21,3.44-2.23h.17s107.1,0,107.1,0c.23.03,2.28.31,3.44,2.23.99,1.65.94,3.88-.15,6.62-2.59,6.54-10.56,17.8-20.89,20.18-8.84,2.04-30.97,2.14-35.33,2.14ZM367.11,349.74c.27,0,26.09.08,35.37-2.06,8.72-2.01,16.23-11.95,18.77-18.36.7-1.76.83-3.16.38-3.95-.34-.58-.97-.76-1.17-.81h-106.69c-.18.04-.82.21-1.17.81-.45.79-.32,2.19.38,3.95,2.54,6.41,10.05,16.35,18.77,18.36,9.28,2.14,35.1,2.06,35.36,2.06Z"></path><path d="M355.68,311.18h-29.04c-1.94,0-3.65-1.09-4.47-2.86-.81-1.76-.54-3.78.72-5.25l29.04-34.04c1.35-1.58,3.49-2.14,5.44-1.42,1.95.72,3.22,2.53,3.22,4.62v34.04c0,2.71-2.21,4.92-4.92,4.92ZM355.64,270.29c-.43,0-.96.14-1.42.68l-29.04,34.04c-.5.58-.6,1.35-.28,2.05.32.7.97,1.12,1.74,1.12h29.04c1.06,0,1.92-.86,1.92-1.92v-34.04c0-1.24-.96-1.69-1.26-1.8-.13-.05-.39-.12-.7-.12Z"></path><path d="M409.81,311.18h-39.1c-2.71,0-4.92-2.21-4.92-4.92v-49.69c0-2.13,1.3-3.95,3.31-4.65,2.01-.7,4.16-.07,5.47,1.61l39.1,49.69c1.17,1.49,1.39,3.48.56,5.19-.83,1.71-2.53,2.77-4.42,2.77ZM370.75,254.64c-.3,0-.55.07-.67.11-.3.1-1.29.55-1.29,1.81v49.69c0,1.06.86,1.92,1.92,1.92h39.1c.75,0,1.4-.4,1.73-1.08.33-.68.25-1.43-.22-2.02l-39.1-49.69c-.47-.59-1.02-.74-1.46-.74Z"></path></svg></button>
+      <button class="tab-btn" data-tab="chat" aria-label="커뮤니티"><svg class="tab-icon" viewBox="605.8 251.2 113.3 99.1" fill="currentColor" aria-hidden="true"><path d="M700.68,265.11c-21.18-15.84-55.53-15.84-76.71,0-10.49,7.82-16.22,18.32-16.22,29.58,0,12.4,7.06,23.85,19.65,31.87l-2.86,19.08c-.19.95.19,1.91,1.15,2.29.76.57,1.72.57,2.67,0l20.42-13.17c17.56,3.44,37.59.38,52.29-10.49,21.37-16.22,21.37-42.94-.38-59.16ZM662.32,331.32c-4.77,0-9.35-.57-13.93-1.53-.57-.19-1.33,0-1.72.38l-16.79,10.88,2.29-15.46c.19-.95-.38-1.91-1.15-2.48-11.83-7.06-18.7-17.37-18.7-28.62,0-20.23,22.33-36.64,49.8-36.64s49.8,16.41,49.8,36.64-22.14,36.83-49.61,36.83Z"></path><circle cx="647.82" cy="293.54" r="4.77"></circle><circle cx="662.13" cy="293.54" r="4.77"></circle><circle cx="676.44" cy="293.54" r="4.77"></circle></svg></button>
+      <button class="tab-btn" data-tab="menu" aria-label="메뉴"><svg class="tab-icon" viewBox="859.3 267.2 87.0 69.9" fill="currentColor" aria-hidden="true"><path d="M941.25,275.23h-76.95c-1.66,0-3-1.34-3-3s1.34-3,3-3h76.95c1.66,0,3,1.34,3,3s-1.34,3-3,3Z"></path><path d="M941.25,305.19h-76.95c-1.66,0-3-1.34-3-3s1.34-3,3-3h76.95c1.66,0,3,1.34,3,3s-1.34,3-3,3Z"></path><path d="M941.25,335.15h-76.95c-1.66,0-3-1.34-3-3s1.34-3,3-3h76.95c1.66,0,3,1.34,3,3s-1.34,3-3,3Z"></path></svg></button>
     </div>
   </div>
 
@@ -566,6 +675,7 @@
     saveProfile(profile);
     goTo(4);
   });
+  document.getElementById('onb-back').addEventListener('click', function () { goTo(2); });
 
   // --- Step 2: swipe up to continue ---
   (function initSwipeUp() {
@@ -625,16 +735,21 @@
   var tabHome = document.getElementById('tab-home');
   var tabExplore = document.getElementById('tab-explore');
   var tabChat = document.getElementById('tab-chat');
-  var tabPanels = { home: tabHome, explore: tabExplore, chat: tabChat };
-  var tabDisplay = { home: 'block', explore: 'flex', chat: 'flex' };
+  var tabMenu = document.getElementById('tab-menu');
+  var tabPanels = { home: tabHome, explore: tabExplore, chat: tabChat, menu: tabMenu };
+  var tabDisplay = { home: 'block', explore: 'flex', chat: 'flex', menu: 'flex' };
+  var tabOrder = ['home', 'explore', 'chat', 'menu'];
+  var tabBg = { home: '#eeece7', explore: '#15120f', chat: '#15120f', menu: '#1d1714' };
+  var tabBubble = document.getElementById('tab-bubble');
   var tabBtns = Array.prototype.slice.call(document.querySelectorAll('.tab-btn'));
 
   function showTab(target) {
     tabBtns.forEach(function (b) {
-      var active = b.dataset.tab === target;
-      b.classList.toggle('active', active);
-      b.style.color = active ? '#f3ede4' : 'rgba(243,237,228,.4)';
+      b.classList.toggle('active', b.dataset.tab === target);
     });
+    tabBubble.style.transform = 'translateX(' + (tabOrder.indexOf(target) * 100) + '%)';
+    document.querySelector('.tab-bar').style.setProperty('--notch-x', (tabOrder.indexOf(target) * 25 + 12.5) + '%');
+    document.querySelector('.screen[data-step="4"]').style.background = tabBg[target];
     Object.keys(tabPanels).forEach(function (key) {
       tabPanels[key].style.display = key === target ? tabDisplay[key] : 'none';
     });
@@ -645,6 +760,10 @@
   tabBtns.forEach(function (btn) {
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
+      var icon = btn.querySelector('.tab-icon');
+      icon.classList.remove('pop');
+      void icon.offsetWidth;
+      icon.classList.add('pop');
       showTab(btn.dataset.tab);
     });
   });
