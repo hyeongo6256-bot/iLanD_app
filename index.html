@@ -20,6 +20,8 @@
   html, body {
     margin: 0;
     height: 100%;
+    height: 100dvh;
+    height: -webkit-fill-available;
     overflow: hidden;
     overscroll-behavior: none;
     background: #0c0a09;
@@ -31,7 +33,9 @@
   .frame {
     position: relative;
     width: 100%;
+    height: 100vh;
     height: 100dvh;
+    height: -webkit-fill-available;
     max-width: 560px;
     margin: 0 auto;
     overflow: hidden;
@@ -313,24 +317,6 @@
 </head>
 <body>
 
-<svg width="0" height="0" style="position:absolute">
-  <filter id="pinkDuo" color-interpolation-filters="sRGB">
-    <feColorMatrix type="matrix" values="0.299 0.587 0.114 0 0  0.299 0.587 0.114 0 0  0.299 0.587 0.114 0 0  0 0 0 1 0"/>
-    <feComponentTransfer>
-      <feFuncR type="table" tableValues="0 1.113"></feFuncR>
-      <feFuncG type="table" tableValues="0 0.825"></feFuncG>
-      <feFuncB type="table" tableValues="0 0.930"></feFuncB>
-    </feComponentTransfer>
-  </filter>
-  <filter id="welcomeDuo" color-interpolation-filters="sRGB">
-    <feColorMatrix type="matrix" values="0.299 0.587 0.114 0 0  0.299 0.587 0.114 0 0  0.299 0.587 0.114 0 0  0 0 0 1 0"/>
-    <feComponentTransfer>
-      <feFuncR type="table" tableValues="0.957 1"></feFuncR>
-      <feFuncG type="table" tableValues="0.682 1"></feFuncG>
-      <feFuncB type="table" tableValues="0.757 1"></feFuncB>
-    </feComponentTransfer>
-  </filter>
-</svg>
 <div class="frame" id="frame" style="--accent:#c98a4b;">
 
   <!-- Step 0 — NFC tap -->
@@ -374,14 +360,13 @@
 
   <!-- Step 1 — welcome -->
   <div class="screen" data-step="1" style="background:#f4aec1; color:#f3ede4; cursor:pointer; padding:0; overflow:hidden;">
-    <video id="welcome-video" src="assets/iland-intro.mp4" muted playsinline style="display:block; width:100%; height:100%; object-fit:cover; filter:url(#welcomeDuo);"></video>
+    <video id="welcome-video" src="assets/iland-intro.mp4" muted playsinline style="display:block; width:100%; height:100%; object-fit:cover; mix-blend-mode:screen;"></video>
   </div>
 
   <!-- Step 2 — coordinate dial (swipe up to continue) -->
-  <div class="screen plot-map-bg" data-step="2" style="background-color:#4a3024; color:#f3ede4; padding:0;">
-    <div class="coord-map-drift" style="position:absolute; inset:0; background-image:url('assets/world-map.png'); opacity:.5;"></div>
-    <video id="dial-video" src="assets/intro-dial.mp4" muted playsinline loop preload="auto" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center bottom; opacity:0; transition:opacity .25s ease; filter:url(#pinkDuo); mix-blend-mode:screen; pointer-events:none;"></video>
-    <div style="position:absolute; inset:0; background:rgba(0,0,0,.8); pointer-events:none;"></div>
+  <div class="screen plot-map-bg" data-step="2" style="background-color:#663b2c; color:#f3ede4; padding:0;">
+    <div class="coord-map-drift" style="position:absolute; inset:0; background-image:url('assets/world-map.png'); opacity:.51;"></div>
+    <video id="dial-video" src="assets/intro-dial.mp4" muted playsinline preload="auto" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center bottom; opacity:0; transition:opacity .25s ease; mix-blend-mode:screen; pointer-events:none;"></video>
 
     <div id="dial-drag" style="position:relative; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; width:100%; padding:32px 32px calc(56px + env(safe-area-inset-bottom)); touch-action:none; cursor:grab;">
       <div style="display:flex; flex-direction:column; align-items:center; gap:7px; color:rgba(243,237,228,.4); animation: swipeHint 1.8s ease-in-out infinite;">
