@@ -184,11 +184,11 @@
     align-items: center;
     gap: 14px;
     height: 58px;
-    padding: 0 18px;
+    padding: 0 20px;
     margin-top: 12px;
     border-radius: 18px;
-    background: #2a201d;
-    border: 1px solid rgba(255,255,255,.12);
+    background: #ffffff;
+    border: 1.5px solid #e8aab7;
   }
   .onb-input {
     flex: 1;
@@ -196,11 +196,11 @@
     border: none;
     outline: none;
     background: transparent;
-    color: #f3ede4;
+    color: #2b2622;
     font-family: 'Noto Sans KR', sans-serif;
     font-size: 15px;
   }
-  .onb-input::placeholder { color: #8d7f7c; }
+  .onb-input::placeholder { color: #8a8074; }
 
   .onb-cta {
     width: 100%;
@@ -322,6 +322,14 @@
       <feFuncB type="table" tableValues="0 0.930"></feFuncB>
     </feComponentTransfer>
   </filter>
+  <filter id="welcomeDuo" color-interpolation-filters="sRGB">
+    <feColorMatrix type="matrix" values="0.299 0.587 0.114 0 0  0.299 0.587 0.114 0 0  0.299 0.587 0.114 0 0  0 0 0 1 0"/>
+    <feComponentTransfer>
+      <feFuncR type="table" tableValues="0.957 1"></feFuncR>
+      <feFuncG type="table" tableValues="0.682 1"></feFuncG>
+      <feFuncB type="table" tableValues="0.757 1"></feFuncB>
+    </feComponentTransfer>
+  </filter>
 </svg>
 <div class="frame" id="frame" style="--accent:#c98a4b;">
 
@@ -365,14 +373,15 @@
   </div>
 
   <!-- Step 1 — welcome -->
-  <div class="screen" data-step="1" style="background:#0c0a09; color:#f3ede4; cursor:pointer; padding:0; overflow:hidden;">
-    <video id="welcome-video" src="assets/iland-intro.mp4" muted playsinline style="display:block; width:100%; height:100%; object-fit:cover;"></video>
+  <div class="screen" data-step="1" style="background:#f4aec1; color:#f3ede4; cursor:pointer; padding:0; overflow:hidden;">
+    <video id="welcome-video" src="assets/iland-intro.mp4" muted playsinline style="display:block; width:100%; height:100%; object-fit:cover; filter:url(#welcomeDuo);"></video>
   </div>
 
   <!-- Step 2 — coordinate dial (swipe up to continue) -->
   <div class="screen plot-map-bg" data-step="2" style="background-color:#4a3024; color:#f3ede4; padding:0;">
     <div class="coord-map-drift" style="position:absolute; inset:0; background-image:url('assets/world-map.png'); opacity:.5;"></div>
-    <video id="dial-video" src="assets/intro-dial.mp4" muted playsinline preload="auto" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center bottom; opacity:0; transition:opacity .25s ease; filter:url(#pinkDuo); mix-blend-mode:screen; pointer-events:none;"></video>
+    <video id="dial-video" src="assets/intro-dial.mp4" muted playsinline loop preload="auto" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center bottom; opacity:0; transition:opacity .25s ease; filter:url(#pinkDuo); mix-blend-mode:screen; pointer-events:none;"></video>
+    <div style="position:absolute; inset:0; background:rgba(0,0,0,.8); pointer-events:none;"></div>
 
     <div id="dial-drag" style="position:relative; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; width:100%; padding:32px 32px calc(56px + env(safe-area-inset-bottom)); touch-action:none; cursor:grab;">
       <div style="display:flex; flex-direction:column; align-items:center; gap:7px; color:rgba(243,237,228,.4); animation: swipeHint 1.8s ease-in-out infinite;">
@@ -383,28 +392,22 @@
   </div>
 
   <!-- Step 3 — basic info input -->
-  <div class="screen" data-step="3" style="background:#1d1714; color:#f3ede4; padding:0; overflow-y:auto;">
-    <div style="position:relative; flex:none; height:min(44dvh, 380px); overflow:hidden;">
-      <img src="assets/onboarding-hero.jpg" alt="" style="display:block; width:100%; height:100%; object-fit:cover; object-position:center 40%;">
-      <div style="position:absolute; left:0; right:0; bottom:0; height:40%; background:linear-gradient(to bottom, rgba(29,23,20,0), #1d1714);"></div>
-      <button id="onb-back" aria-label="이전으로" style="position:absolute; left:0; top:calc(40px + env(safe-area-inset-top)); width:48px; height:48px; border:none; background:transparent; cursor:pointer;"></button>
-    </div>
+  <div class="screen plot-map-bg" data-step="3" style="background-color:#4a3024; color:#f3ede4; padding:0; overflow-y:auto;">
+    <div class="coord-map-drift" style="position:absolute; inset:0; background-image:url('assets/world-map.png'); opacity:.5;"></div>
 
-    <div style="flex:none; padding:0 30px calc(28px + env(safe-area-inset-bottom));">
+    <div style="position:relative; flex:1; display:flex; flex-direction:column; justify-content:center; padding:10px 30px calc(28px + env(safe-area-inset-bottom));">
       <div style="text-align:center;">
         <div style="font-size:23px; font-weight:700;">당신의 섬이 기다리고 있어요</div>
-        <div style="font-size:13.5px; color:rgba(243,237,228,.6); margin-top:8px;">이름을 정하고, 나만의 공간으로 떠나보세요.</div>
+        <div style="font-size:13.5px; color:#e8aab7; margin-top:8px;">이름을 정하고, 나만의 공간으로 떠나보세요.</div>
       </div>
 
       <div style="margin-top:30px; font-size:14px;">이 섬의 주인은 누구인가요?</div>
       <label class="onb-field">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4.5" fill="#e8aab7"/><path d="M4 21c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5z" fill="#e8aab7"/></svg>
         <input id="profile-nickname" class="onb-input" type="text" placeholder="닉네임을 입력해주세요" maxlength="16">
       </label>
 
       <div style="margin-top:22px; font-size:14px;">당신의 섬에 이름을 붙여주세요</div>
       <label class="onb-field">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 20.5c3-1.6 6-1.6 9 0 3-1.6 6-1.6 9 0z" fill="#e8aab7"/><path d="M12 19.5c-.3-3.5.2-7 1.4-10.5" stroke="#e8aab7" stroke-width="1.8" stroke-linecap="round"/><path d="M13.4 9c-2-2.5-4.6-3.2-7.2-2.4M13.4 9c1.6-2.8 4.2-3.7 7-2.6M13.4 9c-.4-2.6.4-4.6 2.2-5.8M13.4 9c-1.4-2-.9-4.4.2-5.8" stroke="#e8aab7" stroke-width="1.8" stroke-linecap="round"/></svg>
         <input id="profile-island" class="onb-input" type="text" placeholder="섬 이름을 입력해주세요" maxlength="12">
       </label>
 
@@ -675,7 +678,6 @@
     saveProfile(profile);
     goTo(4);
   });
-  document.getElementById('onb-back').addEventListener('click', function () { goTo(2); });
 
   // --- Step 2: swipe up to continue ---
   (function initSwipeUp() {
