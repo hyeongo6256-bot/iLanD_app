@@ -48,6 +48,7 @@
     display: none;
     flex-direction: column;
     animation: riseIn .6s cubic-bezier(.2,.7,.2,1) both;
+    isolation: isolate;
   }
   .screen.active { display: flex; }
 
@@ -319,6 +320,15 @@
 
 <div class="frame" id="frame" style="--accent:#c98a4b;">
 
+  <!-- Shared background for steps 2 & 3: map + dial video live outside both .screen elements so
+       the swipe from step2 into step3 never hides/restarts them (no display:none toggle = no CSS
+       animation restart, no video pause/reset). Sits behind every screen; each opaque screen
+       (0/1/4, and 2/3's own content) simply paints over it when active. -->
+  <div id="dial-bg" class="plot-map-bg" style="position:absolute; inset:0; background:#663b2c; pointer-events:none; isolation:isolate; display:none;">
+    <div class="coord-map-drift" style="position:absolute; inset:0; background-image:url('assets/world-map.png'); opacity:.51;"></div>
+    <video id="dial-video" src="assets/intro-dial.mp4" muted playsinline preload="auto" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center bottom; opacity:0; transition:opacity .25s ease; mix-blend-mode:screen;"></video>
+  </div>
+
   <!-- Step 0 — NFC tap -->
   <div class="screen active" data-step="0" style="background: radial-gradient(120% 90% at 50% 18%, #1c1815 0%, #0c0a09 62%); color:#f3ede4; cursor:pointer; align-items:center; justify-content:flex-start; padding:96px 28px 40px;">
     <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:15px; letter-spacing:.14em; color:rgba(243,237,228,.55);">iLanD &middot; Lonely</div>
@@ -364,10 +374,7 @@
   </div>
 
   <!-- Step 2 — coordinate dial (swipe up to continue) -->
-  <div class="screen plot-map-bg" data-step="2" style="background-color:#663b2c; color:#f3ede4; padding:0;">
-    <div class="coord-map-drift" style="position:absolute; inset:0; background-image:url('assets/world-map.png'); opacity:.51;"></div>
-    <video id="dial-video" src="assets/intro-dial.mp4" muted playsinline preload="auto" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center bottom; opacity:0; transition:opacity .25s ease; mix-blend-mode:screen; pointer-events:none;"></video>
-
+  <div class="screen" data-step="2" style="color:#f3ede4; padding:0;">
     <div id="dial-drag" style="position:relative; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; width:100%; padding:32px 32px calc(56px + env(safe-area-inset-bottom)); touch-action:none; cursor:grab;">
       <div style="display:flex; flex-direction:column; align-items:center; gap:7px; color:rgba(243,237,228,.4); animation: swipeHint 1.8s ease-in-out infinite;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M12 5L6 11M12 5L18 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -376,11 +383,10 @@
     </div>
   </div>
 
-  <!-- Step 3 — basic info input -->
-  <div class="screen plot-map-bg" data-step="3" style="background-color:#4a3024; color:#f3ede4; padding:0; overflow-y:auto;">
-    <div class="coord-map-drift" style="position:absolute; inset:0; background-image:url('assets/world-map.png'); opacity:.5;"></div>
-
-    <div style="position:relative; flex:1; display:flex; flex-direction:column; justify-content:center; padding:10px 30px calc(28px + env(safe-area-inset-bottom));">
+  <!-- Step 3 — basic info input: rises automatically on top of the still-playing step2 background -->
+  <div class="screen" data-step="3" style="color:#f3ede4; padding:0; overflow:hidden;">
+    <div style="position:absolute; inset:0; background:rgba(0,0,0,.7); pointer-events:none;"></div>
+    <div id="profile-sheet" style="position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; padding:10px 30px calc(28px + env(safe-area-inset-bottom)); transform:translateY(100%); transition:transform .45s cubic-bezier(.2,.7,.2,1);">
       <div style="text-align:center;">
         <div style="font-size:23px; font-weight:700;">당신의 섬이 기다리고 있어요</div>
         <div style="font-size:13.5px; color:#e8aab7; margin-top:8px;">이름을 정하고, 나만의 공간으로 떠나보세요.</div>
@@ -536,6 +542,7 @@
   }
 
   function goTo(n) {
+    var prevStep = step;
     step = Math.max(0, Math.min(TOTAL_STEPS, n));
     clearAutoTimer();
     render();
@@ -546,15 +553,31 @@
     } else {
       welcomeVideo.pause();
     }
-    if (step === 2) {
+    var wasInDialFlow = (prevStep === 2 || prevStep === 3);
+    var isInDialFlow = (step === 2 || step === 3);
+    if (isInDialFlow && !wasInDialFlow) {
+      // fresh entry into the dial/profile flow — mount the shared background and start it
+      // from scratch. It stays unmounted (display:none) the rest of the time so its animated
+      // map/video can never bleed into other screens via mix-blend-mode compositing.
+      dialBg.style.display = 'block';
       dialVideo.style.opacity = '0';
       dialVideo.currentTime = 0;
       dialVideo.play().catch(function () {});
-    } else {
+    } else if (!isInDialFlow) {
+      dialBg.style.display = 'none';
       dialVideo.pause();
       dialVideo.style.opacity = '0';
     }
-    if (step === 3) prefillProfileForm();
+    // moving between step 2 and step 3 never pauses/restarts dialBg or dialVideo — only their
+    // opacity (below) changes, so playback and the map's animation position are never disturbed.
+    if (step === 3) {
+      prefillProfileForm();
+      revealProfileSheet();
+      dialVideo.style.opacity = '0'; // numbers/title fade away; the map underneath keeps drifting
+    } else if (step === 2) {
+      hideProfileSheet();
+      if (wasInDialFlow) dialVideo.style.opacity = '1';
+    }
     if (step === 4) { showTab('home'); renderProfileTab(); initIslandViewer(); }
     scheduleAuto();
   }
@@ -571,6 +594,7 @@
   var welcomeVideo = document.getElementById('welcome-video');
   welcomeVideo.playbackRate = 1.35;
 
+  var dialBg = document.getElementById('dial-bg');
   var dialVideo = document.getElementById('dial-video');
   dialVideo.load(); // start buffering immediately so it's ready before step 2
   dialVideo.addEventListener('playing', function () {
@@ -712,6 +736,25 @@
     wrap.addEventListener('pointerup', function (e) { onEnd(e.clientY); });
     wrap.addEventListener('pointercancel', function () { onEnd(null); });
   })();
+
+  // --- Step 3: the info-input sheet rises on its own the moment step2's swipe-up lands here —
+  // no second gesture, since step2 already has its own "swipe up to continue" hint.
+  var profileSheet = document.getElementById('profile-sheet');
+  function revealProfileSheet() {
+    // next frame, so the transition actually animates instead of snapping in
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        profileSheet.style.transform = 'translateY(0)';
+      });
+    });
+  }
+  function hideProfileSheet() {
+    profileSheet.style.transition = 'none';
+    profileSheet.style.transform = 'translateY(100%)';
+    requestAnimationFrame(function () {
+      profileSheet.style.transition = 'transform .45s cubic-bezier(.2,.7,.2,1)';
+    });
+  }
 
   document.getElementById('restart-btn').addEventListener('click', function (e) {
     e.stopPropagation();
