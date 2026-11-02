@@ -485,49 +485,88 @@
       </div>
     </div>
 
-    <div id="tab-explore" class="tab-panel" style="display:none; flex:1; min-height:0; position:relative; overflow:hidden; background-color:#663b2c; color:#f3ede4;">
-      <div id="explore-map-scroll" style="position:absolute; inset:0; overflow:auto; -webkit-overflow-scrolling:touch;">
-        <div id="explore-map-canvas" class="plot-map-bg" style="position:relative; width:140%; height:140%; background-color:#663b2c;">
-          <div style="position:absolute; inset:0; background-image:url('assets/world-map.png'); background-size:cover; background-position:center; opacity:.51;"></div>
-          <div id="explore-pins" style="position:absolute; inset:0;"></div>
+    <div id="tab-explore" class="tab-panel" style="display:none; flex:1; min-height:0; position:relative; overflow:hidden; background-color:#78abbe; color:#f3ede4;">
+      <div id="google-map-el" style="position:absolute; inset:0;"></div>
+      <div style="position:absolute; top:calc(16px + env(safe-area-inset-top)); left:20px; right:20px; pointer-events:none; display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <img id="explore-logo" src="assets/iland-logo-white.png" alt="iLanD" style="height:24px; width:auto; display:block;">
+          <div id="explore-subtitle" style="font-size:12.5px; margin-top:6px; color:#f3ede4;">다른 섬 둘러보기</div>
         </div>
+        <button id="map-style-toggle" style="pointer-events:auto; flex:none; border:1px solid rgba(243,237,228,.4); background:rgba(21,18,15,.5); color:#f3ede4; font-family:'Noto Sans KR', sans-serif; font-size:11.5px; padding:7px 12px; border-radius:999px; cursor:pointer; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);">구글 기본색</button>
       </div>
-      <div style="position:absolute; top:calc(16px + env(safe-area-inset-top)); left:20px; right:20px; pointer-events:none;">
-        <div style="font-family:'Playfair Display', serif; font-style:italic; font-weight:600; font-size:22px; color:#f4aec1;">iLanD</div>
-        <div style="font-size:12.5px; margin-top:2px;">다른 섬 둘러보기</div>
-      </div>
-      <div id="explore-card" style="display:none; position:absolute; left:20px; right:20px; bottom:calc(20px + env(safe-area-inset-bottom)); background:rgba(21,18,15,.92); border:1px solid rgba(243,237,228,.14); border-radius:16px; padding:16px 18px; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);">
-        <div id="explore-card-name" style="font-family:'Playfair Display', serif; font-style:italic; font-weight:600; font-size:15px;"></div>
-        <div id="explore-card-text" style="font-size:12.5px; color:rgba(243,237,228,.6); margin-top:6px; line-height:1.6;"></div>
-        <button id="explore-chat-btn" style="margin-top:12px; border:none; background:var(--accent); color:#15120f; font-family:'Noto Sans KR', sans-serif; font-weight:600; font-size:12px; padding:9px 16px; border-radius:999px; cursor:pointer;">채팅하기</button>
+      <div id="explore-card" style="display:none; position:absolute; left:20px; right:20px; bottom:calc(20px + env(safe-area-inset-bottom)); background:rgba(255,255,255,.5); border:1px solid rgba(255,255,255,.6); border-radius:16px; padding:16px 18px; backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px); box-shadow:0 8px 24px rgba(0,0,0,.12);">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <img id="explore-card-avatar" src="" alt="" style="width:40px; height:40px; border-radius:50%; object-fit:cover; flex:none; border:1.5px solid rgba(255,255,255,.85); box-shadow:0 1px 4px rgba(0,0,0,.15);">
+          <div style="flex:1; min-width:0;">
+            <div id="explore-card-name" style="font-family:'Playfair Display', serif; font-style:italic; font-weight:600; font-size:15px; color:#2b2622;"></div>
+            <div id="explore-card-weather" style="display:flex; align-items:center; gap:5px; margin-top:2px;">
+              <img id="explore-card-weather-icon" src="" alt="" style="width:16px; height:16px; display:none;">
+              <span id="explore-card-weather-text" style="font-size:11px; color:rgba(43,38,34,.6); white-space:nowrap;"></span>
+            </div>
+          </div>
+        </div>
+        <div id="explore-card-text" style="font-size:12.5px; color:rgba(43,38,34,.65); margin-top:10px; line-height:1.6;"></div>
+        <div style="display:flex; gap:8px; margin-top:12px;">
+          <button id="explore-visit-btn" disabled style="flex:1; border:1px solid rgba(43,38,34,.15); background:transparent; color:rgba(43,38,34,.35); font-family:'Noto Sans KR', sans-serif; font-weight:600; font-size:12px; padding:9px 0; border-radius:999px; cursor:not-allowed;">방문하기</button>
+          <button id="explore-chat-btn" style="flex:1; border:none; background:#78abbe; color:#15120f; font-family:'Noto Sans KR', sans-serif; font-weight:600; font-size:12px; padding:9px 0; border-radius:999px; cursor:pointer;">채팅하기</button>
+        </div>
       </div>
     </div>
 
     <div id="tab-chat" class="tab-panel" style="display:none; flex:1; min-height:0; flex-direction:column; background:#15120f; color:#f3ede4;">
 
-      <div id="chat-list-view" style="flex:1; min-height:0; display:flex; flex-direction:column;">
-        <div style="flex:none; padding:calc(16px + env(safe-area-inset-top)) 20px 12px; border-bottom:1px solid rgba(243,237,228,.08);">
-          <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:11px; letter-spacing:.1em; color:rgba(243,237,228,.45);">iLanD 커뮤니티</div>
-          <div style="font-size:13.5px; font-weight:600; margin-top:2px;">채팅을 나눈 섬들</div>
+      <div id="chat-list-view" style="flex:1; min-height:0; display:flex; flex-direction:column; background:#f5bacb;">
+        <div style="flex:none; padding:calc(20px + env(safe-area-inset-top)) 22px 14px;">
+          <img src="assets/iland-logo-brown.png" alt="iLanD" style="height:26px; width:auto; display:block;">
         </div>
-        <div id="chat-list" style="flex:1; overflow-y:auto;"></div>
+        <div style="flex:1; min-height:0; display:flex; flex-direction:column; background:#fff; border-radius:22px 22px 0 0; overflow:hidden;">
+          <div style="flex:none; display:flex; align-items:center; gap:8px; padding:16px 20px 12px;">
+            <button class="chat-filter-btn" data-filter="all" style="border:none; background:#663b2c; color:#fff; font-family:'Noto Sans KR', sans-serif; font-weight:600; font-size:12.5px; padding:8px 16px; border-radius:999px; cursor:pointer;">전체</button>
+            <button class="chat-filter-btn" data-filter="unread" style="border:1px solid rgba(102,59,44,.3); background:transparent; color:#663b2c; font-family:'Noto Sans KR', sans-serif; font-weight:600; font-size:12.5px; padding:8px 16px; border-radius:999px; cursor:pointer;">안읽음</button>
+            <button class="chat-filter-btn" data-filter="favorite" style="border:1px solid rgba(102,59,44,.3); background:transparent; color:#663b2c; font-family:'Noto Sans KR', sans-serif; font-weight:600; font-size:12.5px; padding:8px 16px; border-radius:999px; cursor:pointer;">즐겨찾기</button>
+            <div style="flex:1;"></div>
+            <button id="chat-more-btn" aria-label="더보기" style="flex:none; border:none; background:transparent; color:#663b2c; font-size:18px; line-height:1; padding:4px 6px; cursor:pointer;">&#8943;</button>
+          </div>
+          <div id="chat-list" style="flex:1; overflow-y:auto;"></div>
+        </div>
       </div>
 
-      <div id="chat-thread-view" style="display:none; flex:1; min-height:0; flex-direction:column;">
-        <div style="flex:none; display:flex; align-items:center; gap:10px; padding:calc(16px + env(safe-area-inset-top)) 20px 12px; border-bottom:1px solid rgba(243,237,228,.08);">
-          <button id="chat-back" aria-label="목록으로" style="flex:none; border:none; background:transparent; color:#f3ede4; padding:2px; display:flex; cursor:pointer;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5L8 12L15 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <div>
-            <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:11px; letter-spacing:.1em; color:rgba(243,237,228,.45);">iLanD 커뮤니티</div>
-            <div id="chat-thread-name" style="font-size:13.5px; font-weight:600; margin-top:2px;"></div>
+      <div id="chat-thread-view" style="display:none; flex:1; min-height:0; flex-direction:column; background:#fff; color:#2b2622;">
+        <div style="flex:none; padding:calc(16px + env(safe-area-inset-top)) 20px 0;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <button id="chat-back" aria-label="목록으로" style="flex:none; width:36px; height:36px; border-radius:50%; border:none; background:#f4aec1; color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 5L8 12L15 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div style="flex:none; display:flex; align-items:center; gap:10px;">
+              <button aria-label="음성 통화" style="flex:none; width:36px; height:36px; border-radius:50%; border:none; background:#f4aec1; color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1L6.6 10.8z"/></svg>
+              </button>
+              <button aria-label="화상 통화" style="flex:none; width:36px; height:36px; border-radius:50%; border:none; background:#f4aec1; color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3.5l4 3.5V7l-4 3.5z"/></svg>
+              </button>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-top:14px;">
+            <div style="display:flex; align-items:baseline; gap:6px;">
+              <div id="chat-thread-name" style="font-size:17px; font-weight:700; color:#2b2622;"></div>
+              <div id="chat-thread-count" style="font-size:12px; font-weight:600; color:#f4aec1;"></div>
+            </div>
+            <button aria-label="더보기" style="flex:none; border:none; background:transparent; color:#2b2622; font-size:18px; line-height:1; padding:4px 6px; cursor:pointer;">&#8943;</button>
+          </div>
+          <div style="display:flex; align-items:center; gap:18px; margin-top:12px; border-bottom:1px solid rgba(43,38,34,.08);">
+            <div style="padding-bottom:10px; font-size:13px; font-weight:700; color:#2b2622; border-bottom:2px solid #f4aec1;">전체</div>
+            <div style="padding-bottom:10px; font-size:13px; font-weight:600; color:rgba(43,38,34,.35);">근처 섬</div>
+            <div style="padding-bottom:10px; font-size:13px; font-weight:600; color:rgba(43,38,34,.35);">즐겨찾기</div>
           </div>
         </div>
-        <div id="chat-thread" style="flex:1; overflow-y:auto; padding:18px 18px 10px; display:flex; flex-direction:column; gap:14px;"></div>
-        <div style="flex:none; display:flex; align-items:center; gap:8px; padding:12px 16px calc(14px + env(safe-area-inset-bottom));">
-          <input id="chat-input" type="text" placeholder="당신의 섬 이야기를 남겨보세요" style="flex:1; min-width:0; background:rgba(243,237,228,.07); border:1px solid rgba(243,237,228,.16); color:#f3ede4; font-family:'Noto Sans KR', sans-serif; font-size:16px; padding:11px 14px; border-radius:999px; outline:none;">
-          <button id="chat-send" aria-label="보내기" style="flex:none; width:38px; height:38px; border-radius:50%; border:none; background:var(--accent); display:flex; align-items:center; justify-content:center; cursor:pointer;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 12L20 4L13 20L11 13L4 12Z" fill="#15120f"/></svg>
+        <div id="chat-thread" style="flex:1; overflow-y:auto; padding:16px 18px 10px; display:flex; flex-direction:column; gap:14px;"></div>
+        <div style="flex:none; display:flex; align-items:center; gap:8px; padding:12px 16px calc(14px + env(safe-area-inset-bottom)); border-top:1px solid rgba(43,38,34,.08);">
+          <button aria-label="이미지 첨부" style="flex:none; width:38px; height:38px; border-radius:12px; border:1.5px solid #f4aec1; background:transparent; color:#f4aec1; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <input id="chat-input" type="text" placeholder="메시지를 입력하세요" style="flex:1; min-width:0; background:rgba(244,174,193,.1); border:1.5px solid rgba(244,174,193,.4); color:#2b2622; font-family:'Noto Sans KR', sans-serif; font-size:16px; padding:11px 14px; border-radius:999px; outline:none;">
+          <button id="chat-send" aria-label="보내기" style="flex:none; width:38px; height:38px; border-radius:50%; border:none; background:#f4aec1; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 12L20 4L13 20L11 13L4 12Z" fill="#fff"/></svg>
           </button>
         </div>
       </div>
@@ -542,7 +581,7 @@
          hardcoded onto the bar itself. -->
     <div id="tabbar-white-backdrop" style="display:none; position:absolute; left:0; right:0; bottom:0; height:calc(35px + env(safe-area-inset-bottom)); background:#fff; z-index:1; pointer-events:none;"></div>
 
-    <div class="tab-bar">
+    <div id="tab-bar" class="tab-bar">
       <div id="tab-bubble" class="tab-bubble"></div>
       <button class="tab-btn active" data-tab="home" aria-label="나의 섬"><svg class="tab-icon" viewBox="-0.375 -0.175 10.725 10.775" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" style="stroke:none" d="M8.3,10.2h-2.1c-.2,0-.4-.2-.4-.4v-3h-1.3v3c0,.2-.2.4-.4.4H1.6c-.2,0-.4-.2-.4-.4v-5.3l-.6.6c-.2.1-.4.1-.5,0-.1-.2-.1-.4,0-.5L4.7.3c.1-.1.4-.1.5,0l4.6,4.2c.2.1.2.4,0,.5-.1.2-.4.2-.5,0l-.6-.6v5.3c0,.2-.2.4-.4.4ZM6.6,9.4h1.3V3.9s0,0,0-.1l-3-2.7-3,2.7s0,0,0,.1v5.5h1.7v-3c0-.2.2-.4.4-.4h2.1c.2,0,.4.2.4.4v3Z"></path></svg></button>
       <button class="tab-btn" data-tab="explore" aria-label="둘러보기"><svg class="tab-icon" viewBox="34.3 -0.4 11.0 11.2" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" style="stroke:none" d="M41.5,10.4c0,0-.1,0-.2,0l-3.2-1.6-2.8,1.2c-.1,0-.3,0-.4,0-.1,0-.2-.2-.2-.3V1.6c0-.2,0-.3.2-.4L38,0c.1,0,.2,0,.3,0l3.2,1.6,2.8-1.2c.1,0,.3,0,.4,0,.1,0,.2.2.2.3v8c0,.2,0,.3-.2.4l-2.9,1.3s-.1,0-.2,0ZM41.9,2.3v7.1l2.2-.9V1.4l-2.2.9ZM38.5,8.1l2.6,1.3V2.3l-2.6-1.3v7.1ZM35.6,1.9v7.1l2.2-.9V1l-2.2.9Z"></path></svg></button>
@@ -869,7 +908,7 @@
   var tabPanels = { home: tabHome, explore: tabExplore, chat: tabChat, menu: tabMenu };
   var tabDisplay = { home: 'block', explore: 'flex', chat: 'flex', menu: 'flex' };
   var tabOrder = ['home', 'explore', 'chat', 'menu'];
-  var tabBg = { home: '#f5bacb', explore: '#663b2c', chat: '#15120f', menu: '#1d1714' };
+  var tabBg = { home: '#f5bacb', explore: '#78abbe', chat: '#ffffff', menu: '#1d1714' };
   var tabBubble = document.getElementById('tab-bubble');
   var tabBtns = Array.prototype.slice.call(document.querySelectorAll('.tab-btn'));
 
@@ -890,16 +929,7 @@
     if (target === 'chat') closeChatThread();
     islandRenderActive = (target === 'home');
     if (target === 'home') requestAnimationFrame(adjustHomeScrollSpacer);
-    if (target === 'explore') requestAnimationFrame(centerExploreMap);
-  }
-
-  // 둘러보기 지도는 화면보다 살짝 커서(140%) 상하좌우로 스크롤할 여유가 있다 — 처음 들어갈
-  // 때는 그 가운데 지점에서 시작하게 맞춘다.
-  function centerExploreMap() {
-    var scroller = document.getElementById('explore-map-scroll');
-    if (!scroller) return;
-    scroller.scrollLeft = (scroller.scrollWidth - scroller.clientWidth) / 2;
-    scroller.scrollTop = (scroller.scrollHeight - scroller.clientHeight) / 2;
+    if (target === 'explore') ensureGoogleMap();
   }
 
   // 홈 탭 스크롤 범위를 "흰 바텀시트가 섬 모델을 다 덮는 지점"에서 딱 멈추도록 보정.
@@ -1044,45 +1074,233 @@
     '당신의 섬도 고요한가요.',
     '이 바람이 당신에게도 닿기를.',
   ];
+  // 대륙별로 서로 멀리 떨어진 고정 좌표 — 새로고침해도 위치가 바뀌지 않고, 한 지역(예: 유럽)에
+  // 몰리지 않도록 손으로 골라 흩어뒀다.
+  var ISLAND_COORDS = [
+    { lat: 45, lng: -100 },  // 북미(캐나다/미국 평원)
+    { lat: 32, lng: -97 },   // 북미(텍사스)
+    { lat: -15, lng: -55 },  // 남미(브라질 내륙)
+    { lat: -34, lng: -64 },  // 남미(아르헨티나)
+    { lat: 48, lng: 2 },     // 유럽(프랑스)
+    { lat: 52, lng: 20 },    // 유럽(폴란드)
+    { lat: 5, lng: 20 },     // 아프리카(중부)
+    { lat: -20, lng: 25 },   // 아프리카(남부)
+    { lat: 15, lng: 10 },    // 아프리카(서부)
+    { lat: 35, lng: 105 },   // 아시아(중국)
+    { lat: 20, lng: 78 },    // 아시아(인도)
+    { lat: 55, lng: 90 },    // 아시아(시베리아)
+    { lat: -25, lng: 135 },  // 오스트레일리아
+  ];
   function generateExploreIslands() {
-    var count = 10 + Math.floor(Math.random() * 6); // 10~15개
     var used = {};
-    var out = [];
-    for (var i = 0; i < count; i++) {
+    return ISLAND_COORDS.map(function (pt) {
       var name, tries = 0;
       do {
         name = ISLAND_PREFIXES[Math.floor(Math.random() * ISLAND_PREFIXES.length)] + ' · ' + ISLAND_OWNERS[Math.floor(Math.random() * ISLAND_OWNERS.length)];
         tries++;
       } while (used[name] && tries < 20);
       used[name] = true;
-      out.push({
+      return {
         name: name,
         quote: ISLAND_QUOTES[Math.floor(Math.random() * ISLAND_QUOTES.length)],
-        left: 6 + Math.random() * 88,
-        top: 8 + Math.random() * 82,
-      });
-    }
-    return out;
+        // pravatar.cc의 70장짜리 인물 사진 풀에서 랜덤으로 하나 고정 배정 — 섬 주인 프로필처럼 쓴다.
+        avatar: 1 + Math.floor(Math.random() * 70),
+        lat: pt.lat,
+        lng: pt.lng,
+      };
+    });
   }
   var MOCK_ISLANDS = generateExploreIslands();
-  var explorePinsEl = document.getElementById('explore-pins');
   var exploreCard = document.getElementById('explore-card');
   var currentExploreIsland = null;
 
-  MOCK_ISLANDS.forEach(function (isl) {
-    var pin = document.createElement('div');
-    pin.className = 'map-pin-wrap';
-    pin.style.left = isl.left + '%';
-    pin.style.top = isl.top + '%';
-    pin.innerHTML = '<span class="map-pin"></span>';
-    pin.addEventListener('click', function (e) {
-      e.stopPropagation();
-      currentExploreIsland = isl;
-      document.getElementById('explore-card-name').textContent = isl.name;
-      document.getElementById('explore-card-text').textContent = isl.quote;
-      exploreCard.style.display = 'block';
+  function showExploreCard(isl) {
+    currentExploreIsland = isl;
+    document.getElementById('explore-card-name').textContent = isl.name;
+    document.getElementById('explore-card-text').textContent = isl.quote;
+    document.getElementById('explore-card-avatar').src = 'https://i.pravatar.cc/80?img=' + isl.avatar;
+    exploreCard.style.display = 'block';
+    fetchIslandWeather(isl);
+  }
+
+  // 구글 지도용과 같은 데모 키로 구글 날씨 API(Weather API)를 호출 — 좌표만 있으면 전 세계
+  // 어디든(바다 위라도) 현재 기온/상태를 돌려준다. 같은 좌표는 세션 중 재조회하지 않는다.
+  var weatherCache = {};
+  function renderExploreWeather(data) {
+    var iconEl = document.getElementById('explore-card-weather-icon');
+    var textEl = document.getElementById('explore-card-weather-text');
+    var temp = data && data.temperature && typeof data.temperature.degrees === 'number'
+      ? Math.round(data.temperature.degrees) : null;
+    var desc = data && data.weatherCondition && data.weatherCondition.description
+      ? data.weatherCondition.description.text : '';
+    textEl.textContent = temp === null ? desc : temp + '°C' + (desc ? ' · ' + desc : '');
+    if (data && data.weatherCondition && data.weatherCondition.iconBaseUri) {
+      iconEl.src = data.weatherCondition.iconBaseUri + '.svg';
+      iconEl.style.display = 'block';
+    } else {
+      iconEl.style.display = 'none';
+    }
+  }
+  function fetchIslandWeather(isl) {
+    var iconEl = document.getElementById('explore-card-weather-icon');
+    var textEl = document.getElementById('explore-card-weather-text');
+    var key = isl.lat.toFixed(2) + ',' + isl.lng.toFixed(2);
+    if (weatherCache[key]) { renderExploreWeather(weatherCache[key]); return; }
+    iconEl.style.display = 'none';
+    textEl.textContent = '날씨 불러오는 중…';
+    var url = 'https://weather.googleapis.com/v1/currentConditions:lookup?key=' + GOOGLE_MAPS_DEMO_KEY +
+      '&location.latitude=' + isl.lat + '&location.longitude=' + isl.lng + '&languageCode=ko';
+    fetch(url)
+      .then(function (res) { if (!res.ok) throw new Error('weather fetch failed'); return res.json(); })
+      .then(function (data) {
+        weatherCache[key] = data;
+        if (currentExploreIsland === isl) renderExploreWeather(data);
+      })
+      .catch(function () {
+        if (currentExploreIsland === isl) textEl.textContent = '';
+      });
+  }
+
+  // --- 구글 지도 (데모 키, 전시 프로덕션용 아님 — assets/world-map.png 커스텀 지도 대체 테스트) ---
+  var GOOGLE_MAPS_DEMO_KEY = 'AIzaSyCgFzPYNs_RbKA2dQ6e6f356-dvlDhrzC4';
+  var EXPLORE_MAP_STYLE = [
+    { elementType: 'geometry', stylers: [{ color: '#663b2c' }] },
+    { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+    { elementType: 'labels.text.fill', stylers: [{ color: '#000000' }] },
+    { elementType: 'labels.text.stroke', stylers: [{ color: '#ffffff' }, { weight: 1 }] },
+    { featureType: 'landscape.natural', elementType: 'geometry.fill', stylers: [{ color: '#f3adc0' }] },
+    // 해안선 — 구글 기본 지도에서 땅/바다 경계를 실선으로 그리는 것과 같은 역할. 국가
+    // 경계(실선)와 같은 브라운 계열로 맞춰서 땅의 윤곽을 선명하게 잡아준다.
+    { featureType: 'landscape.natural', elementType: 'geometry.stroke', stylers: [{ color: '#78abbe' }, { weight: .6 }] },
+    // 구글 기본 지도의 산악 음영(hillshade) 텍스처를 그대로 살리되 테마 톤으로 — 평지보다 살짝
+    // 밝은 톤을 줘서 입체감(투톤)을 재현한다.
+    { featureType: 'landscape.natural.terrain', elementType: 'geometry', stylers: [{ color: '#c98a4b' }, { visibility: 'on' }] },
+    // 구글 기본 지도의 "흰 대지/초록 공원" 톤 구분을 테마 색으로 재현 — 도심(인공 지형)은
+    // 크림색으로 밝게, 공원/녹지는 포인트 컬러로 구분해서 땅이 전부 한 색으로 뭉개지지 않게 한다.
+    { featureType: 'landscape.man_made', elementType: 'geometry', stylers: [{ color: '#f3ede4' }] },
+    { featureType: 'administrative.country', elementType: 'geometry.stroke', stylers: [{ visibility: 'on' }, { color: '#78abbe' }, { weight: .8 }] },
+    { featureType: 'administrative.country', elementType: 'labels.text', stylers: [{ visibility: 'on' }] },
+    // 대지 안쪽 주/도 경계선 — 국가 경계보다 얇고 옅은 브라운 실선으로.
+    { featureType: 'administrative.province', elementType: 'geometry.stroke', stylers: [{ visibility: 'on' }, { color: '#78abbe' }, { weight: .6 }] },
+    { featureType: 'administrative.province', elementType: 'labels.text', stylers: [{ visibility: 'off' }] },
+    { featureType: 'administrative.locality', stylers: [{ visibility: 'off' }] },
+    { featureType: 'administrative.neighborhood', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+    // poi.park 모양만 poi:off보다 더 구체적인 규칙으로 다시 켠다 — 라벨/아이콘은 건드리지
+    // 않아서 전역 아이콘-끄기 규칙이 그대로 적용된다(나무 아이콘이 다시 뜨지 않게).
+    { featureType: 'poi.park', elementType: 'geometry', stylers: [{ visibility: 'on' }, { color: '#c98a4b' }] },
+    { featureType: 'road', stylers: [{ visibility: 'off' }] },
+    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#78abbe' }] },
+    { featureType: 'water', elementType: 'labels.text', stylers: [{ visibility: 'on' }] },
+  ];
+  // 세로로 쌓인 기본 확대/축소 버튼 대신, 한 알약 모양 안에 -/+ 가 가로로 나란히 있는
+  // 커스텀 컨트롤. map.controls에 직접 꽂는 방식은 구글이 공식 지원하는 커스터마이즈라
+  // 로고/저작권 표기(필수 요소)와 달리 자유롭게 바꿔도 된다.
+  function createZoomControl(map) {
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex; margin:10px; background:rgba(21,18,15,.72); border-radius:999px; overflow:hidden; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); box-shadow:0 2px 10px rgba(0,0,0,.25);';
+    var btnStyle = 'width:38px; height:36px; border:none; background:transparent; color:#f3ede4; font-size:18px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; font-family:\'Noto Sans KR\', sans-serif;';
+    var minusBtn = document.createElement('button');
+    minusBtn.type = 'button';
+    minusBtn.setAttribute('aria-label', '축소');
+    minusBtn.textContent = '−';
+    minusBtn.style.cssText = btnStyle + 'border-right:1px solid rgba(243,237,228,.22);';
+    var plusBtn = document.createElement('button');
+    plusBtn.type = 'button';
+    plusBtn.setAttribute('aria-label', '확대');
+    plusBtn.textContent = '+';
+    plusBtn.style.cssText = btnStyle;
+    minusBtn.addEventListener('click', function (e) { e.stopPropagation(); map.setZoom(map.getZoom() - 1); });
+    plusBtn.addEventListener('click', function (e) { e.stopPropagation(); map.setZoom(map.getZoom() + 1); });
+    wrap.appendChild(minusBtn);
+    wrap.appendChild(plusBtn);
+    return wrap;
+  }
+  var googleMapLoading = false;
+  window.initGoogleMap = function () {
+    var map = new google.maps.Map(document.getElementById('google-map-el'), {
+      center: { lat: 20, lng: 10 },
+      zoom: 2,
+      minZoom: 2,
+      disableDefaultUI: true,
+      // 기본 세로형 확대/축소 컨트롤 대신 가로형 커스텀 컨트롤을 쓴다(아래 createZoomControl).
+      zoomControl: false,
+      styles: EXPLORE_MAP_STYLE,
+      // Google shows plain white while tiles are still loading, and permanently past the poles
+      // (the projection has no tiles up there) — match the ocean color so that reads as "more
+      // map", not a blank flash, and stop panning from ever reaching that empty area at all.
+      backgroundColor: '#78abbe',
+      restriction: {
+        latLngBounds: { north: 80, south: -75, west: -180, east: 180 },
+        strictBounds: true,
+      },
     });
-    explorePinsEl.appendChild(pin);
+    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(createZoomControl(map));
+    var exploreMarkers = [];
+    MOCK_ISLANDS.forEach(function (isl) {
+      var marker = new google.maps.Marker({
+        position: { lat: isl.lat, lng: isl.lng },
+        map: map,
+        title: isl.name,
+        icon: {
+          url: 'assets/pin-white.png',
+          scaledSize: new google.maps.Size(27, 32),
+          anchor: new google.maps.Point(14, 32),
+        },
+        // 유리 느낌을 내기 위해 살짝 투명하게 — 핀 모양 안으로 지도 색이 은은하게 비친다.
+        opacity: 0.82,
+      });
+      marker.addListener('click', function () { showExploreCard(isl); });
+      exploreMarkers.push(marker);
+    });
+    // 핀이 아닌 지도의 빈 곳을 누르면 떠 있던 카드를 닫는다(마커 클릭은 별도 이벤트라 여기로 버블링되지 않음).
+    map.addListener('click', function () {
+      currentExploreIsland = null;
+      exploreCard.style.display = 'none';
+    });
+    exploreMapInstance = map;
+    var toggleBtn = document.getElementById('map-style-toggle');
+    var logoImg = document.getElementById('explore-logo');
+    var subtitleEl = document.getElementById('explore-subtitle');
+    toggleBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      exploreMapUsingCustomStyle = !exploreMapUsingCustomStyle;
+      map.setOptions({ styles: exploreMapUsingCustomStyle ? EXPLORE_MAP_STYLE : null });
+      toggleBtn.textContent = exploreMapUsingCustomStyle ? '구글 기본색' : '테마색';
+      // 구글 기본색일 때는 화이트 로고/핀/서브텍스트가 밝은 기본 지도에 묻혀서, 테마
+      // 핑크(#f7acc0)로 같은 유리 효과를 유지한 채 바꿔준다.
+      logoImg.src = exploreMapUsingCustomStyle ? 'assets/iland-logo-white.png' : 'assets/iland-logo-pink.png';
+      subtitleEl.style.color = exploreMapUsingCustomStyle ? '#f3ede4' : '#f7acc0';
+      var pinUrl = exploreMapUsingCustomStyle ? 'assets/pin-white.png' : 'assets/pin-pink-theme.png';
+      exploreMarkers.forEach(function (marker) {
+        marker.setIcon({
+          url: pinUrl,
+          scaledSize: new google.maps.Size(27, 32),
+          anchor: new google.maps.Point(14, 32),
+        });
+      });
+    });
+  };
+  var exploreMapInstance = null;
+  var exploreMapUsingCustomStyle = true;
+  function ensureGoogleMap() {
+    if (googleMapLoading) return;
+    googleMapLoading = true;
+    var script = document.createElement('script');
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + GOOGLE_MAPS_DEMO_KEY + '&callback=initGoogleMap&libraries=maps';
+    script.async = true;
+    document.head.appendChild(script);
+  }
+
+  // "방문하기" — 다른 사용자의 섬 프로필 페이지는 아직 없어서, 그 섬 좌표로 지도를 바짝
+  // 당겨 보여주는 것으로 "방문"을 표현한다.
+  document.getElementById('explore-visit-btn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (!currentExploreIsland || !exploreMapInstance) return;
+    exploreMapInstance.panTo({ lat: currentExploreIsland.lat, lng: currentExploreIsland.lng });
+    exploreMapInstance.setZoom(10);
+    exploreCard.style.display = 'none';
   });
 
   document.getElementById('explore-chat-btn').addEventListener('click', function (e) {
@@ -1107,9 +1325,22 @@
       var raw = localStorage.getItem('iland_chats_v1');
       if (raw) return JSON.parse(raw);
     } catch (e) {}
+    var now = Date.now();
     var seed = {
-      '고요섬 · 리아': { messages: [{ from: 'them', text: '당신의 섬도 오늘 밤 고요한가요?' }] },
-      '물결섬 · 준': { messages: [{ from: 'them', text: '이 시간, 저도 혼자만의 촛불을 밝혔어요.' }] },
+      '고요섬 · 리아': {
+        messages: [
+          { system: true, text: '고요섬 · 리아 님이 대화에 참여했어요.', time: now - 3 * 3600000 },
+          { from: 'them', text: '당신의 섬도 오늘 밤 고요한가요?', time: now - 2 * 3600000, likes: 2, liked: false },
+        ],
+        lastReadAt: 0,
+      },
+      '물결섬 · 준': {
+        messages: [
+          { system: true, text: '물결섬 · 준 님이 대화에 참여했어요.', time: now - 6 * 3600000 },
+          { from: 'them', text: '이 시간, 저도 혼자만의 촛불을 밝혔어요.', time: now - 5 * 3600000, likes: 1, liked: false },
+        ],
+        lastReadAt: 0,
+      },
     };
     saveChats(seed);
     return seed;
@@ -1122,7 +1353,9 @@
   function ensureChat(name, seedText) {
     var chats = getChats();
     if (!chats[name]) {
-      chats[name] = { messages: seedText ? [{ from: 'them', text: seedText }] : [] };
+      var msgs = [{ system: true, text: name + ' 님이 대화에 참여했어요.', time: Date.now() }];
+      if (seedText) msgs.push({ from: 'them', text: seedText, time: Date.now(), likes: 0, liked: false });
+      chats[name] = { messages: msgs, lastReadAt: 0 };
       saveChats(chats);
     }
     return chats;
@@ -1130,9 +1363,31 @@
 
   function pushMessage(name, from, text) {
     var chats = getChats();
-    if (!chats[name]) chats[name] = { messages: [] };
-    chats[name].messages.push({ from: from, text: text });
+    if (!chats[name]) chats[name] = { messages: [], lastReadAt: 0 };
+    var msg = { from: from, text: text, time: Date.now() };
+    if (from === 'them') { msg.likes = 0; msg.liked = false; }
+    chats[name].messages.push(msg);
     saveChats(chats);
+  }
+
+  function toggleMessageLike(partner, idx) {
+    var chats = getChats();
+    var msg = chats[partner] && chats[partner].messages[idx];
+    if (!msg) return;
+    msg.liked = !msg.liked;
+    msg.likes = Math.max(0, (msg.likes || 0) + (msg.liked ? 1 : -1));
+    saveChats(chats);
+    if (currentPartner === partner) renderThread();
+  }
+
+  function formatChatTime(ts) {
+    if (!ts) return '';
+    var d = new Date(ts);
+    var h = d.getHours();
+    var m = d.getMinutes();
+    var ampm = h < 12 ? '오전' : '오후';
+    var h12 = h % 12; if (h12 === 0) h12 = 12;
+    return ampm + ' ' + h12 + ':' + (m < 10 ? '0' + m : m);
   }
 
   var chatListEl = document.getElementById('chat-list');
@@ -1144,48 +1399,100 @@
   var chatSend = document.getElementById('chat-send');
   var currentPartner = null;
 
+  var currentChatFilter = 'all';
+  var CHAT_EMPTY_MESSAGE = {
+    all: '아직 나눈 대화가 없어요. 둘러보기에서 다른 섬에게 말을 걸어보세요.',
+    unread: '안 읽은 대화가 없어요.',
+    favorite: '즐겨찾기한 대화가 없어요.',
+  };
+
+  function chatAvatarEl() {
+    var av = document.createElement('div');
+    av.style.cssText = 'flex:none; width:46px; height:46px; border-radius:50%; background:#f4aec1; display:flex; align-items:center; justify-content:center;';
+    av.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" fill="#663b2c"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" stroke="#663b2c" stroke-width="2" stroke-linecap="round"/></svg>';
+    return av;
+  }
+
   function renderChatList() {
     var chats = getChats();
-    var names = Object.keys(chats);
+    var rows = Object.keys(chats).map(function (name) {
+      var convo = chats[name];
+      var msgs = convo.messages || [];
+      var last = msgs[msgs.length - 1];
+      var unread = !!last && last.from === 'them' && (last.time || 0) > (convo.lastReadAt || 0);
+      return { name: name, convo: convo, last: last, unread: unread };
+    });
+    rows.sort(function (a, b) { return (b.last ? b.last.time || 0 : 0) - (a.last ? a.last.time || 0 : 0); });
+    if (currentChatFilter === 'unread') rows = rows.filter(function (r) { return r.unread; });
+    else if (currentChatFilter === 'favorite') rows = rows.filter(function (r) { return r.convo.favorite; });
+
     chatListEl.innerHTML = '';
-    if (!names.length) {
+    if (!rows.length) {
       var empty = document.createElement('div');
-      empty.textContent = '아직 나눈 대화가 없어요. 둘러보기에서 다른 섬에게 말을 걸어보세요.';
-      empty.style.cssText = 'padding:24px 20px; font-size:12.5px; line-height:1.6; color:rgba(243,237,228,.4);';
+      empty.textContent = CHAT_EMPTY_MESSAGE[currentChatFilter];
+      empty.style.cssText = 'padding:24px 20px; font-size:12.5px; line-height:1.6; color:rgba(43,38,34,.4);';
       chatListEl.appendChild(empty);
       return;
     }
-    names.forEach(function (name) {
-      var msgs = chats[name].messages;
-      var last = msgs[msgs.length - 1];
+    rows.forEach(function (r) {
+      var name = r.name, last = r.last;
       var row = document.createElement('div');
-      row.style.cssText = 'display:flex; flex-direction:column; gap:3px; padding:14px 20px; border-bottom:1px solid rgba(243,237,228,.06); cursor:pointer;';
+      row.style.cssText = 'display:flex; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid rgba(43,38,34,.07); cursor:pointer;';
+      row.appendChild(chatAvatarEl());
+      var textWrap = document.createElement('div');
+      textWrap.style.cssText = 'flex:1; min-width:0;';
       var nameEl = document.createElement('div');
       nameEl.textContent = name;
-      nameEl.style.cssText = 'font-size:13.5px; font-weight:600;';
+      nameEl.style.cssText = 'font-size:13.5px; font-weight:700; color:#2b2622;';
       var previewEl = document.createElement('div');
       previewEl.textContent = last ? (last.from === 'me' ? '나: ' : '') + last.text : '';
-      previewEl.style.cssText = 'font-size:12px; color:rgba(243,237,228,.45); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;';
-      row.appendChild(nameEl);
-      row.appendChild(previewEl);
+      previewEl.style.cssText = 'font-size:12px; color:rgba(43,38,34,.5); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:3px;';
+      textWrap.appendChild(nameEl);
+      textWrap.appendChild(previewEl);
+      row.appendChild(textWrap);
+      var timeEl = document.createElement('div');
+      timeEl.textContent = last ? formatChatTime(last.time) : '';
+      timeEl.style.cssText = 'flex:none; font-size:11px; color:rgba(43,38,34,.45); margin-left:6px;';
+      row.appendChild(timeEl);
       row.addEventListener('click', function () { openChatThread(name); });
       chatListEl.appendChild(row);
     });
   }
 
+  Array.prototype.slice.call(document.querySelectorAll('.chat-filter-btn')).forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      currentChatFilter = btn.dataset.filter;
+      Array.prototype.slice.call(document.querySelectorAll('.chat-filter-btn')).forEach(function (b) {
+        var active = b === btn;
+        b.style.background = active ? '#663b2c' : 'transparent';
+        b.style.color = active ? '#fff' : '#663b2c';
+        b.style.border = active ? 'none' : '1px solid rgba(102,59,44,.3)';
+      });
+      renderChatList();
+    });
+  });
+
   function openChatThread(name) {
-    ensureChat(name);
+    var chats = ensureChat(name);
     currentPartner = name;
     chatThreadNameEl.textContent = name;
+    var count = chats[name].messages.filter(function (m) { return !m.system; }).length;
+    document.getElementById('chat-thread-count').textContent = count ? count : '';
     chatListView.style.display = 'none';
     chatThreadView.style.display = 'flex';
+    // 1:1 대화창은 전체 화면으로 — 하단 탭바는 뒤로가기 전까진 필요 없다.
+    document.getElementById('tab-bar').style.display = 'none';
     renderThread();
+    chats[name].lastReadAt = Date.now();
+    saveChats(chats);
   }
 
   function closeChatThread() {
     currentPartner = null;
     chatThreadView.style.display = 'none';
     chatListView.style.display = 'flex';
+    document.getElementById('tab-bar').style.display = 'flex';
     renderChatList();
   }
 
@@ -1194,9 +1501,24 @@
     var chats = getChats();
     var convo = chats[currentPartner];
     if (!convo) return;
-    convo.messages.forEach(function (msg) {
-      addBubble(msg.from === 'me' ? { text: msg.text } : { from: currentPartner, text: msg.text }, msg.from === 'me');
+    convo.messages.forEach(function (msg, idx) {
+      if (msg.system) { addSystemMessage(msg.text); return; }
+      addBubble(msg.from === 'me'
+        ? { text: msg.text, time: msg.time }
+        : { from: currentPartner, text: msg.text, time: msg.time, likes: msg.likes, liked: msg.liked, index: idx },
+        msg.from === 'me');
     });
+  }
+
+  function addSystemMessage(text) {
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex; justify-content:center; margin:2px 0;';
+    var pill = document.createElement('div');
+    pill.textContent = text;
+    pill.style.cssText = 'background:#f4aec1; color:#fff; font-size:11.5px; font-weight:600; padding:7px 16px; border-radius:999px; text-align:center;';
+    row.appendChild(pill);
+    thread.appendChild(row);
+    thread.scrollTop = thread.scrollHeight;
   }
 
   document.getElementById('chat-back').addEventListener('click', function (e) {
@@ -1204,26 +1526,62 @@
     closeChatThread();
   });
 
+  function chatBubbleAvatarEl(mine) {
+    var av = document.createElement('div');
+    av.style.cssText = 'flex:none; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:' + (mine ? '#f4aec1' : '#663b2c') + ';';
+    av.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" fill="#fff"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>';
+    return av;
+  }
+
   function addBubble(msg, mine) {
     var row = document.createElement('div');
-    row.style.display = 'flex';
-    row.style.flexDirection = 'column';
-    row.style.alignItems = mine ? 'flex-end' : 'flex-start';
+    row.style.cssText = 'display:flex; align-items:flex-start; gap:8px;' + (mine ? ' flex-direction:row-reverse;' : '');
+    row.appendChild(chatBubbleAvatarEl(mine));
 
-    if (!mine) {
-      var name = document.createElement('div');
-      name.textContent = msg.from;
-      name.style.cssText = 'font-size:11px; letter-spacing:.04em; color:rgba(243,237,228,.4); margin:0 2px 4px;';
-      row.appendChild(name);
+    if (mine) {
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex; flex-direction:column; align-items:flex-end; max-width:70%;';
+      var timeMe = document.createElement('div');
+      timeMe.textContent = formatChatTime(msg.time);
+      timeMe.style.cssText = 'font-size:10.5px; color:#f4aec1; margin-bottom:4px;';
+      var bubbleMe = document.createElement('div');
+      bubbleMe.textContent = msg.text;
+      bubbleMe.style.cssText = 'font-size:13.5px; line-height:1.55; padding:11px 15px; border-radius:16px; border-bottom-right-radius:5px; background:#f4aec1; color:#2b2622;';
+      wrap.appendChild(timeMe);
+      wrap.appendChild(bubbleMe);
+      row.appendChild(wrap);
+    } else {
+      var bubble = document.createElement('div');
+      bubble.style.cssText = 'max-width:70%; padding:11px 15px; border-radius:16px; border-bottom-left-radius:5px; background:#663b2c;';
+      var head = document.createElement('div');
+      head.style.cssText = 'display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:4px;';
+      var nameEl = document.createElement('span');
+      nameEl.textContent = msg.from;
+      nameEl.style.cssText = 'font-size:12px; font-weight:700; color:#f4aec1;';
+      var timeThem = document.createElement('span');
+      timeThem.textContent = formatChatTime(msg.time);
+      timeThem.style.cssText = 'font-size:10.5px; color:rgba(244,174,193,.8); white-space:nowrap;';
+      head.appendChild(nameEl);
+      head.appendChild(timeThem);
+      var textEl = document.createElement('div');
+      textEl.textContent = msg.text;
+      textEl.style.cssText = 'font-size:13.5px; line-height:1.55; color:#fff;';
+      bubble.appendChild(head);
+      bubble.appendChild(textEl);
+
+      var likeBtn = document.createElement('button');
+      likeBtn.type = 'button';
+      likeBtn.setAttribute('aria-label', '좋아요');
+      likeBtn.style.cssText = 'margin-top:8px; display:inline-flex; align-items:center; gap:4px; border:none; background:#fff; color:' + (msg.liked ? '#e0608a' : '#663b2c') + '; font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px; cursor:pointer;';
+      likeBtn.textContent = (msg.liked ? '♥ ' : '♡ ') + (msg.likes || 0);
+      likeBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        toggleMessageLike(currentPartner, msg.index);
+      });
+      bubble.appendChild(likeBtn);
+
+      row.appendChild(bubble);
     }
-
-    var bubble = document.createElement('div');
-    bubble.textContent = msg.text;
-    bubble.style.cssText = 'max-width:78%; font-size:13.5px; line-height:1.55; padding:10px 14px; border-radius:16px;' +
-      (mine
-        ? 'background:var(--accent); color:#15120f; border-bottom-right-radius:5px;'
-        : 'background:rgba(243,237,228,.08); color:#f3ede4; border-bottom-left-radius:5px;');
-    row.appendChild(bubble);
 
     thread.appendChild(row);
     thread.scrollTop = thread.scrollHeight;
@@ -1232,14 +1590,11 @@
   function showTyping(from) {
     var row = document.createElement('div');
     row.id = 'chat-typing';
-    row.style.cssText = 'display:flex; flex-direction:column; align-items:flex-start;';
-    var name = document.createElement('div');
-    name.textContent = from;
-    name.style.cssText = 'font-size:11px; letter-spacing:.04em; color:rgba(243,237,228,.4); margin:0 2px 4px;';
+    row.style.cssText = 'display:flex; align-items:flex-start; gap:8px;';
+    row.appendChild(chatBubbleAvatarEl(false));
     var bubble = document.createElement('div');
     bubble.textContent = '...';
-    bubble.style.cssText = 'font-size:13.5px; padding:10px 14px; border-radius:16px; border-bottom-left-radius:5px; background:rgba(243,237,228,.08); color:rgba(243,237,228,.5);';
-    row.appendChild(name);
+    bubble.style.cssText = 'font-size:13.5px; padding:11px 15px; border-radius:16px; border-bottom-left-radius:5px; background:#663b2c; color:rgba(255,255,255,.55);';
     row.appendChild(bubble);
     thread.appendChild(row);
     thread.scrollTop = thread.scrollHeight;
@@ -1255,8 +1610,9 @@
     var text = chatInput.value.trim();
     if (!text || !currentPartner) return;
     var partner = currentPartner;
+    var sentAt = Date.now();
     pushMessage(partner, 'me', text);
-    addBubble({ text: text }, true);
+    addBubble({ text: text, time: sentAt }, true);
     chatInput.value = '';
 
     setTimeout(function () { showTyping(partner); }, 400);
@@ -1264,8 +1620,9 @@
       removeTyping();
       var reply = REPLIES[replyIndex % REPLIES.length];
       replyIndex++;
+      var repliedAt = Date.now();
       pushMessage(partner, 'them', reply);
-      if (currentPartner === partner) addBubble({ from: partner, text: reply }, false);
+      if (currentPartner === partner) addBubble({ from: partner, text: reply, time: repliedAt }, false);
     }, 1300);
   }
 
@@ -1292,7 +1649,11 @@
     }
   }, true);
   document.addEventListener('focusin', function (e) {
-    if (e.target.closest('#tab-home, #tab-chat') && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+    // 채팅 대화창은 이제 openChatThread/closeChatThread가 탭바 표시 여부를 독립적으로
+    // 관리해서(키보드 상태와 무관하게 항상 숨김) 여기서는 홈 탭 입력만 다룬다 — 예전처럼
+    // #tab-chat도 같이 묶으면, 메시지를 보내고 입력창이 blur될 때 focusout이 탭바를 도로
+    // 보이게 만들어버리는 버그가 생긴다.
+    if (e.target.closest('#tab-home') && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
       tabBarEl.style.display = 'none';
       // Hiding the tab bar grows #tab-home's own height (it reclaims that space via flex:1), which
       // shrinks the scroll spacer's effective range — found via the debug HUD: the locked scrollTop
@@ -1312,7 +1673,7 @@
     }
   });
   document.addEventListener('focusout', function (e) {
-    if (e.target.closest('#tab-home, #tab-chat') && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+    if (e.target.closest('#tab-home') && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
       tabBarEl.style.display = '';
       // mirror the focusin recompute — the tab bar reappearing shrinks #tab-home back down, so the
       // spacer (sized for the taller, bar-hidden state) needs to shrink back with it, or the old
