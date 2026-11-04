@@ -731,6 +731,13 @@
     dialVideo.style.opacity = '1';
   });
 
+  // NFC 감지 화면(step 0)을 건너뛰고 welcome부터 시작한다 — goTo()가 참조하는
+  // dialBg/dialVideo가 막 위에서 초기화된 뒤에 호출해야 한다. 앱이 켜지자마자 바로
+  // 전환하지 않고 0.3초 쉬었다가 welcome을 시작한다.
+  setTimeout(function () {
+    goTo(1);
+  }, 300);
+
   // Pre-decode the dial background map while dial-bg is still display:none, so switching it
   // to visible on step2 entry doesn't also pay a first-time image-decode cost in the same frame
   // (a likely source of the stutter some devices show right as step2 starts).
@@ -797,7 +804,18 @@
   screens.forEach(function (s) {
     var n = Number(s.dataset.step);
     if (n === 2 || n === 3 || n === 4) return; // step 2 uses swipe-up; step 3 is a form; step 4 has its own tab bar
-    s.addEventListener('click', function () { advance(); });
+    s.addEventListener('click', function () {
+      // welcome 영상은 이제 NFC 탭 없이 페이지 로드와 동시에 autoplay를 시도하는데, iOS
+      // 저전력 모드에서는 muted+playsinline이어도 사용자 제스처 없는 autoplay가 막힌다
+      // (이게 그동안 "탭해서 iLanD 앱 열기" 탭이 사실상 대신 해주던 일) — 영상이 아직 멈춰
+      // 있는 상태에서 이 화면을 처음 탭하면, 다음 화면으로 넘기지 않고 그 탭으로 영상만
+      // 틔워준다. 이미 재생 중이면 평소대로 다음 화면으로 넘어간다.
+      if (n === 1 && welcomeVideo.paused) {
+        welcomeVideo.play().catch(function () {});
+        return;
+      }
+      advance();
+    });
   });
 
   // --- Step 3: basic info input ---
@@ -897,7 +915,7 @@
 
   document.getElementById('restart-btn').addEventListener('click', function (e) {
     e.stopPropagation();
-    goTo(0);
+    goTo(1);
   });
 
   // --- Main page tab bar (나의 섬 / 둘러보기 / 커뮤니티) ---
@@ -926,10 +944,19 @@
     Object.keys(tabPanels).forEach(function (key) {
       tabPanels[key].style.display = key === target ? tabDisplay[key] : 'none';
     });
-    if (target === 'chat') closeChatThread();
+    if (target === 'chat') { closeChatThread(); chatListEl.scrollTop = 0; }
     islandRenderActive = (target === 'home');
-    if (target === 'home') requestAnimationFrame(adjustHomeScrollSpacer);
-    if (target === 'explore') ensureGoogleMap();
+    if (target === 'home') {
+      // 탭을 옮겼다가 다시 돌아와도 예전 스크롤 위치가 아니라 항상 맨 위부터 보이게.
+      document.getElementById('tab-home').scrollTop = 0;
+      requestAnimationFrame(adjustHomeScrollSpacer);
+    }
+    if (target === 'explore') {
+      ensureGoogleMap();
+      // 지도도 마찬가지 — 탭을 다시 들어올 때마다 마지막으로 팬/줌했던 위치가 아니라
+      // 기본 화면(줌아웃된 상태, 한국 중앙)으로 되돌린다.
+      resetExploreView(exploreMapInstance);
+    }
   }
 
   // 홈 탭 스크롤 범위를 "흰 바텀시트가 섬 모델을 다 덮는 지점"에서 딱 멈추도록 보정.
@@ -1172,12 +1199,10 @@
     // 해안선 — 구글 기본 지도에서 땅/바다 경계를 실선으로 그리는 것과 같은 역할. 국가
     // 경계(실선)와 같은 브라운 계열로 맞춰서 땅의 윤곽을 선명하게 잡아준다.
     { featureType: 'landscape.natural', elementType: 'geometry.stroke', stylers: [{ color: '#78abbe' }, { weight: .6 }] },
-    // 구글 기본 지도의 산악 음영(hillshade) 텍스처를 그대로 살리되 테마 톤으로 — 평지보다 살짝
-    // 밝은 톤을 줘서 입체감(투톤)을 재현한다.
-    { featureType: 'landscape.natural.terrain', elementType: 'geometry', stylers: [{ color: '#c98a4b' }, { visibility: 'on' }] },
-    // 구글 기본 지도의 "흰 대지/초록 공원" 톤 구분을 테마 색으로 재현 — 도심(인공 지형)은
-    // 크림색으로 밝게, 공원/녹지는 포인트 컬러로 구분해서 땅이 전부 한 색으로 뭉개지지 않게 한다.
-    { featureType: 'landscape.man_made', elementType: 'geometry', stylers: [{ color: '#f3ede4' }] },
+    // 대지 색 통일 — 산악 음영(terrain)과 도심(man_made)도 자연 지형과 같은 색으로 맞춰서
+    // 땅이 지형 종류별로 다른 색으로 쪼개지지 않고 하나의 테마 색으로 보이게 한다.
+    { featureType: 'landscape.natural.terrain', elementType: 'geometry', stylers: [{ color: '#f3adc0' }, { visibility: 'on' }] },
+    { featureType: 'landscape.man_made', elementType: 'geometry', stylers: [{ color: '#f3adc0' }] },
     { featureType: 'administrative.country', elementType: 'geometry.stroke', stylers: [{ visibility: 'on' }, { color: '#78abbe' }, { weight: .8 }] },
     { featureType: 'administrative.country', elementType: 'labels.text', stylers: [{ visibility: 'on' }] },
     // 대지 안쪽 주/도 경계선 — 국가 경계보다 얇고 옅은 브라운 실선으로.
@@ -1188,7 +1213,7 @@
     { featureType: 'poi', stylers: [{ visibility: 'off' }] },
     // poi.park 모양만 poi:off보다 더 구체적인 규칙으로 다시 켠다 — 라벨/아이콘은 건드리지
     // 않아서 전역 아이콘-끄기 규칙이 그대로 적용된다(나무 아이콘이 다시 뜨지 않게).
-    { featureType: 'poi.park', elementType: 'geometry', stylers: [{ visibility: 'on' }, { color: '#c98a4b' }] },
+    { featureType: 'poi.park', elementType: 'geometry', stylers: [{ visibility: 'on' }, { color: '#f3adc0' }] },
     { featureType: 'road', stylers: [{ visibility: 'off' }] },
     { featureType: 'transit', stylers: [{ visibility: 'off' }] },
     { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#78abbe' }] },
@@ -1217,11 +1242,20 @@
     wrap.appendChild(plusBtn);
     return wrap;
   }
+  // 둘러보기 탭의 기본 화면 — 처음 지도를 만들 때도, 탭을 다시 들어올 때도 이 위치로 돌아간다.
+  // 둘러보기 탭의 기본 화면 — 처음 지도를 만들 때도, 탭을 다시 들어올 때도, 심지어 앱을 다시
+  // 실행해도 항상 이 줌아웃된 상태(한반도가 중앙에 오는 전체적인 지도)로 고정한다. 애니메이션
+  // 없이 — moveCamera로 즉시 스냅시켜서 어떤 경우에도 줌인/줌아웃 연출 없이 바로 이 상태다.
+  var EXPLORE_DEFAULT_VIEW = { lat: 36.5, lng: 127.8, zoom: 3 };
+  function resetExploreView(map) {
+    if (!map) return;
+    map.moveCamera({ center: { lat: EXPLORE_DEFAULT_VIEW.lat, lng: EXPLORE_DEFAULT_VIEW.lng }, zoom: EXPLORE_DEFAULT_VIEW.zoom });
+  }
   var googleMapLoading = false;
   window.initGoogleMap = function () {
     var map = new google.maps.Map(document.getElementById('google-map-el'), {
-      center: { lat: 20, lng: 10 },
-      zoom: 2,
+      center: { lat: EXPLORE_DEFAULT_VIEW.lat, lng: EXPLORE_DEFAULT_VIEW.lng },
+      zoom: EXPLORE_DEFAULT_VIEW.zoom,
       minZoom: 2,
       disableDefaultUI: true,
       // 기본 세로형 확대/축소 컨트롤 대신 가로형 커스텀 컨트롤을 쓴다(아래 createZoomControl).
