@@ -14,7 +14,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="iLanD">
 
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Petit+Formal+Script&family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Petit+Formal+Script&family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;500;600;700&family=Baloo+2:wght@600;700;800&display=swap">
 <style>
   * { box-sizing: border-box; }
   html, body {
@@ -437,12 +437,16 @@
 
     <div id="tab-home" class="tab-panel" style="flex:1; min-height:0; overflow-y:auto; overscroll-behavior-y:none; padding:0; color:#2b2622;">
       <div id="home-header" style="position:sticky; top:0; z-index:3; background:#f5bacb; padding:calc(20px + env(safe-area-inset-top)) 0 14px;">
-        <div style="padding:0 22px; display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
-          <div>
-            <div id="profile-owner" style="font-family:'Playfair Display', serif; font-style:italic; font-size:11px; letter-spacing:.1em; color:#9c6a60;">이름 없는 소유주의 섬</div>
-            <div id="profile-islandname" style="font-family:'Playfair Display', serif; font-weight:600; font-style:italic; font-size:26px; margin-top:4px; color:#663b2c;">나의 섬</div>
+        <!-- 레이아웃: 왼쪽 "소유주의 섬"(작게) / 가운데 섬 이름(섬 주인이 지은 "섬 로고"처럼 큼직한 디스플레이 서체) / 오른쪽 등기부증서 버튼.
+             "Ohno Blazeface 24 Point"는 라이선스 폰트라 구할 수 없어 비슷한 톤의 굵고 둥근 무료 서체(Baloo 2)로 대체 — 나중에 실제 폰트 파일이 생기면 font-family만 바꾸면 됨. -->
+        <div style="padding:0 18px; display:flex; align-items:flex-start; justify-content:space-between; gap:8px;">
+          <div style="flex:1; min-width:0;">
+            <div id="profile-owner" style="font-family:'Playfair Display', serif; font-style:italic; font-size:11px; letter-spacing:.1em; color:#9c6a60; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">이름 없는 소유주의 섬</div>
           </div>
-          <button id="deed-btn" style="flex:none; border:1px solid #663b2c; background:transparent; color:#663b2c; font-size:11.5px; letter-spacing:.03em; padding:9px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;">등기부증서</button>
+          <div id="profile-islandname" style="flex:none; font-family:'Baloo 2', sans-serif; font-weight:800; font-size:25px; line-height:1; color:#663b2c; max-width:46%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">나의 섬</div>
+          <div style="flex:1; display:flex; justify-content:flex-end;">
+            <button id="deed-btn" style="flex:none; border:1px solid #663b2c; background:transparent; color:#663b2c; font-size:11.5px; letter-spacing:.03em; padding:9px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;">등기부증서</button>
+          </div>
         </div>
       </div>
 
@@ -455,29 +459,74 @@
         <div id="emotion-chips" style="display:flex; justify-content:center; gap:8px; margin-top:18px; padding:0 22px 18px;"></div>
       </div>
 
-      <div id="home-sheet" style="position:relative; z-index:2; background:#fff; border-radius:28px 28px 0 0; padding:20px 22px calc(28px + env(safe-area-inset-bottom));">
+      <div id="home-sheet" style="position:relative; z-index:2; background:#fff; border-radius:28px 28px 0 0; overflow:hidden; -webkit-mask-image:-webkit-radial-gradient(circle, #fff 100%, #fff 100%); mask-image:radial-gradient(circle, #fff 100%, #fff 100%); padding:20px 22px calc(28px + env(safe-area-inset-bottom));">
         <div style="width:36px; height:4px; border-radius:999px; background:rgba(43,38,34,.14); margin:0 auto 18px;"></div>
 
-        <div style="font-family:'Playfair Display', serif; font-style:italic; font-weight:700; font-size:11px; letter-spacing:.14em; color:#663b2c;">TODAY'S MOOD</div>
-        <div style="font-size:19px; font-weight:700; margin-top:8px; color:#2b2622;">오늘, 당신의 마음은 어떤가요?</div>
-        <div style="font-size:12.5px; color:#8a8074; margin-top:6px;">지금 느끼는 감정을 천천히 들여다보세요</div>
+        <!-- 쓰기 화면: 오늘의 기분을 적는 화면. 섬 아래 떠 있는 Breeze/Cherish/Lonley 칩(공개, 다른 사람도 보는 지금의 분위기)과
+             달리, 여기 6칸 그리드+강도 슬라이더는 그날의 기록에만 비공개로 저장된다 — "이 감정은 나에게만 보여요". -->
+        <div id="mood-write-view">
+          <div style="font-family:'Playfair Display', serif; font-style:italic; font-weight:700; font-size:11px; letter-spacing:.14em; color:#663b2c;">TODAY'S MOOD</div>
+          <div style="font-size:19px; font-weight:700; margin-top:8px; color:#2b2622;">오늘, 당신의 마음은 어떤가요?</div>
 
-        <div style="display:flex; align-items:center; gap:8px; margin-top:16px;">
-          <input id="diary-line" type="text" maxlength="60" placeholder="예: 조금 피곤하지만, 기분은 괜찮아요." style="flex:1; min-width:0; height:48px; border:1.5px solid #663b2c; border-radius:999px; background:transparent; outline:none; padding:0 16px; font-family:'Noto Sans KR', sans-serif; font-size:16px; color:#2b2622;">
-          <button id="diary-confirm" style="flex:none; height:48px; padding:0 18px; border:none; border-radius:999px; background:#663b2c; color:#fff; font-size:13px; font-weight:700; cursor:pointer;">확인</button>
+          <div style="margin-top:16px;">
+            <input id="diary-line" type="text" maxlength="60" placeholder="예: 조금 피곤하지만, 기분은 괜찮아요." style="width:100%; height:48px; border:1.5px solid #663b2c; border-radius:999px; background:transparent; outline:none; padding:0 16px; font-family:'Noto Sans KR', sans-serif; font-size:16px; color:#2b2622;">
+          </div>
+          <div style="font-size:12.5px; color:#8a8074; margin-top:10px; text-align:center;">어떤 감정이든 괜찮아요.</div>
+
+          <div id="mood-emotion-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:16px;"></div>
+
+          <div style="margin-top:24px; text-align:center;">
+            <div style="font-size:12.5px; color:#8a8074;">오늘의 마음이 얼마나 느껴지시나요?</div>
+            <div style="display:flex; align-items:center; gap:10px; margin-top:12px;">
+              <span style="flex:none; font-size:11px; color:#a39a8d;">은은하게</span>
+              <input id="mood-intensity" type="range" min="0" max="100" value="50" style="flex:1; accent-color:#663b2c;">
+              <span style="flex:none; font-size:11px; color:#a39a8d;">아주깊게</span>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; justify-content:center; gap:5px; margin-top:18px; color:#a39a8d; font-size:11px;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:none;"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+            <span>이 감정은 나에게만 보여요</span>
+          </div>
         </div>
 
-        <div style="margin-top:22px; border-top:1px solid rgba(43,38,34,.12);"></div>
+        <!-- 둘러보기 화면: 그동안 쌓인 기록을 달력으로 돌아보는 화면. 기록하기/둘러보기 버튼이 이 둘 사이를
+             전환하는 2단 스위치 역할도 겸한다(눌린 쪽이 진하게 채워짐). -->
+        <div id="mood-browse-view" style="display:none;">
+          <div style="font-family:'Playfair Display', serif; font-style:italic; font-weight:700; font-size:11px; letter-spacing:.14em; color:#663b2c;">MOOD NOTES</div>
+          <div style="font-size:19px; font-weight:700; margin-top:8px; color:#2b2622;">쌓인 마음이 나를 알려줘요</div>
 
-        <div style="display:flex; margin-top:22px; border:1px solid #663b2c; border-radius:999px; overflow:hidden;">
-          <button type="button" class="home-subtab" data-subtab="guestbook" style="flex:1; border:none; background:transparent; color:#663b2c; font-size:12.5px; font-weight:600; padding:12px 0; cursor:pointer;">방명록</button>
-          <button type="button" class="home-subtab" data-subtab="photos" style="flex:1; border:none; border-left:1px solid #663b2c; border-right:1px solid #663b2c; background:transparent; color:#663b2c; font-size:12.5px; font-weight:600; padding:12px 0; cursor:pointer;">사진첩</button>
-          <button type="button" class="home-subtab" data-subtab="decorate" style="flex:1; border:none; background:transparent; color:#663b2c; font-size:12.5px; font-weight:600; padding:12px 0; cursor:pointer;">꾸미기</button>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-top:20px;">
+            <button type="button" id="mood-cal-prev" aria-label="이전 달" style="border:none; background:transparent; color:#663b2c; font-size:16px; padding:4px 10px; cursor:pointer;">&lsaquo;</button>
+            <div id="mood-cal-label" style="font-family:'Playfair Display', serif; font-weight:600; font-style:italic; font-size:15px; color:#2b2622;"></div>
+            <button type="button" id="mood-cal-next" aria-label="다음 달" style="border:none; background:transparent; color:#663b2c; font-size:16px; padding:4px 10px; cursor:pointer;">&rsaquo;</button>
+          </div>
+
+          <div id="mood-cal-weekdays" style="display:grid; grid-template-columns:repeat(7, 1fr); margin-top:14px; text-align:center; font-size:10.5px; color:#a39a8d; letter-spacing:.04em;"></div>
+          <div id="mood-cal-grid" style="display:grid; grid-template-columns:repeat(7, 1fr); row-gap:8px; margin-top:6px;"></div>
+          <div id="mood-cal-count" style="text-align:right; font-size:10.5px; color:#a39a8d; margin-top:8px;"></div>
+
+          <div id="mood-insight-card" style="margin-top:18px; background:#fbe9ee; border-radius:16px; padding:16px; text-align:center; display:none;">
+            <div style="font-size:11px; color:#9c6a60;">이번달의 작은 발견</div>
+            <div id="mood-insight-main" style="font-size:14px; font-weight:700; color:#2b2622; margin-top:6px; line-height:1.5;"></div>
+            <div id="mood-insight-sub" style="font-size:11.5px; color:#8a8074; margin-top:4px;"></div>
+          </div>
+
+          <div id="mood-entry-preview" style="margin-top:18px; display:none;">
+            <div id="mood-entry-preview-date" style="font-size:11.5px; color:#8a8074; text-align:center;"></div>
+            <div style="margin-top:10px; border:1px solid rgba(43,38,34,.12); border-radius:14px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+              <div id="mood-entry-preview-text" style="font-size:13.5px; color:#2b2622; line-height:1.5; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;"></div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a39a8d" stroke-width="2.5" style="flex:none;"><path d="M9 6l6 6-6 6"></path></svg>
+            </div>
+          </div>
         </div>
 
-        <div style="margin-top:44px; padding-top:32px; border-top:1px solid rgba(43,38,34,.14); text-align:center;">
-          <button id="restart-btn" style="border:1px solid rgba(43,38,34,.25); background:transparent; color:#2b2622; font-family:'Noto Sans KR', sans-serif; font-size:12.5px; letter-spacing:.06em; padding:11px 24px; border-radius:999px; cursor:pointer;">처음으로 다시보기</button>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <button type="button" id="diary-confirm" style="flex:1; height:48px; border:none; border-radius:999px; background:#663b2c; color:#fff; font-size:13px; font-weight:700; cursor:pointer;">기록하기</button>
+          <button type="button" id="mood-browse-btn" style="flex:1; height:48px; border:1px solid #663b2c; border-radius:999px; background:transparent; color:#663b2c; font-size:13px; font-weight:700; cursor:pointer;">둘러보기</button>
         </div>
+
+        <div id="mood-write-extras"></div>
 
         <!-- Sized in JS (adjustHomeScrollSpacer) so max scroll lands exactly where the sheet
              has fully covered the sticky model section — no further, no blank runway. -->
@@ -913,11 +962,6 @@
     });
   }
 
-  document.getElementById('restart-btn').addEventListener('click', function (e) {
-    e.stopPropagation();
-    goTo(1);
-  });
-
   // --- Main page tab bar (나의 섬 / 둘러보기 / 커뮤니티) ---
   var tabHome = document.getElementById('tab-home');
   var tabExplore = document.getElementById('tab-explore');
@@ -961,6 +1005,7 @@
 
   // 홈 탭 스크롤 범위를 "흰 바텀시트가 섬 모델을 다 덮는 지점"에서 딱 멈추도록 보정.
   // 상단 헤더(섬이름/등기부증서)는 별도 sticky 레이어라 계속 보이고, 모델 블록만 덮인다.
+  var HOME_SHEET_MIN_GAP = 28;
   function adjustHomeScrollSpacer() {
     var homeTab = document.getElementById('tab-home');
     var header = document.getElementById('home-header');
@@ -973,7 +1018,9 @@
     var headerH = header.offsetHeight;
     var sheetH = sheet.offsetHeight;
     var viewportH = homeTab.clientHeight;
-    spacer.style.height = Math.max(0, viewportH - headerH - sheetH) + 'px';
+    // 흰 시트가 헤더에 딱 붙는 지점까지 스크롤되면 둥근 윗모서리가 거의 안 보이게 됐다 —
+    // 최대로 스크롤해도 헤더 아래 핑크 여백이 항상 조금은 남도록 여유를 둔다.
+    spacer.style.height = Math.max(0, viewportH - headerH - sheetH - HOME_SHEET_MIN_GAP) + 'px';
   }
   window.addEventListener('resize', adjustHomeScrollSpacer);
 
@@ -1023,6 +1070,29 @@
     emotionChipsEl.appendChild(chip);
   });
 
+  function todayDateKey(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+
+  function findDiaryEntry(profile, dateKey) {
+    var entries = profile.diaryEntries || [];
+    for (var i = 0; i < entries.length; i++) {
+      if (entries[i].date === dateKey) return entries[i];
+    }
+    return null;
+  }
+
+  // 시안: 선택된 박스는 핑크로 채워짐 — 감정별로 색을 따로 쓰지 않고 이 한 가지 색만 쓴다.
+  var MOOD_ACTIVE_COLOR = '#f4aec1';
+  var MOOD_GRID_SIZE = 6;
+  // 섬 아래 뜬 공개 칩(Breeze/Cherish/Lonley, profile.emotion)과 별개로 그날의 기록에만 비공개로
+  // 붙는 감정/강도 — "이 감정은 나에게만 보여요".
+  var draftEmotion = null;
+  var draftIntensity = 50;
+  var moodSheetMode = 'write';
+  var moodCalYear, moodCalMonth; // 0-based month, 첫 둘러보기 렌더에서 오늘 날짜로 초기화
+
   function renderProfileTab() {
     var profile = getProfile();
     document.getElementById('profile-owner').textContent = (profile.nickname || '이름 없는 소유주') + '의 섬';
@@ -1033,24 +1103,205 @@
       chip.style.color = active ? '#fff' : '#bf898c';
       chip.style.background = active ? '#663b2c' : 'transparent';
     });
-    diaryInput.value = profile.diary || '';
+    var todayEntry = findDiaryEntry(profile, todayDateKey());
+    diaryInput.value = todayEntry ? todayEntry.text : '';
+    draftEmotion = todayEntry ? (todayEntry.emotion || null) : null;
+    draftIntensity = (todayEntry && typeof todayEntry.intensity === 'number') ? todayEntry.intensity : 50;
+    moodIntensityInput.value = String(draftIntensity);
+    renderMoodEmotionGrid();
+  }
+
+  // --- 오늘의 기분: 비공개 감정 6칸 그리드. 앞 3칸만 실제 감정(공개 칩과 같은 이름)이고,
+  // 나머지 3칸은 추후 추가될 예정이라 지금은 빈 채로 둔다. ---
+  var moodEmotionGridEl = document.getElementById('mood-emotion-grid');
+  for (var gi = 0; gi < MOOD_GRID_SIZE; gi++) {
+    (function (index) {
+      var label = EMOTIONS[index] || null;
+      var box = document.createElement('button');
+      box.type = 'button';
+      box.dataset.emotion = label || '';
+      box.style.cssText = 'aspect-ratio:1; border-radius:16px; cursor:pointer; font-size:11.5px; font-weight:600;';
+      if (label) {
+        box.textContent = label;
+        box.addEventListener('click', function (e) {
+          e.stopPropagation();
+          draftEmotion = (draftEmotion === label) ? null : label;
+          renderMoodEmotionGrid();
+        });
+      } else {
+        box.disabled = true;
+        box.style.cursor = 'default';
+      }
+      moodEmotionGridEl.appendChild(box);
+    })(gi);
+  }
+
+  function renderMoodEmotionGrid() {
+    Array.prototype.forEach.call(moodEmotionGridEl.children, function (box) {
+      var label = box.dataset.emotion;
+      if (!label) {
+        box.style.border = '1.5px solid rgba(43,38,34,.18)';
+        box.style.background = 'transparent';
+        return;
+      }
+      var active = label === draftEmotion;
+      box.style.border = '1.5px solid ' + (active ? MOOD_ACTIVE_COLOR : 'rgba(43,38,34,.18)');
+      box.style.background = active ? MOOD_ACTIVE_COLOR : 'transparent';
+      box.style.color = active ? '#fff' : '#8a8074';
+    });
   }
 
   var diaryInput = document.getElementById('diary-line');
-  diaryInput.addEventListener('input', function () {
-    var profile = getProfile();
-    profile.diary = diaryInput.value;
-    saveProfile(profile);
-  });
   diaryInput.addEventListener('click', function (e) { e.stopPropagation(); });
+
+  var moodIntensityInput = document.getElementById('mood-intensity');
+  moodIntensityInput.addEventListener('click', function (e) { e.stopPropagation(); });
+  moodIntensityInput.addEventListener('input', function () {
+    draftIntensity = Number(moodIntensityInput.value);
+  });
 
   document.getElementById('diary-confirm').addEventListener('click', function (e) {
     e.stopPropagation();
+    if (moodSheetMode === 'browse') { setMoodSheetMode('write'); return; }
+    var text = diaryInput.value.trim();
+    if (!text) { diaryInput.blur(); return; }
     var profile = getProfile();
-    profile.diary = diaryInput.value;
+    var entries = (profile.diaryEntries || []).slice();
+    var todayKey = todayDateKey();
+    var idx = -1;
+    for (var i = 0; i < entries.length; i++) {
+      if (entries[i].date === todayKey) { idx = i; break; }
+    }
+    var entry = { date: todayKey, text: text, emotion: draftEmotion, intensity: draftIntensity, ts: Date.now() };
+    if (idx > -1) entries[idx] = entry; else entries.push(entry);
+    profile.diaryEntries = entries;
     saveProfile(profile);
     diaryInput.blur();
-    showToast('저장되었어요');
+    showToast('오늘의 기록이 저장되었어요');
+  });
+
+  // --- 둘러보기: 기록하기/둘러보기 버튼이 쓰기 화면 ↔ 달력 화면을 전환하는 2단 스위치도 겸한다
+  // (지금 보고 있는 쪽 버튼이 진하게 채워진다). ---
+  var moodBrowseBtn = document.getElementById('mood-browse-btn');
+  var moodWriteView = document.getElementById('mood-write-view');
+  var moodBrowseView = document.getElementById('mood-browse-view');
+  var moodWriteExtras = document.getElementById('mood-write-extras');
+  var diaryConfirmBtn = document.getElementById('diary-confirm');
+
+  function setMoodSheetMode(mode) {
+    moodSheetMode = mode;
+    var writing = mode === 'write';
+    moodWriteView.style.display = writing ? '' : 'none';
+    moodBrowseView.style.display = writing ? 'none' : '';
+    moodWriteExtras.style.display = writing ? '' : 'none';
+    diaryConfirmBtn.style.background = writing ? '#663b2c' : 'transparent';
+    diaryConfirmBtn.style.color = writing ? '#fff' : '#663b2c';
+    diaryConfirmBtn.style.border = writing ? 'none' : '1px solid #663b2c';
+    moodBrowseBtn.style.background = writing ? 'transparent' : '#663b2c';
+    moodBrowseBtn.style.color = writing ? '#663b2c' : '#fff';
+    moodBrowseBtn.style.border = writing ? '1px solid #663b2c' : 'none';
+    if (!writing) renderMoodCalendar();
+    // 글쓰기 화면과 달력 화면은 높이가 많이 달라서, 전환 직후 이전 스크롤 위치를 그대로 두면
+    // 새 높이 기준으로 스크롤이 어긋나 보이는(위아래로 튀는) 문제가 있었다 — 전환할 때마다
+    // 시트 맨 위로 스크롤을 맞추고 나서 spacer를 다시 계산한다.
+    document.getElementById('tab-home').scrollTop = 0;
+    requestAnimationFrame(adjustHomeScrollSpacer);
+  }
+
+  moodBrowseBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    setMoodSheetMode('browse');
+  });
+
+  // --- 둘러보기 달력 ---
+  var moodCalWeekdaysEl = document.getElementById('mood-cal-weekdays');
+  var WEEKDAY_LABELS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  WEEKDAY_LABELS.forEach(function (d) {
+    var el = document.createElement('div');
+    el.textContent = d;
+    moodCalWeekdaysEl.appendChild(el);
+  });
+
+  function renderMoodCalendar() {
+    var profile = getProfile();
+    var entries = profile.diaryEntries || [];
+    var now = new Date();
+    if (moodCalYear === undefined) { moodCalYear = now.getFullYear(); moodCalMonth = now.getMonth(); }
+
+    document.getElementById('mood-cal-label').textContent = moodCalYear + '.' + pad(moodCalMonth + 1);
+
+    var entryMap = {};
+    entries.forEach(function (en) { entryMap[en.date] = en; });
+
+    var gridEl = document.getElementById('mood-cal-grid');
+    gridEl.innerHTML = '';
+    var firstDay = new Date(moodCalYear, moodCalMonth, 1).getDay();
+    var daysInMonth = new Date(moodCalYear, moodCalMonth + 1, 0).getDate();
+    var todayKey = todayDateKey();
+    var monthEntryCount = 0;
+
+    for (var i = 0; i < firstDay; i++) gridEl.appendChild(document.createElement('div'));
+
+    for (var day = 1; day <= daysInMonth; day++) {
+      var key = moodCalYear + '-' + pad(moodCalMonth + 1) + '-' + pad(day);
+      var hasEntry = !!entryMap[key];
+      if (hasEntry) monthEntryCount++;
+      var isToday = key === todayKey;
+      var cell = document.createElement('div');
+      cell.textContent = String(day);
+      cell.style.cssText = 'aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:12px;' +
+        'background:' + (isToday ? '#663b2c' : (hasEntry ? MOOD_ACTIVE_COLOR : 'transparent')) + ';' +
+        'color:' + (isToday ? '#fff' : '#2b2622') + ';';
+      gridEl.appendChild(cell);
+    }
+
+    document.getElementById('mood-cal-count').textContent = monthEntryCount + '번의 감정의 기록';
+
+    renderMoodInsight(entries, monthEntryCount);
+    renderMoodEntryPreview();
+  }
+
+  function renderMoodInsight(entries, monthEntryCount) {
+    var card = document.getElementById('mood-insight-card');
+    if (!monthEntryCount) { card.style.display = 'none'; return; }
+    var monthPrefix = moodCalYear + '-' + pad(moodCalMonth + 1);
+    var counts = {};
+    entries.forEach(function (en) {
+      if (en.date.indexOf(monthPrefix) === 0 && en.emotion) counts[en.emotion] = (counts[en.emotion] || 0) + 1;
+    });
+    var topLabel = null, topCount = 0;
+    Object.keys(counts).forEach(function (k) {
+      if (counts[k] > topCount) { topLabel = k; topCount = counts[k]; }
+    });
+    if (!topLabel) { card.style.display = 'none'; return; }
+    card.style.display = '';
+    document.getElementById('mood-insight-main').textContent = "가장 많이 머문 감정은 '" + topLabel + "'이에요.";
+    document.getElementById('mood-insight-sub').textContent = monthEntryCount + '번 중 ' + topCount + '번이었어요.';
+  }
+
+  function renderMoodEntryPreview() {
+    var box = document.getElementById('mood-entry-preview');
+    var todayKey = todayDateKey();
+    var entry = findDiaryEntry(getProfile(), todayKey);
+    if (!entry) { box.style.display = 'none'; return; }
+    box.style.display = '';
+    var parts = todayKey.split('-');
+    document.getElementById('mood-entry-preview-date').textContent =
+      Number(parts[1]) + '월 ' + Number(parts[2]) + '일 · 오늘의 기록';
+    document.getElementById('mood-entry-preview-text').textContent = entry.text;
+  }
+
+  document.getElementById('mood-cal-prev').addEventListener('click', function (e) {
+    e.stopPropagation();
+    moodCalMonth--;
+    if (moodCalMonth < 0) { moodCalMonth = 11; moodCalYear--; }
+    renderMoodCalendar();
+  });
+  document.getElementById('mood-cal-next').addEventListener('click', function (e) {
+    e.stopPropagation();
+    moodCalMonth++;
+    if (moodCalMonth > 11) { moodCalMonth = 0; moodCalYear++; }
+    renderMoodCalendar();
   });
 
   // --- 나의 섬: 방명록/사진첩/꾸미기 (아직 미구현 — UI만, 탭하면 준비중 안내) ---
