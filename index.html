@@ -445,8 +445,12 @@
         <div id="emotion-chips" style="display:flex; justify-content:center; gap:14px; margin-top:28px; padding:0 22px 30px;"></div>
       </div>
 
-      <div id="home-sheet" style="position:relative; z-index:2; background:#fff; border-radius:40px 40px 0 0; overflow-y:hidden; overflow-x:hidden; -webkit-overflow-scrolling:touch; -webkit-mask-image:-webkit-radial-gradient(circle, #fff 100%, #fff 100%); mask-image:radial-gradient(circle, #fff 100%, #fff 100%); padding:16px 15px calc(28px + env(safe-area-inset-bottom)); text-align:center; color:var(--brown);">
-        <div style="width:50px; height:8px; border-radius:999px; background:#efefef; margin:0 auto 26px;"></div>
+      <div id="home-sheet" style="position:relative; z-index:2; background:#fff; border-radius:40px 40px 0 0; overflow-y:hidden; overflow-x:hidden; -webkit-overflow-scrolling:touch; -webkit-mask-image:-webkit-radial-gradient(circle, #fff 100%, #fff 100%); mask-image:radial-gradient(circle, #fff 100%, #fff 100%); padding:0 15px calc(28px + env(safe-area-inset-bottom)); text-align:center; color:var(--brown);">
+        <!-- 드래그 핸들은 시트 안쪽 스크롤과 같이 밀려 올라가면 안 되므로, 시트 상단에 sticky로 고정하고
+             흰 배경을 깔아 뒤에서 스크롤되는 내용을 가린다. -->
+        <div style="position:sticky; top:0; z-index:1; background:#fff; margin:0 -15px; padding:16px 15px 26px;">
+          <div style="width:50px; height:8px; border-radius:999px; background:#efefef; margin:0 auto;"></div>
+        </div>
 
         <!-- 쓰기 화면(시안 main.02~03): 오늘의 기분을 적는 화면. 섬 아래 떠 있는 Breeze/Cherish/Lonley 칩(공개)과
              달리, 여기 6칸 그리드+강도 슬라이더는 그날의 기록에만 비공개로 저장된다 — "이 감정은 나에게만 보여요". -->
