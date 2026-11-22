@@ -445,7 +445,7 @@
         <div id="emotion-chips" style="display:flex; justify-content:center; gap:14px; margin-top:28px; padding:0 22px 30px;"></div>
       </div>
 
-      <div id="home-sheet" style="position:relative; z-index:2; background:#fff; border-radius:40px 40px 0 0; overflow:hidden; -webkit-mask-image:-webkit-radial-gradient(circle, #fff 100%, #fff 100%); mask-image:radial-gradient(circle, #fff 100%, #fff 100%); padding:16px 15px calc(28px + env(safe-area-inset-bottom)); text-align:center; color:var(--brown);">
+      <div id="home-sheet" style="position:relative; z-index:2; background:#fff; border-radius:40px 40px 0 0; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; -webkit-mask-image:-webkit-radial-gradient(circle, #fff 100%, #fff 100%); mask-image:radial-gradient(circle, #fff 100%, #fff 100%); padding:16px 15px calc(28px + env(safe-area-inset-bottom)); text-align:center; color:var(--brown);">
         <div style="width:50px; height:8px; border-radius:999px; background:#efefef; margin:0 auto 26px;"></div>
 
         <!-- 쓰기 화면(시안 main.02~03): 오늘의 기분을 적는 화면. 섬 아래 떠 있는 Breeze/Cherish/Lonley 칩(공개)과
@@ -1009,9 +1009,16 @@
     if (!homeTab || !header || !model || !sheet || !spacer) return;
     model.style.top = header.offsetHeight + 'px';
     spacer.style.height = '0px';
+    sheet.style.maxHeight = 'none';
     var headerH = header.offsetHeight;
-    var sheetH = sheet.offsetHeight;
     var viewportH = homeTab.clientHeight;
+    // 시트 내용(텍스트박스+감정 6칸+슬라이더+버튼)이 남은 화면보다 길면, 라운드 모서리가
+    // 보이는 지점(바깥 스크롤 정지 지점)이 시트 내용 길이에 끌려다니며 기기/뷰포트 높이에 따라
+    // 들쭉날쭉해진다(아이폰 주소창이 접히고 펼쳐지는 정도에 따라 실측 viewportH가 달라져서).
+    // 그래서 시트 자체를 "남은 화면 높이"로 한 번 더 제한해 안에서만 스크롤되게 하면, 바깥
+    // 스크롤 정지 지점은 시트 길이와 무관하게 항상 일정해진다.
+    sheet.style.maxHeight = Math.max(0, viewportH - headerH - HOME_MODEL_UNSTICK_SAFETY) + 'px';
+    var sheetH = sheet.offsetHeight;
     var gap = headerH + HOME_MODEL_UNSTICK_SAFETY;
     spacer.style.height = Math.max(0, viewportH - headerH - sheetH - gap) + 'px';
   }
