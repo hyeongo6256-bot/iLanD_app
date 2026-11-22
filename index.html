@@ -445,7 +445,7 @@
         <div id="emotion-chips" style="display:flex; justify-content:center; gap:14px; margin-top:28px; padding:0 22px 30px;"></div>
       </div>
 
-      <div id="home-sheet" style="position:relative; z-index:2; background:#fff; border-radius:40px 40px 0 0; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; -webkit-mask-image:-webkit-radial-gradient(circle, #fff 100%, #fff 100%); mask-image:radial-gradient(circle, #fff 100%, #fff 100%); padding:16px 15px calc(28px + env(safe-area-inset-bottom)); text-align:center; color:var(--brown);">
+      <div id="home-sheet" style="position:relative; z-index:2; background:#fff; border-radius:40px 40px 0 0; overflow-y:hidden; overflow-x:hidden; -webkit-overflow-scrolling:touch; -webkit-mask-image:-webkit-radial-gradient(circle, #fff 100%, #fff 100%); mask-image:radial-gradient(circle, #fff 100%, #fff 100%); padding:16px 15px calc(28px + env(safe-area-inset-bottom)); text-align:center; color:var(--brown);">
         <div style="width:50px; height:8px; border-radius:999px; background:#efefef; margin:0 auto 26px;"></div>
 
         <!-- 쓰기 화면(시안 main.02~03): 오늘의 기분을 적는 화면. 섬 아래 떠 있는 Breeze/Cherish/Lonley 칩(공개)과
@@ -1023,6 +1023,26 @@
     spacer.style.height = Math.max(0, viewportH - headerH - sheetH - gap) + 'px';
   }
   window.addEventListener('resize', adjustHomeScrollSpacer);
+  // 시트는 기본 overflow-y:hidden(스크롤 불가) 상태로 두고, 바깥(#tab-home) 스크롤이 자기
+  // 최대치(라운드 모서리 유지 지점)에 도달했을 때만 auto로 바꿔 안쪽 스크롤을 열어준다.
+  // 항상 auto로 열어두면, 아직 모델/섬이 안 치워진 초기 상태에서 시트 쪽을 건드려도 바깥
+  // 전환보다 시트 내부 스크롤을 먼저 먹어버려 "라운드가 보이기도 전에 안쪽 내용이 넘어가는"
+  // 문제가 있었다.
+  (function () {
+    var homeTabEl = document.getElementById('tab-home');
+    var homeSheetEl = document.getElementById('home-sheet');
+    if (!homeTabEl || !homeSheetEl) return;
+    homeTabEl.addEventListener('scroll', function () {
+      if (step !== 4) return;
+      var atOuterMax = homeTabEl.scrollTop >= homeTabEl.scrollHeight - homeTabEl.clientHeight - 1;
+      if (atOuterMax) {
+        homeSheetEl.style.overflowY = 'auto';
+      } else {
+        homeSheetEl.style.overflowY = 'hidden';
+        homeSheetEl.scrollTop = 0;
+      }
+    });
+  })();
   // 섬 이름 로고(Blazeface Hangeul/Ohno Blazeface)는 자체 호스팅 @font-face라 폴백 서체보다
   // 늦게 도착한다 — 그 사이에 이미 위 계산이 한 번 끝나버리면 헤더 높이가 폴백 서체 기준으로
   // 캐시돼서, 실제 폰트가 적용되며 헤더가 커진 뒤에도 model.top/spacer가 갱신되지 않는다.
