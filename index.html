@@ -1010,6 +1010,13 @@
     spacer.style.height = Math.max(0, viewportH - headerH - sheetH - gap) + 'px';
   }
   window.addEventListener('resize', adjustHomeScrollSpacer);
+  // 섬 이름 로고(Blazeface Hangeul/Ohno Blazeface)는 자체 호스팅 @font-face라 폴백 서체보다
+  // 늦게 도착한다 — 그 사이에 이미 위 계산이 한 번 끝나버리면 헤더 높이가 폴백 서체 기준으로
+  // 캐시돼서, 실제 폰트가 적용되며 헤더가 커진 뒤에도 model.top/spacer가 갱신되지 않는다.
+  // 그 결과 흰 시트가 새 헤더 높이보다 더 위로 올라가 상단 라운드가 헤더 밑에 가려진다.
+  document.fonts.ready.then(function () {
+    if (step === 4) adjustHomeScrollSpacer();
+  });
 
   tabBtns.forEach(function (btn) {
     btn.addEventListener('click', function (e) {
