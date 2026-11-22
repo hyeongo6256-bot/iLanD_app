@@ -44,7 +44,7 @@
     background:linear-gradient(to right, var(--pink) 0, var(--pink) var(--fill,50%), var(--brown-50) var(--fill,50%), var(--brown-50) 100%); }
   .mood-range::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:20px; height:20px; border-radius:50%; background:var(--pink); border:none; }
   .mood-range::-moz-range-thumb { width:20px; height:20px; border-radius:50%; background:var(--pink); border:none; }
-  .mood-toggle-btn { flex:none; width:100px; height:32px; border-radius:999px; border:1.5px solid var(--brown); background:#fff; color:var(--brown); font-family:'Noto Sans KR', sans-serif; font-size:12.5px; font-weight:700; cursor:pointer; }
+  .mood-toggle-btn { width:100%; height:46px; border-radius:999px; border:1.5px solid var(--brown); font-family:'Noto Sans KR', sans-serif; font-size:13.5px; font-weight:700; cursor:pointer; }
   .mood-cal-arrow { border:none; background:transparent; color:var(--brown); padding:4px 8px; cursor:pointer; display:flex; align-items:center; }
   * { box-sizing: border-box; }
   html, body {
@@ -477,8 +477,9 @@
           </div>
         </div>
 
-        <!-- 둘러보기 화면(시안 main.04~05): 그동안 쌓인 기록을 달력으로 돌아보는 화면. 기록하기/둘러보기 버튼이 이 둘 사이를
-             전환하는 2단 스위치 역할도 겸한다(눌린 쪽이 진하게 채워짐). -->
+        <!-- 둘러보기 화면(시안 main.04~05): 그동안 쌓인 기록을 달력으로 돌아보는 화면. "오늘 마음 기록하기"/
+             "쌓인 마음 돌아보기" 버튼은 각자 고정된 역할·스타일을 유지하는 별개의 버튼으로, 이 둘 사이를 오가는
+             네비게이션 역할만 한다(토글 스위치처럼 스타일이 바뀌지 않음). -->
         <div id="mood-browse-view" style="display:none;">
           <div class="mood-eyebrow">MOOD NOTES</div>
           <div class="mood-title">쌓인 마음이 나를 알려줘요</div>
@@ -513,9 +514,9 @@
           </div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; margin-top:36px; padding:0 21px;">
-          <button type="button" id="diary-confirm" class="mood-toggle-btn" style="background:var(--brown); color:#fff;">기록하기</button>
-          <button type="button" id="mood-browse-btn" class="mood-toggle-btn">둘러보기</button>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:36px;">
+          <button type="button" id="diary-confirm" class="mood-toggle-btn" style="background:var(--brown); color:#fff;">오늘 마음 기록하기</button>
+          <button type="button" id="mood-browse-btn" class="mood-toggle-btn" style="background:#fff; color:var(--brown);">쌓인 마음 돌아보기</button>
         </div>
 
         <div id="mood-write-extras"></div>
@@ -1206,8 +1207,9 @@
     showToast('오늘의 기록이 저장되었어요');
   });
 
-  // --- 둘러보기: 기록하기/둘러보기 버튼이 쓰기 화면 ↔ 달력 화면을 전환하는 2단 스위치도 겸한다
-  // (지금 보고 있는 쪽 버튼이 진하게 채워진다). ---
+  // --- 둘러보기: "오늘 마음 기록하기"(쓰기 화면, 항상 채워짐)와 "쌓인 마음 돌아보기"
+  // (달력 화면, 항상 테두리)는 서로 역할이 분리된 별개의 버튼이다 — 토글 스위치처럼 눌린 쪽
+  // 스타일이 바뀌지 않고, 각자 늘 같은 모양을 유지한 채 해당 화면으로 보내주기만 한다. ---
   var moodBrowseBtn = document.getElementById('mood-browse-btn');
   var moodWriteView = document.getElementById('mood-write-view');
   var moodBrowseView = document.getElementById('mood-browse-view');
@@ -1220,11 +1222,6 @@
     moodWriteView.style.display = writing ? '' : 'none';
     moodBrowseView.style.display = writing ? 'none' : '';
     moodWriteExtras.style.display = writing ? '' : 'none';
-    // 지금 보고 있는 쪽 버튼만 브라운으로 채움 (테두리 두께는 양쪽 동일하게 유지해 크기가 안 튐)
-    diaryConfirmBtn.style.background = writing ? 'var(--brown)' : '#fff';
-    diaryConfirmBtn.style.color = writing ? '#fff' : 'var(--brown)';
-    moodBrowseBtn.style.background = writing ? '#fff' : 'var(--brown)';
-    moodBrowseBtn.style.color = writing ? 'var(--brown)' : '#fff';
     if (!writing) renderMoodCalendar();
     // 글쓰기 화면과 달력 화면은 높이가 많이 달라서, 전환 직후 이전 스크롤 위치를 그대로 두면
     // 새 높이 기준으로 스크롤이 어긋나 보이는(위아래로 튀는) 문제가 있었다 — 전환할 때마다
