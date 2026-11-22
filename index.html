@@ -45,6 +45,13 @@
   .mood-range::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:20px; height:20px; border-radius:50%; background:var(--pink); border:none; }
   .mood-range::-moz-range-thumb { width:20px; height:20px; border-radius:50%; background:var(--pink); border:none; }
   .mood-save-btn { width:100%; height:46px; border-radius:999px; border:none; background:var(--brown); color:#fff; font-family:'Noto Sans KR', sans-serif; font-size:13.5px; font-weight:700; cursor:pointer; }
+  /* 기록이 없는 날은 인사이트/미리보기 카드가 통째로 숨겨져 콘텐츠가 짧아진다 — 그래도 하단 버튼이
+     탭바에서 항상 같은 간격에 오도록, 시트(.mood-sheet-flex)를 flex 컨테이너로 만들어 이 뷰가
+     상단 sticky 영역을 뺀 "남은 공간"을 flex:1로 정확히 채우게 한다(min-height:100%는 상단 sticky
+     영역 높이를 못 빼고 전체 시트 높이만큼 요구해서 흘러넘쳤다). 뷰 안에서는 다시 flex-direction:
+     column + 맨 아래 flex 스페이서로 버튼을 뷰 맨 아래에 붙인다. */
+  .mood-sheet-flex { display:flex; flex-direction:column; }
+  .mood-view-flex { display:flex; flex-direction:column; flex:1 0 0; min-height:0; }
   .mood-tab-btn { flex:1; height:36px; border:none; border-radius:999px; background:transparent; color:var(--brown); font-family:'Noto Sans KR', sans-serif; font-size:12.5px; font-weight:700; cursor:pointer; transition:background .15s ease, color .15s ease; }
   .mood-tab-btn.active { background:var(--brown); color:#fff; }
   .mood-cal-arrow { border:none; background:transparent; color:var(--brown); padding:4px 8px; cursor:pointer; display:flex; align-items:center; }
@@ -447,7 +454,7 @@
         <div id="emotion-chips" style="display:flex; justify-content:center; gap:14px; margin-top:28px; padding:0 22px 30px;"></div>
       </div>
 
-      <div id="home-sheet" style="position:relative; z-index:2; background:#fff; border-radius:40px 40px 0 0; overflow-y:hidden; overflow-x:hidden; -webkit-overflow-scrolling:touch; -webkit-mask-image:-webkit-radial-gradient(circle, #fff 100%, #fff 100%); mask-image:radial-gradient(circle, #fff 100%, #fff 100%); padding:0 15px calc(28px + env(safe-area-inset-bottom)); text-align:center; color:var(--brown);">
+      <div id="home-sheet" class="mood-sheet-flex" style="position:relative; z-index:2; background:#fff; border-radius:40px 40px 0 0; overflow-y:hidden; overflow-x:hidden; -webkit-overflow-scrolling:touch; -webkit-mask-image:-webkit-radial-gradient(circle, #fff 100%, #fff 100%); mask-image:radial-gradient(circle, #fff 100%, #fff 100%); padding:0 15px calc(30px + env(safe-area-inset-bottom)); text-align:center; color:var(--brown);">
         <!-- 드래그 핸들 + 기록하기/둘러보기 탭은 시트 안쪽 스크롤과 같이 밀려 올라가면 안 되므로,
              시트 상단에 sticky로 고정하고 흰 배경을 깔아 뒤에서 스크롤되는 내용을 가린다. 모드
              전환을 시트 맨 아래 버튼에서 상단 탭으로 옮겨서, 스크롤을 끝까지 내리지 않아도 언제든
@@ -493,7 +500,7 @@
 
         <!-- 둘러보기 화면(시안 main.04~05): 그동안 쌓인 기록을 달력으로 돌아보는 화면. 글쓰기 화면과의
              전환은 위쪽 sticky 탭(기록하기/둘러보기)에서 담당한다. -->
-        <div id="mood-browse-view" style="display:none;">
+        <div id="mood-browse-view" class="mood-view-flex" style="display:none;">
           <div class="mood-eyebrow">MOOD NOTES</div>
           <div class="mood-title">쌓인 마음이 나를 알려줘요</div>
 
@@ -526,8 +533,13 @@
             </div>
           </div>
 
-          <!-- 상단 세그먼트 탭과 별개로, 달력을 쭉 보다가 바로 오늘 기록으로 넘어갈 수 있도록 -->
-          <button type="button" id="mood-write-cta" class="mood-save-btn" style="margin-top:28px;">오늘 마음 기록하기</button>
+          <!-- 상단 세그먼트 탭과 별개로, 달력을 쭉 보다가 바로 오늘 기록으로 넘어갈 수 있도록. 달력/인사이트/
+               미리보기 콘텐츠 길이가 날짜마다 달라지므로(기록이 없으면 인사이트·미리보기 카드가 통째로
+               숨겨진다), 아래 flex 스페이서가 남는 공간을 전부 흡수하게 해서(콘텐츠가 짧을 때만 늘어나고
+               콘텐츠가 길어 넘칠 땐 0으로 줄어든다) 버튼과 하단 탭바 사이 간격이 항상 30px로 일정하게
+               유지되면서도, 버튼 바로 위 28px 여백은 콘텐츠 길이와 무관하게 그대로 유지된다. -->
+          <div style="flex:1 0 0;"></div>
+          <button type="button" id="mood-write-cta" class="mood-save-btn" style="margin-top:28px;">기록 모아보기</button>
         </div>
 
         <div id="mood-write-extras"></div>
@@ -1037,6 +1049,9 @@
     // 같은 값으로 고정해 항상 cap만큼 채우게 하면, 콘텐츠가 짧은 쪽은 안에 여백이 남더라도
     // 바깥 스크롤 정지 지점(= 시트가 최종적으로 멈추는 높이)은 모드와 무관하게 항상 같아진다.
     sheet.style.minHeight = sheetCap;
+    // height까지 명시해야 시트(.mood-sheet-flex)의 flex 레이아웃이 "콘텐츠가 요구하는 만큼"이
+    // 아니라 이 cap 값 기준으로 자식(.mood-view-flex)에게 남는 공간을 정확히 분배한다.
+    sheet.style.height = sheetCap;
     var sheetH = sheet.offsetHeight;
     var gap = headerH + HOME_MODEL_UNSTICK_SAFETY;
     spacer.style.height = Math.max(0, viewportH - headerH - sheetH - gap) + 'px';
