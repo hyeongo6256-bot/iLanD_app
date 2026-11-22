@@ -1004,7 +1004,7 @@
   // 역효과였다 — 그래서 여기서는 model의 "자연 분리 지점"을 넘기 전에 스크롤 자체를 멈추는
   // 쪽으로 고쳤다. 이론상 여유는 headerH만큼이면 되는데, 실측해보니 레이아웃 측정 시점 차이로
   // 10~20px 정도 더 넘어가길래 넉넉하게 더 둔다.
-  var HOME_MODEL_UNSTICK_SAFETY = 56;
+  var HOME_MODEL_UNSTICK_SAFETY = 20;
   function adjustHomeScrollSpacer() {
     var homeTab = document.getElementById('tab-home');
     var header = document.getElementById('home-header');
