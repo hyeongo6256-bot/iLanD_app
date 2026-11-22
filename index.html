@@ -1022,7 +1022,14 @@
     // 들쭉날쭉해진다(아이폰 주소창이 접히고 펼쳐지는 정도에 따라 실측 viewportH가 달라져서).
     // 그래서 시트 자체를 "남은 화면 높이"로 한 번 더 제한해 안에서만 스크롤되게 하면, 바깥
     // 스크롤 정지 지점은 시트 길이와 무관하게 항상 일정해진다.
-    sheet.style.maxHeight = Math.max(0, viewportH - headerH - HOME_MODEL_UNSTICK_SAFETY) + 'px';
+    var sheetCap = Math.max(0, viewportH - headerH - HOME_MODEL_UNSTICK_SAFETY) + 'px';
+    sheet.style.maxHeight = sheetCap;
+    // 글쓰기/달력 화면은 실제 콘텐츠 길이가 서로 달라서, 짧은 쪽(예: 기록이 적어 달력 내용이
+    // 짧을 때)은 시트가 cap까지 안 채워지고 줄어들어 버린다 — 그러면 바깥 스크롤 정지 지점이
+    // 더 일찍 끝나버려서 시트가 덜 올라온 채로 멈춘다(모드마다 최종 위치가 달라짐). min-height도
+    // 같은 값으로 고정해 항상 cap만큼 채우게 하면, 콘텐츠가 짧은 쪽은 안에 여백이 남더라도
+    // 바깥 스크롤 정지 지점(= 시트가 최종적으로 멈추는 높이)은 모드와 무관하게 항상 같아진다.
+    sheet.style.minHeight = sheetCap;
     var sheetH = sheet.offsetHeight;
     var gap = headerH + HOME_MODEL_UNSTICK_SAFETY;
     spacer.style.height = Math.max(0, viewportH - headerH - sheetH - gap) + 'px';
@@ -1215,19 +1222,45 @@
   var moodBrowseView = document.getElementById('mood-browse-view');
   var moodWriteExtras = document.getElementById('mood-write-extras');
   var diaryConfirmBtn = document.getElementById('diary-confirm');
+  var homeSheetEl = document.getElementById('home-sheet');
+  var homeTabEl = document.getElementById('tab-home');
 
   function setMoodSheetMode(mode) {
+    if (mode === moodSheetMode) return;
     moodSheetMode = mode;
     var writing = mode === 'write';
-    moodWriteView.style.display = writing ? '' : 'none';
-    moodBrowseView.style.display = writing ? 'none' : '';
+    var showEl = writing ? moodWriteView : moodBrowseView;
+    var hideEl = writing ? moodBrowseView : moodWriteView;
     moodWriteExtras.style.display = writing ? '' : 'none';
     if (!writing) renderMoodCalendar();
-    // 글쓰기 화면과 달력 화면은 높이가 많이 달라서, 전환 직후 이전 스크롤 위치를 그대로 두면
-    // 새 높이 기준으로 스크롤이 어긋나 보이는(위아래로 튀는) 문제가 있었다 — 전환할 때마다
-    // 시트 맨 위로 스크롤을 맞추고 나서 spacer를 다시 계산한다.
-    document.getElementById('tab-home').scrollTop = 0;
-    requestAnimationFrame(adjustHomeScrollSpacer);
+
+    // 예전에는 전환할 때마다 홈 탭 전체를 맨 위(3D 모델이 보이는 지점)로 스크롤을 되돌렸는데,
+    // 시트가 모델을 덮은 자리에서 화면이 뒤로 튕기는 느낌이라 부자연스러웠다 — 이제는 시트
+    // 자체 위치는 그대로 두고, 안쪽 콘텐츠만 짧게 페이드 아웃 → 교체 → 페이드 인으로 바꾼다.
+    hideEl.style.transition = 'opacity .12s ease';
+    hideEl.style.opacity = '0';
+    setTimeout(function () {
+      hideEl.style.display = 'none';
+      hideEl.style.transition = '';
+      hideEl.style.opacity = '';
+      homeSheetEl.scrollTop = 0;
+      showEl.style.opacity = '0';
+      showEl.style.display = '';
+      requestAnimationFrame(function () {
+        // 글쓰기/달력 화면은 실제 콘텐츠 높이가 달라서, spacer 재계산 후 그대로 두면 문서
+        // 전체 높이가 바뀌어 지금 scrollTop이 더 이상 "끝까지 스크롤된" 위치가 아니게
+        // 되면서 시트가 아래로 가라앉아 보인다 — 이 버튼은 시트 맨 아래에서만 눌리므로
+        // (바깥 스크롤이 이미 최대인 상태에서만 닿을 수 있다) 재계산 직후 다시 최대로 맞춘다.
+        adjustHomeScrollSpacer();
+        homeTabEl.scrollTop = homeTabEl.scrollHeight - homeTabEl.clientHeight;
+        showEl.style.transition = 'opacity .12s ease';
+        showEl.style.opacity = '1';
+        setTimeout(function () {
+          showEl.style.transition = '';
+          showEl.style.opacity = '';
+        }, 130);
+      });
+    }, 120);
   }
 
   moodBrowseBtn.addEventListener('click', function (e) {
