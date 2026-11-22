@@ -525,6 +525,9 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M9 5l7 7-7 7"></path></svg>
             </div>
           </div>
+
+          <!-- 상단 세그먼트 탭과 별개로, 달력을 쭉 보다가 바로 오늘 기록으로 넘어갈 수 있도록 -->
+          <button type="button" id="mood-write-cta" class="mood-save-btn" style="margin-top:28px;">오늘 마음 기록하기</button>
         </div>
 
         <div id="mood-write-extras"></div>
@@ -1215,6 +1218,7 @@
     saveProfile(profile);
     diaryInput.blur();
     showToast('오늘의 기록이 저장되었어요');
+    setMoodSheetMode('browse');
   });
 
   // --- 기록하기/둘러보기 전환: 시트 맨 아래 버튼 대신, 상단 sticky 탭(세그먼트 컨트롤)에서
@@ -1268,6 +1272,10 @@
   moodTabBrowseBtn.addEventListener('click', function (e) {
     e.stopPropagation();
     setMoodSheetMode('browse');
+  });
+  document.getElementById('mood-write-cta').addEventListener('click', function (e) {
+    e.stopPropagation();
+    setMoodSheetMode('write');
   });
 
   // --- 둘러보기 달력 ---
