@@ -16,6 +16,36 @@
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Petit+Formal+Script&family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;500;600;700&family=Baloo+2:wght@600;700;800&display=swap">
 <style>
+  /* 섬 이름 로고용 — Adobe Fonts로 라이선스 구매(활성화)한 폰트. 한글 짝꿍 서체(Blazeface Hangeul)는
+     Ohno Blazeface의 이탤릭 컷에 맞춰 디자인되어 있어(한글 자체가 항상 기울어진 형태), 영문 쪽도
+     이탤릭(18 Point Italic)을 같이 쓴다 — 로만을 섞으면 한글/영문 스타일이 어긋난다. */
+  @font-face {
+    font-family: 'Blazeface Hangeul 18pt';
+    src: url('assets/fonts/BlazefaceHangeul-18Point.otf') format('opentype');
+  }
+  @font-face {
+    font-family: 'Ohno Blazeface 18pt Italic';
+    src: url('assets/fonts/OhnoBlazeface-18PointItalic.otf') format('opentype');
+  }
+  /* 디자인 토큰 — CLAUDE.md "Design rules" 참고. 새 스타일은 HEX 대신 이 변수를 쓴다. */
+  :root {
+    --pink: #f4aec1;                     /* 메인 핑크 */
+    --pink-soft: rgba(244,174,193,.6);   /* 흰 배경 위 연핑크 카드 */
+    --brown: #663b2c;
+    --brown-50: rgba(102,59,44,.5);      /* placeholder, 슬라이더 남은 구간, 잠금 안내 */
+    --brown-35: rgba(102,59,44,.35);     /* 비활성 감정 칩 */
+    --weather-dot: #ffcc01;
+  }
+  .mood-eyebrow { font-family:'Playfair Display', serif; font-style:italic; font-weight:600; font-size:13.5px; color:var(--brown); }
+  .mood-title { font-size:23px; font-weight:700; margin-top:14px; color:var(--brown); letter-spacing:-.01em; }
+  .mood-caption { font-size:12.5px; font-weight:500; color:var(--brown); }
+  #diary-line::placeholder { color:var(--brown-50); }
+  .mood-range { -webkit-appearance:none; appearance:none; flex:1; min-width:0; height:5px; margin:0; border-radius:999px; outline:none; cursor:pointer;
+    background:linear-gradient(to right, var(--pink) 0, var(--pink) var(--fill,50%), var(--brown-50) var(--fill,50%), var(--brown-50) 100%); }
+  .mood-range::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:20px; height:20px; border-radius:50%; background:var(--pink); border:none; }
+  .mood-range::-moz-range-thumb { width:20px; height:20px; border-radius:50%; background:var(--pink); border:none; }
+  .mood-toggle-btn { flex:none; width:100px; height:32px; border-radius:999px; border:1.5px solid var(--brown); background:#fff; color:var(--brown); font-family:'Noto Sans KR', sans-serif; font-size:12.5px; font-weight:700; cursor:pointer; }
+  .mood-cal-arrow { border:none; background:transparent; color:var(--brown); padding:4px 8px; cursor:pointer; display:flex; align-items:center; }
   * { box-sizing: border-box; }
   html, body {
     margin: 0;
@@ -244,45 +274,11 @@
   }
   .onb-cta:disabled { opacity: .35; cursor: default; }
 
-  @property --notch-x {
-    syntax: '<percentage>';
-    inherits: true;
-    initial-value: 12.5%;
-  }
   .tab-bar {
-    --notch-x: 12.5%;
     position: relative;
     z-index: 10;
     flex: none;
     display: flex;
-    background: transparent;
-  }
-  .tab-bar::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: #e8aab7;
-    -webkit-mask-image: radial-gradient(circle 36px at var(--notch-x) 7px, transparent 35px, #000 36px);
-    mask-image: radial-gradient(circle 36px at var(--notch-x) 7px, transparent 35px, #000 36px);
-    transition: --notch-x .55s cubic-bezier(.34, 1.45, .5, 1);
-  }
-  .tab-bubble {
-    position: absolute;
-    top: -30px;
-    left: 0;
-    width: 25%;
-    height: 74px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-    transition: transform .55s cubic-bezier(.34, 1.45, .5, 1);
-  }
-  .tab-bubble::before {
-    content: '';
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
     background: #f5bacb;
   }
   .tab-btn {
@@ -295,32 +291,17 @@
     background: transparent;
     color: #fff;
     cursor: pointer;
+    transition: color .2s;
   }
+  .tab-btn.active { color: var(--brown); }
   .tab-icon {
-    --lift: 0px;
     width: 28px;
     height: 28px;
-    opacity: .85;
-    transform: translateY(var(--lift));
-    transition: transform .55s cubic-bezier(.34, 1.45, .5, 1), opacity .3s;
-  }
-  .tab-icon * { stroke: currentColor; stroke-width: 3; stroke-linejoin: round; }
-  .tab-btn[data-tab="home"] .tab-icon,
-  .tab-btn[data-tab="explore"] .tab-icon,
-  .tab-btn[data-tab="chat"] .tab-icon { width: 31px; height: 31px; }
-  .tab-btn.active .tab-icon {
-    --lift: calc(7px - 17.5px - env(safe-area-inset-bottom) / 2);
-    opacity: 1;
-  }
-  .tab-btn:active .tab-icon {
-    transform: translateY(var(--lift)) scale(.82);
-    transition-duration: .08s;
-  }
-  .tab-icon.pop { animation: tabPop .45s cubic-bezier(.34, 1.45, .5, 1); }
-  @keyframes tabPop {
-    0%   { transform: translateY(var(--lift)) scale(1); }
-    35%  { transform: translateY(calc(var(--lift) - 4px)) scale(1.18); }
-    100% { transform: translateY(var(--lift)) scale(1); }
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   .deed-row {
@@ -435,95 +416,106 @@
   <!-- Step 4 — main page (my island / explore / community tabs) -->
   <div class="screen" data-step="4" style="background:#f5bacb; padding:0;">
 
-    <div id="tab-home" class="tab-panel" style="flex:1; min-height:0; overflow-y:auto; overscroll-behavior-y:none; padding:0; color:#2b2622;">
+    <div id="tab-home" class="tab-panel" style="flex:1; min-height:0; overflow-y:auto; overscroll-behavior-y:contain; padding:0; color:#2b2622;">
       <div id="home-header" style="position:sticky; top:0; z-index:3; background:#f5bacb; padding:calc(20px + env(safe-area-inset-top)) 0 14px;">
         <!-- 레이아웃: 왼쪽 "소유주의 섬"(작게) / 가운데 섬 이름(섬 주인이 지은 "섬 로고"처럼 큼직한 디스플레이 서체) / 오른쪽 등기부증서 버튼.
-             "Ohno Blazeface 24 Point"는 라이선스 폰트라 구할 수 없어 비슷한 톤의 굵고 둥근 무료 서체(Baloo 2)로 대체 — 나중에 실제 폰트 파일이 생기면 font-family만 바꾸면 됨. -->
-        <div style="padding:0 18px; display:flex; align-items:flex-start; justify-content:space-between; gap:8px;">
+             섬 이름은 한글이라 Blazeface Hangeul을 먼저 쓰고, 영문/숫자는 Ohno Blazeface 18pt Italic으로 폴백. -->
+        <!-- 시안(main.01): 왼쪽 "OOO의 섬" + 날씨(노란 점 + 상태) / 가운데 섬 이름 로고 / 오른쪽 작은 등기부증서 버튼. -->
+        <div style="padding:0 22px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
           <div style="flex:1; min-width:0;">
-            <div id="profile-owner" style="font-family:'Playfair Display', serif; font-style:italic; font-size:11px; letter-spacing:.1em; color:#9c6a60; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">이름 없는 소유주의 섬</div>
+            <div id="profile-owner" style="font-size:12.5px; color:var(--brown); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">이름 없는 소유주의 섬</div>
+            <div id="home-weather" style="display:none; align-items:center; gap:7px; margin-top:6px;">
+              <span style="flex:none; width:10px; height:10px; border-radius:50%; background:var(--weather-dot);"></span>
+              <span id="home-weather-text" style="font-size:13.5px; color:var(--brown); white-space:nowrap;"></span>
+            </div>
           </div>
-          <div id="profile-islandname" style="flex:none; font-family:'Baloo 2', sans-serif; font-weight:800; font-size:25px; line-height:1; color:#663b2c; max-width:46%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">나의 섬</div>
+          <div id="profile-islandname" style="flex:none; font-family:'Blazeface Hangeul 18pt', 'Ohno Blazeface 18pt Italic', sans-serif; font-weight:400; font-size:25px; line-height:1; color:var(--brown); max-width:44%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">나의 섬</div>
           <div style="flex:1; display:flex; justify-content:flex-end;">
-            <button id="deed-btn" style="flex:none; border:1px solid #663b2c; background:transparent; color:#663b2c; font-size:11.5px; letter-spacing:.03em; padding:9px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;">등기부증서</button>
+            <button id="deed-btn" style="flex:none; border:1px solid var(--brown); background:transparent; color:var(--brown); font-size:10.5px; padding:5px 10px; border-radius:999px; cursor:pointer; white-space:nowrap;">등기부증서</button>
           </div>
         </div>
       </div>
 
       <div id="home-model" style="position:sticky; top:0; z-index:1; background:#f5bacb;">
-        <div style="padding:0 22px; position:relative; height:340px; overflow:hidden; transform:translateZ(0); -webkit-transform:translateZ(0);">
+        <div style="padding:0 22px; position:relative; height:clamp(300px, calc(100dvh - 380px), 480px); overflow:hidden; transform:translateZ(0); -webkit-transform:translateZ(0);">
           <canvas id="island-canvas" style="display:block; width:100%; height:100%; touch-action:none; cursor:grab; transform:translateZ(0); -webkit-transform:translateZ(0); backface-visibility:hidden; -webkit-backface-visibility:hidden; will-change:transform;"></canvas>
         </div>
-        <div style="text-align:center; font-size:10.5px; letter-spacing:.06em; color:#9c6a60; margin-top:8px;">드래그해서 섬을 360&deg;로 돌려보세요</div>
+        <div style="text-align:center; font-size:10.5px; color:var(--brown); margin-top:8px;">드래그 해서 섬을 360&deg; 로 돌려보세요</div>
 
-        <div id="emotion-chips" style="display:flex; justify-content:center; gap:8px; margin-top:18px; padding:0 22px 18px;"></div>
+        <div id="emotion-chips" style="display:flex; justify-content:center; gap:14px; margin-top:28px; padding:0 22px 30px;"></div>
       </div>
 
-      <div id="home-sheet" style="position:relative; z-index:2; background:#fff; border-radius:28px 28px 0 0; overflow:hidden; -webkit-mask-image:-webkit-radial-gradient(circle, #fff 100%, #fff 100%); mask-image:radial-gradient(circle, #fff 100%, #fff 100%); padding:20px 22px calc(28px + env(safe-area-inset-bottom));">
-        <div style="width:36px; height:4px; border-radius:999px; background:rgba(43,38,34,.14); margin:0 auto 18px;"></div>
+      <div id="home-sheet" style="position:relative; z-index:2; background:#fff; border-radius:40px 40px 0 0; overflow:hidden; -webkit-mask-image:-webkit-radial-gradient(circle, #fff 100%, #fff 100%); mask-image:radial-gradient(circle, #fff 100%, #fff 100%); padding:16px 15px calc(28px + env(safe-area-inset-bottom)); text-align:center; color:var(--brown);">
+        <div style="width:50px; height:8px; border-radius:999px; background:#efefef; margin:0 auto 26px;"></div>
 
-        <!-- 쓰기 화면: 오늘의 기분을 적는 화면. 섬 아래 떠 있는 Breeze/Cherish/Lonley 칩(공개, 다른 사람도 보는 지금의 분위기)과
+        <!-- 쓰기 화면(시안 main.02~03): 오늘의 기분을 적는 화면. 섬 아래 떠 있는 Breeze/Cherish/Lonley 칩(공개)과
              달리, 여기 6칸 그리드+강도 슬라이더는 그날의 기록에만 비공개로 저장된다 — "이 감정은 나에게만 보여요". -->
         <div id="mood-write-view">
-          <div style="font-family:'Playfair Display', serif; font-style:italic; font-weight:700; font-size:11px; letter-spacing:.14em; color:#663b2c;">TODAY'S MOOD</div>
-          <div style="font-size:19px; font-weight:700; margin-top:8px; color:#2b2622;">오늘, 당신의 마음은 어떤가요?</div>
+          <div class="mood-eyebrow">TODAY'S MOOD</div>
+          <div class="mood-title">오늘, 당신의 마음은 어떤가요?</div>
 
-          <div style="margin-top:16px;">
-            <input id="diary-line" type="text" maxlength="60" placeholder="예: 조금 피곤하지만, 기분은 괜찮아요." style="width:100%; height:48px; border:1.5px solid #663b2c; border-radius:999px; background:transparent; outline:none; padding:0 16px; font-family:'Noto Sans KR', sans-serif; font-size:16px; color:#2b2622;">
+          <div style="margin-top:28px; padding:0 18px;">
+            <!-- font-size 16px 유지: 16px 미만이면 iOS가 포커스 시 화면을 확대한다 -->
+            <input id="diary-line" type="text" maxlength="60" placeholder="예: 조금 피곤하지만, 기분은 괜찮아요." style="width:100%; height:44px; border:2px solid var(--brown); border-radius:999px; background:transparent; outline:none; padding:0 16px; font-family:'Noto Sans KR', sans-serif; font-size:16px; color:var(--brown);">
           </div>
-          <div style="font-size:12.5px; color:#8a8074; margin-top:10px; text-align:center;">어떤 감정이든 괜찮아요.</div>
+          <div class="mood-caption" style="margin-top:28px;">어떤 감정이든 괜찮아요.</div>
 
-          <div id="mood-emotion-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:16px;"></div>
+          <div id="mood-emotion-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:20px 18px; margin-top:14px;"></div>
 
-          <div style="margin-top:24px; text-align:center;">
-            <div style="font-size:12.5px; color:#8a8074;">오늘의 마음이 얼마나 느껴지시나요?</div>
-            <div style="display:flex; align-items:center; gap:10px; margin-top:12px;">
-              <span style="flex:none; font-size:11px; color:#a39a8d;">은은하게</span>
-              <input id="mood-intensity" type="range" min="0" max="100" value="50" style="flex:1; accent-color:#663b2c;">
-              <span style="flex:none; font-size:11px; color:#a39a8d;">아주깊게</span>
+          <div style="margin-top:32px;">
+            <div class="mood-caption">오늘의 마음이 얼마나 느껴지시나요?</div>
+            <div style="display:flex; align-items:center; gap:16px; margin-top:22px; padding:0 12px;">
+              <span class="mood-caption" style="flex:none;">은은하게</span>
+              <input id="mood-intensity" class="mood-range" type="range" min="0" max="100" value="50">
+              <span class="mood-caption" style="flex:none;">아주깊게</span>
             </div>
           </div>
 
-          <div style="display:flex; align-items:center; justify-content:center; gap:5px; margin-top:18px; color:#a39a8d; font-size:11px;">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:none;"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px; margin-top:24px; color:var(--brown-50); font-size:10.5px;">
+            <svg width="12" height="13" viewBox="0 0 24 26" fill="currentColor" style="flex:none;"><path d="M7 9V7a5 5 0 0 1 10 0v2h1a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V12a3 3 0 0 1 3-3h1zm3 0h4V7a2 2 0 0 0-4 0v2z"></path></svg>
             <span>이 감정은 나에게만 보여요</span>
           </div>
         </div>
 
-        <!-- 둘러보기 화면: 그동안 쌓인 기록을 달력으로 돌아보는 화면. 기록하기/둘러보기 버튼이 이 둘 사이를
+        <!-- 둘러보기 화면(시안 main.04~05): 그동안 쌓인 기록을 달력으로 돌아보는 화면. 기록하기/둘러보기 버튼이 이 둘 사이를
              전환하는 2단 스위치 역할도 겸한다(눌린 쪽이 진하게 채워짐). -->
         <div id="mood-browse-view" style="display:none;">
-          <div style="font-family:'Playfair Display', serif; font-style:italic; font-weight:700; font-size:11px; letter-spacing:.14em; color:#663b2c;">MOOD NOTES</div>
-          <div style="font-size:19px; font-weight:700; margin-top:8px; color:#2b2622;">쌓인 마음이 나를 알려줘요</div>
+          <div class="mood-eyebrow">MOOD NOTES</div>
+          <div class="mood-title">쌓인 마음이 나를 알려줘요</div>
 
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-top:20px;">
-            <button type="button" id="mood-cal-prev" aria-label="이전 달" style="border:none; background:transparent; color:#663b2c; font-size:16px; padding:4px 10px; cursor:pointer;">&lsaquo;</button>
-            <div id="mood-cal-label" style="font-family:'Playfair Display', serif; font-weight:600; font-style:italic; font-size:15px; color:#2b2622;"></div>
-            <button type="button" id="mood-cal-next" aria-label="다음 달" style="border:none; background:transparent; color:#663b2c; font-size:16px; padding:4px 10px; cursor:pointer;">&rsaquo;</button>
+          <div id="mood-cal-card" style="margin-top:28px; background:var(--pink); border-radius:24px; padding:18px 10px 16px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:0 6px;">
+              <button type="button" id="mood-cal-prev" class="mood-cal-arrow" aria-label="이전 달"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button>
+              <div id="mood-cal-label" style="font-family:'Playfair Display', serif; font-weight:700; font-style:italic; font-size:19px; color:var(--brown);"></div>
+              <button type="button" id="mood-cal-next" class="mood-cal-arrow" aria-label="다음 달"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg></button>
+            </div>
+            <div id="mood-cal-weekdays" style="display:grid; grid-template-columns:repeat(7, 1fr); margin-top:16px; font-family:'Playfair Display', serif; font-style:italic; font-weight:600; font-size:11px; color:var(--brown);"></div>
+            <div id="mood-cal-grid" style="display:grid; grid-template-columns:repeat(7, 1fr); justify-items:center; row-gap:8px; margin-top:16px;"></div>
+            <div id="mood-cal-count" style="text-align:right; font-size:10.5px; color:var(--brown); margin-top:12px; padding-right:12px;"></div>
           </div>
 
-          <div id="mood-cal-weekdays" style="display:grid; grid-template-columns:repeat(7, 1fr); margin-top:14px; text-align:center; font-size:10.5px; color:#a39a8d; letter-spacing:.04em;"></div>
-          <div id="mood-cal-grid" style="display:grid; grid-template-columns:repeat(7, 1fr); row-gap:8px; margin-top:6px;"></div>
-          <div id="mood-cal-count" style="text-align:right; font-size:10.5px; color:#a39a8d; margin-top:8px;"></div>
-
-          <div id="mood-insight-card" style="margin-top:18px; background:#fbe9ee; border-radius:16px; padding:16px; text-align:center; display:none;">
-            <div style="font-size:11px; color:#9c6a60;">이번달의 작은 발견</div>
-            <div id="mood-insight-main" style="font-size:14px; font-weight:700; color:#2b2622; margin-top:6px; line-height:1.5;"></div>
-            <div id="mood-insight-sub" style="font-size:11.5px; color:#8a8074; margin-top:4px;"></div>
+          <div id="mood-insight-card" style="margin-top:16px; background:var(--pink-soft); border-radius:24px; padding:18px 16px; display:none;">
+            <div style="font-size:11px;">이번달의 작은 발견</div>
+            <div id="mood-insight-main" style="font-size:17px; font-weight:700; margin-top:6px; line-height:1.4; letter-spacing:-.01em;"></div>
+            <div id="mood-insight-sub" style="font-size:12.5px; margin-top:6px;"></div>
           </div>
 
-          <div id="mood-entry-preview" style="margin-top:18px; display:none;">
-            <div id="mood-entry-preview-date" style="font-size:11.5px; color:#8a8074; text-align:center;"></div>
-            <div style="margin-top:10px; border:1px solid rgba(43,38,34,.12); border-radius:14px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
-              <div id="mood-entry-preview-text" style="font-size:13.5px; color:#2b2622; line-height:1.5; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;"></div>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a39a8d" stroke-width="2.5" style="flex:none;"><path d="M9 6l6 6-6 6"></path></svg>
+          <div id="mood-entry-preview" style="margin-top:28px; display:none;">
+            <div id="mood-entry-preview-date" style="font-size:12.5px;"></div>
+            <div style="margin-top:10px; background:var(--pink-soft); border-radius:24px; padding:20px 18px 20px 22px; display:flex; align-items:center; gap:14px; text-align:left;">
+              <div style="flex:1; min-width:0;">
+                <!-- 제목 필드는 아직 데이터에 없음 — entry.title이 생기면 표시된다 -->
+                <div id="mood-entry-preview-title" style="display:none; font-size:13.5px; font-weight:700; margin-bottom:8px;"></div>
+                <div id="mood-entry-preview-text" style="font-size:12.5px; line-height:1.6; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;"></div>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M9 5l7 7-7 7"></path></svg>
             </div>
           </div>
         </div>
 
-        <div style="display:flex; gap:10px; margin-top:20px;">
-          <button type="button" id="diary-confirm" style="flex:1; height:48px; border:none; border-radius:999px; background:#663b2c; color:#fff; font-size:13px; font-weight:700; cursor:pointer;">기록하기</button>
-          <button type="button" id="mood-browse-btn" style="flex:1; height:48px; border:1px solid #663b2c; border-radius:999px; background:transparent; color:#663b2c; font-size:13px; font-weight:700; cursor:pointer;">둘러보기</button>
+        <div style="display:flex; justify-content:space-between; margin-top:36px; padding:0 21px;">
+          <button type="button" id="diary-confirm" class="mood-toggle-btn" style="background:var(--brown); color:#fff;">기록하기</button>
+          <button type="button" id="mood-browse-btn" class="mood-toggle-btn">둘러보기</button>
         </div>
 
         <div id="mood-write-extras"></div>
@@ -624,18 +616,11 @@
 
     <div id="tab-menu" class="tab-panel" style="display:none; flex:1; min-height:0; align-items:center; justify-content:center; background:#1d1714; color:rgba(243,237,228,.5); font-size:13px;">준비 중이에요</div>
 
-    <!-- Real "layer 2" (white, R-value sheet) backdrop behind the tab bar — only exists while the
-         home tab is showing, so the bar's cutout is genuinely transparent: it reveals this white
-         layer on home, and the real (dark) screen background on every other tab, with no color
-         hardcoded onto the bar itself. -->
-    <div id="tabbar-white-backdrop" style="display:none; position:absolute; left:0; right:0; bottom:0; height:calc(35px + env(safe-area-inset-bottom)); background:#fff; z-index:1; pointer-events:none;"></div>
-
     <div id="tab-bar" class="tab-bar">
-      <div id="tab-bubble" class="tab-bubble"></div>
-      <button class="tab-btn active" data-tab="home" aria-label="나의 섬"><svg class="tab-icon" viewBox="-0.375 -0.175 10.725 10.775" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" style="stroke:none" d="M8.3,10.2h-2.1c-.2,0-.4-.2-.4-.4v-3h-1.3v3c0,.2-.2.4-.4.4H1.6c-.2,0-.4-.2-.4-.4v-5.3l-.6.6c-.2.1-.4.1-.5,0-.1-.2-.1-.4,0-.5L4.7.3c.1-.1.4-.1.5,0l4.6,4.2c.2.1.2.4,0,.5-.1.2-.4.2-.5,0l-.6-.6v5.3c0,.2-.2.4-.4.4ZM6.6,9.4h1.3V3.9s0,0,0-.1l-3-2.7-3,2.7s0,0,0,.1v5.5h1.7v-3c0-.2.2-.4.4-.4h2.1c.2,0,.4.2.4.4v3Z"></path></svg></button>
-      <button class="tab-btn" data-tab="explore" aria-label="둘러보기"><svg class="tab-icon" viewBox="34.3 -0.4 11.0 11.2" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" style="stroke:none" d="M41.5,10.4c0,0-.1,0-.2,0l-3.2-1.6-2.8,1.2c-.1,0-.3,0-.4,0-.1,0-.2-.2-.2-.3V1.6c0-.2,0-.3.2-.4L38,0c.1,0,.2,0,.3,0l3.2,1.6,2.8-1.2c.1,0,.3,0,.4,0,.1,0,.2.2.2.3v8c0,.2,0,.3-.2.4l-2.9,1.3s-.1,0-.2,0ZM41.9,2.3v7.1l2.2-.9V1.4l-2.2.9ZM38.5,8.1l2.6,1.3V2.3l-2.6-1.3v7.1ZM35.6,1.9v7.1l2.2-.9V1l-2.2.9Z"></path></svg></button>
-      <button class="tab-btn" data-tab="chat" aria-label="커뮤니티"><svg class="tab-icon" viewBox="67.3 -0.3 12.6 11.0" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" style="stroke:none" d="M70.1,10.3c0,0-.1,0-.2,0-.1,0-.2-.2-.2-.4v-1.7c-1.2-.9-2-2.1-2-3.5,0-2.5,2.7-4.6,5.9-4.6s5.9,2,5.9,4.6-2.7,4.6-5.9,4.6-1.2,0-1.7-.2l-1.6,1.2c0,0-.2,0-.2,0ZM73.6.9c-2.8,0-5.2,1.7-5.2,3.8s.7,2.2,2,3c.1,0,.2.2.2.4v1.1c0,0,.9-.8.9-.8,0,0,.2,0,.3,0,.6.1,1.1.2,1.7.2,2.8,0,5.2-1.7,5.2-3.8s-2.3-3.8-5.2-3.8Z"></path><circle cx="70.9" cy="4.5" r=".6" style="stroke:none"></circle><circle cx="73.8" cy="4.5" r=".6" style="stroke:none"></circle><circle cx="76.6" cy="4.5" r=".6" style="stroke:none"></circle></svg></button>
-      <button class="tab-btn" data-tab="menu" aria-label="메뉴"><svg class="tab-icon" viewBox="102.1 1.0 10.7 8.4" fill="currentColor" aria-hidden="true"><path style="stroke:none" d="M112,2.2h-9.1c-.2,0-.4-.2-.4-.4s.2-.4.4-.4h9.1c.2,0,.4.2.4.4s-.2.4-.4.4Z"></path><path style="stroke:none" d="M112,5.6h-9.1c-.2,0-.4-.2-.4-.4s.2-.4.4-.4h9.1c.2,0,.4.2.4.4s-.2.4-.4.4Z"></path><path style="stroke:none" d="M112,9h-9.1c-.2,0-.4-.2-.4-.4s.2-.4.4-.4h9.1c.2,0,.4.2.4.4s-.2.4-.4.4Z"></path></svg></button>
+      <button class="tab-btn active" data-tab="home" aria-label="나의 섬"><svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5L12 4l9 7.5"></path><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"></path></svg></button>
+      <button class="tab-btn" data-tab="explore" aria-label="둘러보기"><svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"></path><path d="M9 4v14"></path><path d="M15 6v14"></path></svg></button>
+      <button class="tab-btn" data-tab="chat" aria-label="커뮤니티"><svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path><circle cx="8.5" cy="12" r=".9" fill="currentColor" stroke="none"></circle><circle cx="12" cy="12" r=".9" fill="currentColor" stroke="none"></circle><circle cx="15.5" cy="12" r=".9" fill="currentColor" stroke="none"></circle></svg></button>
+      <button class="tab-btn" data-tab="menu" aria-label="메뉴"><svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path></svg></button>
     </div>
   </div>
 
@@ -720,6 +705,7 @@
     window.visualViewport.addEventListener('scroll', syncFrameToViewport);
   }
 
+  window.__TEST_goTo = function (n) { goTo(n); };
   function goTo(n) {
     var prevStep = step;
     step = Math.max(0, Math.min(TOTAL_STEPS, n));
@@ -971,20 +957,13 @@
   var tabDisplay = { home: 'block', explore: 'flex', chat: 'flex', menu: 'flex' };
   var tabOrder = ['home', 'explore', 'chat', 'menu'];
   var tabBg = { home: '#f5bacb', explore: '#78abbe', chat: '#ffffff', menu: '#1d1714' };
-  var tabBubble = document.getElementById('tab-bubble');
   var tabBtns = Array.prototype.slice.call(document.querySelectorAll('.tab-btn'));
 
   function showTab(target) {
     tabBtns.forEach(function (b) {
       b.classList.toggle('active', b.dataset.tab === target);
     });
-    tabBubble.style.transform = 'translateX(' + (tabOrder.indexOf(target) * 100) + '%)';
-    document.querySelector('.tab-bar').style.setProperty('--notch-x', (tabOrder.indexOf(target) * 25 + 12.5) + '%');
     document.querySelector('.screen[data-step="4"]').style.background = tabBg[target];
-    // The tab-bar itself is never colored — its cutout is genuinely transparent. Only home has
-    // a real white "layer 2" in its composition, so only home mounts the backdrop behind the
-    // bar; every other tab leaves the cutout showing their own (dark) screen straight through.
-    document.getElementById('tabbar-white-backdrop').style.display = (target === 'home') ? 'block' : 'none';
     Object.keys(tabPanels).forEach(function (key) {
       tabPanels[key].style.display = key === target ? tabDisplay[key] : 'none';
     });
@@ -1005,7 +984,16 @@
 
   // 홈 탭 스크롤 범위를 "흰 바텀시트가 섬 모델을 다 덮는 지점"에서 딱 멈추도록 보정.
   // 상단 헤더(섬이름/등기부증서)는 별도 sticky 레이어라 계속 보이고, 모델 블록만 덮인다.
-  var HOME_SHEET_MIN_GAP = 28;
+  //
+  // 진짜 원인: model은 position:sticky; top:headerH라서 "자기 자신의 박스 높이"를 넘어서는
+  // 못 붙어있는다 — model 높이(modelH)만큼 스크롤되면(scrollY ≈ modelH - headerH) 그 순간부터
+  // 그냥 같이 밀려 올라가버린다. 그 지점을 지나서까지 스크롤을 허용하면 시트 모서리 노치 뒤에
+  // 더 이상 분홍이 없어서 라운드가 깎여 보인다. model 자체를 더 늘리는 시도(padding-bottom +
+  // 음수 margin-bottom)는 전체 스크롤 가능 높이까지 같이 늘려버려서 오히려 더 많이 넘어가는
+  // 역효과였다 — 그래서 여기서는 model의 "자연 분리 지점"을 넘기 전에 스크롤 자체를 멈추는
+  // 쪽으로 고쳤다. 이론상 여유는 headerH만큼이면 되는데, 실측해보니 레이아웃 측정 시점 차이로
+  // 10~20px 정도 더 넘어가길래 넉넉하게 더 둔다.
+  var HOME_MODEL_UNSTICK_SAFETY = 56;
   function adjustHomeScrollSpacer() {
     var homeTab = document.getElementById('tab-home');
     var header = document.getElementById('home-header');
@@ -1018,19 +1006,14 @@
     var headerH = header.offsetHeight;
     var sheetH = sheet.offsetHeight;
     var viewportH = homeTab.clientHeight;
-    // 흰 시트가 헤더에 딱 붙는 지점까지 스크롤되면 둥근 윗모서리가 거의 안 보이게 됐다 —
-    // 최대로 스크롤해도 헤더 아래 핑크 여백이 항상 조금은 남도록 여유를 둔다.
-    spacer.style.height = Math.max(0, viewportH - headerH - sheetH - HOME_SHEET_MIN_GAP) + 'px';
+    var gap = headerH + HOME_MODEL_UNSTICK_SAFETY;
+    spacer.style.height = Math.max(0, viewportH - headerH - sheetH - gap) + 'px';
   }
   window.addEventListener('resize', adjustHomeScrollSpacer);
 
   tabBtns.forEach(function (btn) {
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
-      var icon = btn.querySelector('.tab-icon');
-      icon.classList.remove('pop');
-      void icon.offsetWidth;
-      icon.classList.add('pop');
       showTab(btn.dataset.tab);
     });
   });
@@ -1060,7 +1043,7 @@
     chip.type = 'button';
     chip.textContent = label;
     chip.dataset.emotion = label;
-    chip.style.cssText = 'font-size:12.5px; letter-spacing:.02em; padding:8px 16px; border-radius:999px; border:1px solid #bf898c; background:transparent; color:#bf898c; cursor:pointer;';
+    chip.style.cssText = 'font-size:10.5px; font-weight:500; padding:4px 11px; border-radius:999px; border:1px solid var(--brown-35); background:transparent; color:var(--brown-35); cursor:pointer;';
     chip.addEventListener('click', function () {
       var profile = getProfile();
       profile.emotion = label;
@@ -1084,7 +1067,7 @@
   }
 
   // 시안: 선택된 박스는 핑크로 채워짐 — 감정별로 색을 따로 쓰지 않고 이 한 가지 색만 쓴다.
-  var MOOD_ACTIVE_COLOR = '#f4aec1';
+  var MOOD_ACTIVE_COLOR = 'var(--pink)';
   var MOOD_GRID_SIZE = 6;
   // 섬 아래 뜬 공개 칩(Breeze/Cherish/Lonley, profile.emotion)과 별개로 그날의 기록에만 비공개로
   // 붙는 감정/강도 — "이 감정은 나에게만 보여요".
@@ -1099,16 +1082,18 @@
     document.getElementById('profile-islandname').textContent = profile.islandName || '나의 섬';
     Array.prototype.forEach.call(emotionChipsEl.children, function (chip) {
       var active = chip.dataset.emotion === profile.emotion;
-      chip.style.borderColor = active ? '#663b2c' : '#bf898c';
-      chip.style.color = active ? '#fff' : '#bf898c';
-      chip.style.background = active ? '#663b2c' : 'transparent';
+      chip.style.borderColor = active ? 'var(--brown)' : 'var(--brown-35)';
+      chip.style.color = active ? '#fff' : 'var(--brown-35)';
+      chip.style.background = active ? 'var(--brown)' : 'transparent';
     });
     var todayEntry = findDiaryEntry(profile, todayDateKey());
     diaryInput.value = todayEntry ? todayEntry.text : '';
     draftEmotion = todayEntry ? (todayEntry.emotion || null) : null;
     draftIntensity = (todayEntry && typeof todayEntry.intensity === 'number') ? todayEntry.intensity : 50;
     moodIntensityInput.value = String(draftIntensity);
+    updateMoodRangeFill();
     renderMoodEmotionGrid();
+    setTimeout(loadHomeWeather, 0);
   }
 
   // --- 오늘의 기분: 비공개 감정 6칸 그리드. 앞 3칸만 실제 감정(공개 칩과 같은 이름)이고,
@@ -1120,9 +1105,10 @@
       var box = document.createElement('button');
       box.type = 'button';
       box.dataset.emotion = label || '';
-      box.style.cssText = 'aspect-ratio:1; border-radius:16px; cursor:pointer; font-size:11.5px; font-weight:600;';
+      box.style.cssText = 'aspect-ratio:1; border-radius:22px; cursor:pointer; font-family:inherit; font-size:12.5px; font-weight:600; color:var(--brown);';
+      // 시안(main.02/03): 6칸 전부 글자 없이 빈 상자 — 선택된 한 칸만 핑크로 채워질 뿐, 라벨
+      // 텍스트는 어디에도 없다. 실제 아이콘/이미지는 나중에 채울 자리라 지금은 비워둔다.
       if (label) {
-        box.textContent = label;
         box.addEventListener('click', function (e) {
           e.stopPropagation();
           draftEmotion = (draftEmotion === label) ? null : label;
@@ -1139,15 +1125,10 @@
   function renderMoodEmotionGrid() {
     Array.prototype.forEach.call(moodEmotionGridEl.children, function (box) {
       var label = box.dataset.emotion;
-      if (!label) {
-        box.style.border = '1.5px solid rgba(43,38,34,.18)';
-        box.style.background = 'transparent';
-        return;
-      }
-      var active = label === draftEmotion;
-      box.style.border = '1.5px solid ' + (active ? MOOD_ACTIVE_COLOR : 'rgba(43,38,34,.18)');
+      // 시안: 모든 칸은 브라운 2px 테두리, 선택된 칸만 테두리 없이 핑크로 채워짐
+      var active = !!label && label === draftEmotion;
+      box.style.border = '2px solid ' + (active ? MOOD_ACTIVE_COLOR : 'var(--brown)');
       box.style.background = active ? MOOD_ACTIVE_COLOR : 'transparent';
-      box.style.color = active ? '#fff' : '#8a8074';
     });
   }
 
@@ -1156,8 +1137,13 @@
 
   var moodIntensityInput = document.getElementById('mood-intensity');
   moodIntensityInput.addEventListener('click', function (e) { e.stopPropagation(); });
+  // 시안: 썸 왼쪽은 핑크, 오른쪽은 브라운 50% — 값에 맞춰 트랙 그라데이션 경계(--fill)를 옮긴다
+  function updateMoodRangeFill() {
+    moodIntensityInput.style.setProperty('--fill', moodIntensityInput.value + '%');
+  }
   moodIntensityInput.addEventListener('input', function () {
     draftIntensity = Number(moodIntensityInput.value);
+    updateMoodRangeFill();
   });
 
   document.getElementById('diary-confirm').addEventListener('click', function (e) {
@@ -1194,12 +1180,11 @@
     moodWriteView.style.display = writing ? '' : 'none';
     moodBrowseView.style.display = writing ? 'none' : '';
     moodWriteExtras.style.display = writing ? '' : 'none';
-    diaryConfirmBtn.style.background = writing ? '#663b2c' : 'transparent';
-    diaryConfirmBtn.style.color = writing ? '#fff' : '#663b2c';
-    diaryConfirmBtn.style.border = writing ? 'none' : '1px solid #663b2c';
-    moodBrowseBtn.style.background = writing ? 'transparent' : '#663b2c';
-    moodBrowseBtn.style.color = writing ? '#663b2c' : '#fff';
-    moodBrowseBtn.style.border = writing ? '1px solid #663b2c' : 'none';
+    // 지금 보고 있는 쪽 버튼만 브라운으로 채움 (테두리 두께는 양쪽 동일하게 유지해 크기가 안 튐)
+    diaryConfirmBtn.style.background = writing ? 'var(--brown)' : '#fff';
+    diaryConfirmBtn.style.color = writing ? '#fff' : 'var(--brown)';
+    moodBrowseBtn.style.background = writing ? '#fff' : 'var(--brown)';
+    moodBrowseBtn.style.color = writing ? 'var(--brown)' : '#fff';
     if (!writing) renderMoodCalendar();
     // 글쓰기 화면과 달력 화면은 높이가 많이 달라서, 전환 직후 이전 스크롤 위치를 그대로 두면
     // 새 높이 기준으로 스크롤이 어긋나 보이는(위아래로 튀는) 문제가 있었다 — 전환할 때마다
@@ -1228,7 +1213,7 @@
     var now = new Date();
     if (moodCalYear === undefined) { moodCalYear = now.getFullYear(); moodCalMonth = now.getMonth(); }
 
-    document.getElementById('mood-cal-label').textContent = moodCalYear + '.' + pad(moodCalMonth + 1);
+    document.getElementById('mood-cal-label').textContent = moodCalYear + ' . ' + pad(moodCalMonth + 1);
 
     var entryMap = {};
     entries.forEach(function (en) { entryMap[en.date] = en; });
@@ -1249,9 +1234,10 @@
       var isToday = key === todayKey;
       var cell = document.createElement('div');
       cell.textContent = String(day);
-      cell.style.cssText = 'aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:12px;' +
-        'background:' + (isToday ? '#663b2c' : (hasEntry ? MOOD_ACTIVE_COLOR : 'transparent')) + ';' +
-        'color:' + (isToday ? '#fff' : '#2b2622') + ';';
+      // 시안: 기록 있는 날 = 흰 50% 원, 오늘 = 브라운 45% 원(글자는 브라운 그대로)
+      cell.style.cssText = 'width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:50%;' +
+        "font-family:'Playfair Display', serif; font-style:italic; font-weight:500; font-size:12.5px; color:var(--brown);" +
+        'background:' + (isToday ? 'rgba(102,59,44,.45)' : (hasEntry ? 'rgba(255,255,255,.5)' : 'transparent')) + ';';
       gridEl.appendChild(cell);
     }
 
@@ -1287,8 +1273,11 @@
     box.style.display = '';
     var parts = todayKey.split('-');
     document.getElementById('mood-entry-preview-date').textContent =
-      Number(parts[1]) + '월 ' + Number(parts[2]) + '일 · 오늘의 기록';
+      Number(parts[1]) + '월 ' + Number(parts[2]) + '일 | 오늘의 기록';
     document.getElementById('mood-entry-preview-text').textContent = entry.text;
+    var titleEl = document.getElementById('mood-entry-preview-title');
+    titleEl.textContent = entry.title || '';
+    titleEl.style.display = entry.title ? '' : 'none';
   }
 
   document.getElementById('mood-cal-prev').addEventListener('click', function (e) {
@@ -1437,6 +1426,33 @@
       .catch(function () {
         if (currentExploreIsland === isl) textEl.textContent = '';
       });
+  }
+
+  // --- 홈 헤더 날씨(시안 main.01: 노란 점 + "맑음"): 내 섬 좌표(getPlot)의 현재 날씨 설명만 표시.
+  // 실패하면 줄 자체를 숨긴 채로 둔다. 세션당 한 번만 조회. ---
+  var homeWeatherState = 'idle';
+  function loadHomeWeather() {
+    if (homeWeatherState !== 'idle') return;
+    homeWeatherState = 'loading';
+    var plot = getPlot();
+    var url = 'https://weather.googleapis.com/v1/currentConditions:lookup?key=' + GOOGLE_MAPS_DEMO_KEY +
+      '&location.latitude=' + plot.lat + '&location.longitude=' + plot.lng + '&languageCode=ko';
+    fetch(url)
+      .then(function (res) { if (!res.ok) throw new Error('weather fetch failed'); return res.json(); })
+      .then(function (data) {
+        homeWeatherState = 'done';
+        var desc = data && data.weatherCondition && data.weatherCondition.description
+          ? data.weatherCondition.description.text : '';
+        if (!desc) return;
+        document.getElementById('home-weather-text').textContent = desc;
+        document.getElementById('home-weather').style.display = 'flex';
+        // 날씨 줄이 생기면 헤더 높이가 늘어난다 — 이 fetch는 비동기라 처음 레이아웃을 잡을 때는
+        // 아직 반영이 안 된 상태였다. 그래서 model의 sticky top 오프셋(헤더 높이 기준)이 날씨가
+        // 늦게 뜨고 나면 실제보다 작은 값으로 굳어 있었고, 그 어긋남 때문에 모델이 헤더 바로
+        // 아래가 아니라 그보다 위(헤더에 살짝 가려진 자리)에 붙어 있었다 — 다시 맞춘다.
+        if (step === 4) adjustHomeScrollSpacer();
+      })
+      .catch(function () { homeWeatherState = 'idle'; });
   }
 
   // --- 구글 지도 (데모 키, 전시 프로덕션용 아님 — assets/world-map.png 커스텀 지도 대체 테스트) ---
@@ -1982,7 +1998,7 @@
     // Keep the sheet's rounded top corners alive: a flat white rectangle erases that cue (it only
     // reads as "rounded" against the pink behind it), so give this layer the same radius while
     // it's whited out — its corner notches reveal the pink screen bg behind, right under the header.
-    homeModelEl.style.borderRadius = on ? '28px 28px 0 0' : '0';
+    homeModelEl.style.borderRadius = on ? '40px 40px 0 0' : '0';
     Array.prototype.forEach.call(homeModelEl.children, function (c) { c.style.opacity = on ? '0' : ''; });
   }
   function engageHomeScrollLock(y) {
@@ -1992,8 +2008,21 @@
     if (homeScrollLockY !== null) { setHomeModelWhiteout(true); return; }
     homeScrollLockY = y;
     setHomeModelWhiteout(true);
+    var framesSinceEngage = 0;
     (function loop() {
       if (homeScrollLockY === null) return;
+      framesSinceEngage++;
+      // touchstart engages this *before* the browser has actually moved focus (see above) — if that
+      // touch turns out to be a scroll/drag instead of a tap, focus never lands on the input, so
+      // 'focusout' never fires either, and without this check the lock (and the forced scrollTop
+      // below) would stay stuck forever, freezing the whole tab's scroll. Give a short grace window
+      // for the real tap→focus to land, then self-release if it never did.
+      if (framesSinceEngage > 20 && !isHomeTextInput(document.activeElement)) {
+        homeScrollLockY = null;
+        setHomeModelWhiteout(false);
+        homeTabEl.style.overflowY = 'auto';
+        return;
+      }
       if (homeTabEl.scrollTop !== homeScrollLockY) homeTabEl.scrollTop = homeScrollLockY;
       // The actual drop culprit: despite html/body having overflow:hidden, iOS force-scrolls the
       // *document* itself (bypassing that) to try to reveal the focused input, and #frame being
