@@ -462,11 +462,11 @@
             <!-- font-size 16px 유지: 16px 미만이면 iOS가 포커스 시 화면을 확대한다 -->
             <input id="diary-line" type="text" maxlength="60" placeholder="예: 조금 피곤하지만, 기분은 괜찮아요." style="width:100%; height:44px; border:2px solid var(--brown); border-radius:999px; background:transparent; outline:none; padding:0 16px; font-family:'Noto Sans KR', sans-serif; font-size:16px; color:var(--brown);">
           </div>
-          <div class="mood-caption" style="margin-top:28px;">어떤 감정이든 괜찮아요.</div>
+          <div class="mood-caption" style="margin-top:60px;">어떤 감정이든 괜찮아요.</div>
 
           <div id="mood-emotion-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:20px 18px; margin-top:14px;"></div>
 
-          <div style="margin-top:32px;">
+          <div style="margin-top:72px;">
             <div class="mood-caption">오늘의 마음이 얼마나 느껴지시나요?</div>
             <div style="display:flex; align-items:center; gap:16px; margin-top:22px; padding:0 12px;">
               <span class="mood-caption" style="flex:none;">은은하게</span>
@@ -1141,28 +1141,24 @@
     setTimeout(loadHomeWeather, 0);
   }
 
-  // --- 오늘의 기분: 비공개 감정 6칸 그리드. 앞 3칸만 실제 감정(공개 칩과 같은 이름)이고,
-  // 나머지 3칸은 추후 추가될 예정이라 지금은 빈 채로 둔다. ---
+  // --- 오늘의 기분: 비공개 감정 6칸 그리드. 앞 3칸은 실제 감정(공개 칩과 같은 이름), 나머지
+  // 3칸은 이름이 아직 정해지지 않아 내부 키만 붙여둔 자리표시자 — 이름은 추후 정해지면 채운다.
+  // 지금은 6칸 모두 동일하게 클릭 가능하고 선택 시 핑크로 활성화된다. ---
   var moodEmotionGridEl = document.getElementById('mood-emotion-grid');
   for (var gi = 0; gi < MOOD_GRID_SIZE; gi++) {
     (function (index) {
-      var label = EMOTIONS[index] || null;
+      var label = EMOTIONS[index] || ('emotion-slot-' + index);
       var box = document.createElement('button');
       box.type = 'button';
-      box.dataset.emotion = label || '';
+      box.dataset.emotion = label;
       box.style.cssText = 'aspect-ratio:1; border-radius:22px; cursor:pointer; font-family:inherit; font-size:12.5px; font-weight:600; color:var(--brown);';
       // 시안(main.02/03): 6칸 전부 글자 없이 빈 상자 — 선택된 한 칸만 핑크로 채워질 뿐, 라벨
       // 텍스트는 어디에도 없다. 실제 아이콘/이미지는 나중에 채울 자리라 지금은 비워둔다.
-      if (label) {
-        box.addEventListener('click', function (e) {
-          e.stopPropagation();
-          draftEmotion = (draftEmotion === label) ? null : label;
-          renderMoodEmotionGrid();
-        });
-      } else {
-        box.disabled = true;
-        box.style.cursor = 'default';
-      }
+      box.addEventListener('click', function (e) {
+        e.stopPropagation();
+        draftEmotion = (draftEmotion === label) ? null : label;
+        renderMoodEmotionGrid();
+      });
       moodEmotionGridEl.appendChild(box);
     })(gi);
   }
