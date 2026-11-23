@@ -48,6 +48,10 @@
   .mood-tab-btn { flex:1; height:32px; border:none; border-radius:999px; background:transparent; color:var(--brown); font-family:'Noto Sans KR', sans-serif; font-size:11px; font-weight:700; cursor:pointer; transition:background .15s ease, color .15s ease; }
   .mood-tab-btn.active { background:var(--pink); color:var(--brown); }
   .mood-cal-arrow { border:none; background:transparent; color:var(--brown); padding:4px 8px; cursor:pointer; display:flex; align-items:center; }
+  /* 섬 날씨(비/눈) 효과 — 3D 씬 안이 아니라 모델 위에 얹는 가벼운 CSS 파티클 */
+  @keyframes fx-fall { 0% { transform:translateY(-20px); opacity:0; } 10% { opacity:1; } 90% { opacity:.7; } 100% { transform:translateY(520px); opacity:0; } }
+  .fx-rain-drop { position:absolute; top:0; width:2px; height:16px; border-radius:1px; background:linear-gradient(to bottom, rgba(120,171,190,0), rgba(120,171,190,.85)); animation-name:fx-fall; animation-timing-function:linear; animation-iteration-count:infinite; }
+  .fx-snow-flake { position:absolute; top:0; border-radius:50%; background:#fff; opacity:.9; animation-name:fx-fall; animation-timing-function:linear; animation-iteration-count:infinite; }
   * { box-sizing: border-box; }
   html, body {
     margin: 0;
@@ -427,7 +431,7 @@
           <div style="flex:1; min-width:0;">
             <div id="profile-owner" style="font-size:12.5px; color:var(--brown); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">이름 없는 소유주의 섬</div>
             <div id="home-weather" style="display:none; align-items:center; gap:7px; margin-top:6px;">
-              <span style="flex:none; width:10px; height:10px; border-radius:50%; background:var(--weather-dot);"></span>
+              <span id="home-weather-dot" style="flex:none; width:10px; height:10px; border-radius:50%; background:var(--weather-dot);"></span>
               <span id="home-weather-text" style="font-size:13.5px; color:var(--brown); white-space:nowrap;"></span>
             </div>
           </div>
@@ -441,6 +445,7 @@
       <div id="home-model" style="position:sticky; top:0; z-index:1; background:#f5bacb;">
         <div style="padding:0 22px; position:relative; height:clamp(300px, calc(100dvh - 380px), 480px); overflow:hidden; transform:translateZ(0); -webkit-transform:translateZ(0);">
           <canvas id="island-canvas" style="display:block; width:100%; height:100%; touch-action:none; cursor:grab; transform:translateZ(0); -webkit-transform:translateZ(0); backface-visibility:hidden; -webkit-backface-visibility:hidden; will-change:transform;"></canvas>
+          <div id="weather-fx" style="position:absolute; inset:0; pointer-events:none; overflow:hidden; display:none;"></div>
         </div>
         <div style="text-align:center; font-size:10.5px; color:var(--brown); margin-top:8px;">드래그 해서 섬을 360&deg; 로 돌려보세요</div>
 
@@ -456,7 +461,7 @@
           <div style="width:50px; height:8px; border-radius:999px; background:#efefef; margin:0 auto 18px;"></div>
           <div id="mood-mode-tabs" style="display:flex; background:var(--brown-35); border-radius:999px; padding:2px;">
             <button type="button" id="mood-tab-write" class="mood-tab-btn active" data-mode="write">기록하기</button>
-            <button type="button" id="mood-tab-browse" class="mood-tab-btn" data-mode="browse">둘러보기</button>
+            <button type="button" id="mood-tab-browse" class="mood-tab-btn" data-mode="browse">돌아보기</button>
           </div>
         </div>
 
@@ -623,13 +628,16 @@
 
     </div>
 
-    <div id="tab-menu" class="tab-panel" style="display:none; flex:1; min-height:0; align-items:center; justify-content:center; background:#1d1714; color:rgba(243,237,228,.5); font-size:13px;">준비 중이에요</div>
+    <div id="tab-menu" class="tab-panel" style="display:none; flex:1; min-height:0; flex-direction:column; align-items:center; justify-content:center; gap:8px; background:#1d1714; color:rgba(243,237,228,.5); font-size:13px;">
+      <div>준비중입니다</div>
+      <div style="font-size:11px; letter-spacing:.08em; text-transform:uppercase;">Coming soon</div>
+    </div>
 
     <div id="tab-bar" class="tab-bar">
       <button class="tab-btn active" data-tab="home" aria-label="나의 섬"><svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5L12 4l9 7.5"></path><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"></path></svg></button>
       <button class="tab-btn" data-tab="explore" aria-label="둘러보기"><svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"></path><path d="M9 4v14"></path><path d="M15 6v14"></path></svg></button>
       <button class="tab-btn" data-tab="chat" aria-label="커뮤니티"><svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path><circle cx="8.5" cy="12" r=".9" fill="currentColor" stroke="none"></circle><circle cx="12" cy="12" r=".9" fill="currentColor" stroke="none"></circle><circle cx="15.5" cy="12" r=".9" fill="currentColor" stroke="none"></circle></svg></button>
-      <button class="tab-btn" data-tab="menu" aria-label="메뉴"><svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path></svg></button>
+      <button class="tab-btn" data-tab="menu" aria-label="상점"><svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg></button>
     </div>
   </div>
 
@@ -1090,24 +1098,65 @@
     }, 1400);
   }
 
-  // --- 나의 섬: 감정상태 ---
-  var EMOTIONS = ['Breeze', 'Cherish', 'Lonley'];
+  // --- 나의 섬: 섬 날씨(공개). 예전엔 Breeze/Cherish/Lonley라는 감정 칩이었는데, 비/맑음/눈
+  // 3가지 "섬 날씨"를 직접 고르는 기능으로 바뀌었다 — 고른 날씨에 맞춰 모델 위에 비/눈 효과를
+  // 띄우고, 헤더의 날씨 표시(원래는 실제 좌표의 실시간 날씨를 불러오던 자리)도 함께 바뀐다.
+  var ISLAND_WEATHER = [
+    { key: 'rain', chipLabel: '비오는날', headerLabel: '비', dot: '#78abbe' },
+    { key: 'sunny', chipLabel: '맑은날', headerLabel: '맑음', dot: 'var(--weather-dot)' },
+    { key: 'snow', chipLabel: '눈오는날', headerLabel: '눈', dot: '#ffffff' }
+  ];
+  var ISLAND_WEATHER_BY_KEY = {};
+  ISLAND_WEATHER.forEach(function (w) { ISLAND_WEATHER_BY_KEY[w.key] = w; });
   var emotionChipsEl = document.getElementById('emotion-chips');
+  var weatherFxEl = document.getElementById('weather-fx');
 
-  EMOTIONS.forEach(function (label) {
+  ISLAND_WEATHER.forEach(function (w) {
     var chip = document.createElement('button');
     chip.type = 'button';
-    chip.textContent = label;
-    chip.dataset.emotion = label;
+    chip.textContent = w.chipLabel;
+    chip.dataset.weather = w.key;
     chip.style.cssText = 'font-size:10.5px; font-weight:500; padding:4px 11px; border-radius:999px; border:1px solid var(--brown-35); background:transparent; color:var(--brown-35); cursor:pointer;';
     chip.addEventListener('click', function () {
       var profile = getProfile();
-      profile.emotion = label;
+      profile.weather = w.key;
       saveProfile(profile);
       renderProfileTab();
     });
     emotionChipsEl.appendChild(chip);
   });
+
+  // 비/눈 효과: 3D 씬 안이 아니라 모델 위에 얹는 가벼운 CSS 파티클 레이어로 구현 — 캐릭터/카메라
+  // 로직이 섬세하게 튜닝돼 있는 Three.js 렌더 루프 자체는 건드리지 않기 위함.
+  function setWeatherEffect(key) {
+    weatherFxEl.innerHTML = '';
+    if (key !== 'rain' && key !== 'snow') { weatherFxEl.style.display = 'none'; return; }
+    weatherFxEl.style.display = 'block';
+    var isRain = key === 'rain';
+    var count = isRain ? 36 : 22;
+    for (var i = 0; i < count; i++) {
+      var el = document.createElement('div');
+      el.className = isRain ? 'fx-rain-drop' : 'fx-snow-flake';
+      var duration = isRain ? (0.5 + Math.random() * 0.4) : (3 + Math.random() * 2.5);
+      el.style.left = (Math.random() * 100) + '%';
+      el.style.animationDuration = duration + 's';
+      el.style.animationDelay = '-' + (Math.random() * duration) + 's';
+      if (!isRain) {
+        var size = 3 + Math.random() * 4;
+        el.style.width = size + 'px';
+        el.style.height = size + 'px';
+      }
+      weatherFxEl.appendChild(el);
+    }
+  }
+
+  function applyIslandWeather(key) {
+    var w = ISLAND_WEATHER_BY_KEY[key] || ISLAND_WEATHER_BY_KEY.sunny;
+    document.getElementById('home-weather-dot').style.background = w.dot;
+    document.getElementById('home-weather-text').textContent = w.headerLabel;
+    document.getElementById('home-weather').style.display = 'flex';
+    setWeatherEffect(w.key);
+  }
 
   function todayDateKey(d) {
     d = d || new Date();
@@ -1136,12 +1185,14 @@
     var profile = getProfile();
     document.getElementById('profile-owner').textContent = (profile.nickname || '이름 없는 소유주') + '의 섬';
     document.getElementById('profile-islandname').textContent = profile.islandName || '나의 섬';
+    var weatherKey = profile.weather || 'sunny';
     Array.prototype.forEach.call(emotionChipsEl.children, function (chip) {
-      var active = chip.dataset.emotion === profile.emotion;
+      var active = chip.dataset.weather === weatherKey;
       chip.style.borderColor = active ? 'var(--brown)' : 'var(--brown-35)';
       chip.style.color = active ? '#fff' : 'var(--brown-35)';
       chip.style.background = active ? 'var(--brown)' : 'transparent';
     });
+    applyIslandWeather(weatherKey);
     var todayEntry = findDiaryEntry(profile, todayDateKey());
     diaryInput.value = todayEntry ? todayEntry.text : '';
     draftEmotion = todayEntry ? (todayEntry.emotion || null) : null;
@@ -1149,7 +1200,6 @@
     moodIntensityInput.value = String(draftIntensity);
     updateMoodRangeFill();
     renderMoodEmotionGrid();
-    setTimeout(loadHomeWeather, 0);
   }
 
   // --- 오늘의 기분: 비공개 감정 6칸 그리드. 공개 칩(섬 아래 Breeze/Cherish/Lonley)과는 별개의
@@ -1162,6 +1212,65 @@
     { label: '울적해요', icon: 'assets/emotions/sad.svg' },
     { label: '행복해요', icon: 'assets/emotions/happy.svg' }
   ];
+
+  // 예전 공개 칩 이름(Breeze/Cherish/Lonley)이 비공개 기록에 그대로 남아있던 걸 새 감정 세트로
+  // 옮기고, 전시 데모용으로 이번 달에 기록 몇 개를 미리 채워 둔다 — 최초 1회만 실행되고
+  // (profile.seededNovemberDemo 플래그), 이미 실제로 적힌 날짜는 절대 덮어쓰지 않는다.
+  (function migrateAndSeedMoodEntries() {
+    var OLD_LABELS = ['Breeze', 'Cherish', 'Lonley', 'Lonely'];
+    var profile = getProfile();
+    var entries = profile.diaryEntries || [];
+    var changed = false;
+
+    entries.forEach(function (en) {
+      if (OLD_LABELS.indexOf(en.emotion) !== -1) {
+        en.emotion = MOOD_GRID_EMOTIONS[Math.floor(Math.random() * MOOD_GRID_EMOTIONS.length)].label;
+        changed = true;
+      }
+    });
+
+    if (!profile.seededNovemberDemo) {
+      var byDate = {};
+      entries.forEach(function (en) { byDate[en.date] = true; });
+      var now = new Date();
+      var year = now.getFullYear(), month = now.getMonth(), todayDate = now.getDate();
+      var sampleTexts = {
+        '즐거워요': '오늘은 왠지 기분 좋은 하루였어요.',
+        '불안해요': '괜히 마음이 조마조마한 하루였어요.',
+        '화가나요': '사소한 일에도 신경이 곤두섰던 하루.',
+        '답답해요': '뭔가 꽉 막힌 듯 답답했던 하루.',
+        '울적해요': '이유 없이 가라앉는 기분이었어요.',
+        '행복해요': '소소하지만 행복을 느낀 하루였어요.'
+      };
+      var days = [];
+      for (var d = 1; d <= todayDate; d++) days.push(d);
+      for (var i = days.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = days[i]; days[i] = days[j]; days[j] = tmp;
+      }
+      var pickCount = Math.min(days.length, 10 + Math.floor(Math.random() * 4));
+      days.slice(0, pickCount).forEach(function (day) {
+        var dateKey = year + '-' + pad(month + 1) + '-' + pad(day);
+        if (byDate[dateKey]) return;
+        var info = MOOD_GRID_EMOTIONS[Math.floor(Math.random() * MOOD_GRID_EMOTIONS.length)];
+        entries.push({
+          date: dateKey,
+          text: sampleTexts[info.label],
+          emotion: info.label,
+          intensity: 30 + Math.floor(Math.random() * 60),
+          ts: new Date(year, month, day, 20, 0, 0).getTime()
+        });
+      });
+      profile.seededNovemberDemo = true;
+      changed = true;
+    }
+
+    if (changed) {
+      profile.diaryEntries = entries;
+      saveProfile(profile);
+    }
+  })();
+
   var moodEmotionGridEl = document.getElementById('mood-emotion-grid');
   for (var gi = 0; gi < MOOD_GRID_SIZE; gi++) {
     (function (index) {
@@ -1169,7 +1278,10 @@
       var box = document.createElement('button');
       box.type = 'button';
       box.dataset.emotion = info.label;
-      box.style.cssText = 'aspect-ratio:1; border-radius:22px; cursor:pointer; font-family:inherit; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:6px;';
+      // 선택 시 border/background를 즉시 바꾸는데, iOS Safari에서 그 변경이 바로 반영되지 않고
+      // 잠깐 잔상처럼 겹쳐 보이는 리페인트 버그가 있어 자체 GPU 레이어로 승격시켜 둔다
+      // (3D 캔버스 클리핑 버그를 고칠 때 썼던 것과 같은 방식).
+      box.style.cssText = 'aspect-ratio:1; border-radius:22px; cursor:pointer; font-family:inherit; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:6px; transform:translateZ(0); -webkit-transform:translateZ(0); will-change:background-color, border-color;';
       var icon = document.createElement('img');
       icon.src = info.icon;
       icon.alt = '';
@@ -1515,32 +1627,6 @@
       });
   }
 
-  // --- 홈 헤더 날씨(시안 main.01: 노란 점 + "맑음"): 내 섬 좌표(getPlot)의 현재 날씨 설명만 표시.
-  // 실패하면 줄 자체를 숨긴 채로 둔다. 세션당 한 번만 조회. ---
-  var homeWeatherState = 'idle';
-  function loadHomeWeather() {
-    if (homeWeatherState !== 'idle') return;
-    homeWeatherState = 'loading';
-    var plot = getPlot();
-    var url = 'https://weather.googleapis.com/v1/currentConditions:lookup?key=' + GOOGLE_MAPS_DEMO_KEY +
-      '&location.latitude=' + plot.lat + '&location.longitude=' + plot.lng + '&languageCode=ko';
-    fetch(url)
-      .then(function (res) { if (!res.ok) throw new Error('weather fetch failed'); return res.json(); })
-      .then(function (data) {
-        homeWeatherState = 'done';
-        var desc = data && data.weatherCondition && data.weatherCondition.description
-          ? data.weatherCondition.description.text : '';
-        if (!desc) return;
-        document.getElementById('home-weather-text').textContent = desc;
-        document.getElementById('home-weather').style.display = 'flex';
-        // 날씨 줄이 생기면 헤더 높이가 늘어난다 — 이 fetch는 비동기라 처음 레이아웃을 잡을 때는
-        // 아직 반영이 안 된 상태였다. 그래서 model의 sticky top 오프셋(헤더 높이 기준)이 날씨가
-        // 늦게 뜨고 나면 실제보다 작은 값으로 굳어 있었고, 그 어긋남 때문에 모델이 헤더 바로
-        // 아래가 아니라 그보다 위(헤더에 살짝 가려진 자리)에 붙어 있었다 — 다시 맞춘다.
-        if (step === 4) adjustHomeScrollSpacer();
-      })
-      .catch(function () { homeWeatherState = 'idle'; });
-  }
 
   // --- 구글 지도 (데모 키, 전시 프로덕션용 아님 — assets/world-map.png 커스텀 지도 대체 테스트) ---
   var GOOGLE_MAPS_DEMO_KEY = 'AIzaSyCgFzPYNs_RbKA2dQ6e6f356-dvlDhrzC4';
