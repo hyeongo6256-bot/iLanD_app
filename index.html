@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>iLanD · Lonely</title>
+<title>iLanD_BETA</title>
 
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0a09">
@@ -342,7 +342,7 @@
 
   <!-- Step 0 — NFC tap -->
   <div class="screen active" data-step="0" style="background: radial-gradient(120% 90% at 50% 18%, #1c1815 0%, #0c0a09 62%); color:#f3ede4; cursor:pointer; align-items:center; justify-content:flex-start; padding:96px 28px 40px;">
-    <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:15px; letter-spacing:.14em; color:rgba(243,237,228,.55);">iLanD &middot; Lonely</div>
+    <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:15px; letter-spacing:.14em; color:rgba(243,237,228,.55);">iLanD_BETA</div>
 
     <div style="position:relative; width:168px; height:168px; margin-top:74px; display:flex; align-items:center; justify-content:center;">
       <div style="position:absolute; inset:0; border-radius:50%; border:1px solid var(--accent); animation: ripple 2.6s ease-out infinite;"></div>
@@ -514,9 +514,10 @@
           </div>
 
           <div id="mood-insight-card" style="margin-top:16px; background:var(--pink-soft); border-radius:24px; padding:18px 16px; display:none;">
-            <div style="font-size:11px;">이번달의 작은 발견</div>
+            <div id="mood-insight-eyebrow" style="font-size:11px;">이번달의 작은 발견</div>
             <div id="mood-insight-main" style="font-size:17px; font-weight:700; margin-top:6px; line-height:1.4; letter-spacing:-.01em;"></div>
             <div id="mood-insight-sub" style="font-size:12.5px; margin-top:6px;"></div>
+            <button type="button" id="mood-insight-cta" style="display:none; margin-top:14px; width:100%; height:40px; border:none; border-radius:999px; background:var(--brown); color:#fff; font-family:'Noto Sans KR', sans-serif; font-size:12.5px; font-weight:700; cursor:pointer;">오늘 마음 기록하러 가기</button>
           </div>
 
           <div id="mood-entry-preview" style="margin-top:28px; display:none;">
@@ -900,7 +901,14 @@
     profile.nickname = nicknameInput.value.trim();
     profile.islandName = islandInput.value.trim();
     saveProfile(profile);
+    // 아직 한 번도 기록을 남긴 적 없는 기기(= diaryEntries가 비어있는 상태)에서만 첫 기록을
+    // 남기라고 가볍게 안내한다 — 기록을 하나라도 쓰면 diaryEntries가 채워지니 다음부터는
+    // 자연스럽게 다시 뜨지 않는다. 가짜 데모 기록으로 달력을 채우던 걸 대신하는 안내.
+    var nudgeFirstEntry = !(profile.diaryEntries && profile.diaryEntries.length);
     goTo(4);
+    if (nudgeFirstEntry) {
+      setTimeout(function () { showToast('오늘 하루, 지금 느낀 감정을 기록해보세요'); }, 900);
+    }
   });
 
   // --- Step 2: swipe up to continue ---
@@ -1214,9 +1222,10 @@
   ];
 
   // 예전 공개 칩 이름(Breeze/Cherish/Lonley)이 비공개 기록에 그대로 남아있던 걸 새 감정 세트로
-  // 옮기고, 전시 데모용으로 이번 달에 기록 몇 개를 미리 채워 둔다 — 최초 1회만 실행되고
-  // (profile.seededNovemberDemo 플래그), 이미 실제로 적힌 날짜는 절대 덮어쓰지 않는다.
-  (function migrateAndSeedMoodEntries() {
+  // 옮긴다 — 가짜 데모 기록을 미리 채워 넣던 방식은 "관람객이 직접 기록해야 진짜 내 기록처럼
+  // 느껴진다"는 피드백으로 없앴다(첫 기록 유도는 아래 onboarding nudge + 빈 달력 안내 카드가
+  // 대신한다).
+  (function migrateOldMoodLabels() {
     var OLD_LABELS = ['Breeze', 'Cherish', 'Lonley', 'Lonely'];
     var profile = getProfile();
     var entries = profile.diaryEntries || [];
@@ -1228,42 +1237,6 @@
         changed = true;
       }
     });
-
-    if (!profile.seededNovemberDemo) {
-      var byDate = {};
-      entries.forEach(function (en) { byDate[en.date] = true; });
-      var now = new Date();
-      var year = now.getFullYear(), month = now.getMonth(), todayDate = now.getDate();
-      var sampleTexts = {
-        '즐거워요': '오늘은 왠지 기분 좋은 하루였어요.',
-        '불안해요': '괜히 마음이 조마조마한 하루였어요.',
-        '화가나요': '사소한 일에도 신경이 곤두섰던 하루.',
-        '답답해요': '뭔가 꽉 막힌 듯 답답했던 하루.',
-        '울적해요': '이유 없이 가라앉는 기분이었어요.',
-        '행복해요': '소소하지만 행복을 느낀 하루였어요.'
-      };
-      var days = [];
-      for (var d = 1; d <= todayDate; d++) days.push(d);
-      for (var i = days.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var tmp = days[i]; days[i] = days[j]; days[j] = tmp;
-      }
-      var pickCount = Math.min(days.length, 10 + Math.floor(Math.random() * 4));
-      days.slice(0, pickCount).forEach(function (day) {
-        var dateKey = year + '-' + pad(month + 1) + '-' + pad(day);
-        if (byDate[dateKey]) return;
-        var info = MOOD_GRID_EMOTIONS[Math.floor(Math.random() * MOOD_GRID_EMOTIONS.length)];
-        entries.push({
-          date: dateKey,
-          text: sampleTexts[info.label],
-          emotion: info.label,
-          intensity: 30 + Math.floor(Math.random() * 60),
-          ts: new Date(year, month, day, 20, 0, 0).getTime()
-        });
-      });
-      profile.seededNovemberDemo = true;
-      changed = true;
-    }
 
     if (changed) {
       profile.diaryEntries = entries;
@@ -1446,9 +1419,21 @@
     renderMoodEntryPreview();
   }
 
+  // 기록이 하나도 없는 달(특히 처음 쓰는 사람의 이번 달)엔 카드를 아예 숨기는 대신, 첫
+  // 기록을 쓰러 가라고 안내하는 빈 상태로 보여준다 — 예전엔 가짜 데모 기록으로 이 허전함을
+  // 메웠지만, "관람객이 직접 써야 진짜 내 기록처럼 느껴진다"는 피드백으로 그 방식은 없앴다.
   function renderMoodInsight(entries, monthEntryCount) {
     var card = document.getElementById('mood-insight-card');
-    if (!monthEntryCount) { card.style.display = 'none'; return; }
+    var cta = document.getElementById('mood-insight-cta');
+    if (!monthEntryCount) {
+      card.style.display = '';
+      document.getElementById('mood-insight-eyebrow').textContent = '아직 쌓인 마음이 없어요';
+      document.getElementById('mood-insight-main').textContent = '첫 기록을 남기면 이 자리에 작은 발견이 쌓여요.';
+      document.getElementById('mood-insight-sub').textContent = '';
+      cta.style.display = '';
+      return;
+    }
+    cta.style.display = 'none';
     var monthPrefix = moodCalYear + '-' + pad(moodCalMonth + 1);
     var counts = {};
     entries.forEach(function (en) {
@@ -1460,9 +1445,15 @@
     });
     if (!topLabel) { card.style.display = 'none'; return; }
     card.style.display = '';
+    document.getElementById('mood-insight-eyebrow').textContent = '이번달의 작은 발견';
     document.getElementById('mood-insight-main').textContent = "가장 많이 머문 감정은 '" + topLabel + "'이에요.";
     document.getElementById('mood-insight-sub').textContent = monthEntryCount + '번 중 ' + topCount + '번이었어요.';
   }
+
+  document.getElementById('mood-insight-cta').addEventListener('click', function (e) {
+    e.stopPropagation();
+    setMoodSheetMode('write');
+  });
 
   function renderMoodEntryPreview() {
     var box = document.getElementById('mood-entry-preview');
@@ -2096,7 +2087,13 @@
       replyIndex++;
       var repliedAt = Date.now();
       pushMessage(partner, 'them', reply);
-      if (currentPartner === partner) addBubble({ from: partner, text: reply, time: repliedAt }, false);
+      if (currentPartner === partner) {
+        // 하트 버튼은 toggleMessageLike(partner, msg.index)로 메시지 배열의 실제 인덱스를
+        // 찾아가는데, index를 안 넣어주면 방금 막 도착한 말풍선의 하트가 눌러도 반응이 없다
+        // (재진입해서 renderThread가 다시 그릴 때만 index가 채워졌었음).
+        var idx = getChats()[partner].messages.length - 1;
+        addBubble({ from: partner, text: reply, time: repliedAt, likes: 0, liked: false, index: idx }, false);
+      }
     }, 1300);
   }
 
