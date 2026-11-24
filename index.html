@@ -1212,14 +1212,18 @@
 
   // --- 오늘의 기분: 비공개 감정 6칸 그리드. 공개 칩(섬 아래 Breeze/Cherish/Lonley)과는 별개의
   // 감정 세트로, 전달받은 아이콘(assets/emotions/*.svg)과 라벨을 함께 보여준다. ---
+  // color는 각 아이콘 SVG 안에서 실제로 쓰인 메인 색(테두리/흰색 제외한 몸통 색)을 그대로
+  // 가져왔다 — 돌아보기 달력의 날짜 원을 이 색으로 칠해서 아이콘 색과 바로 매칭되게 한다.
   var MOOD_GRID_EMOTIONS = [
-    { label: '즐거워요', icon: 'assets/emotions/joy.svg' },
-    { label: '불안해요', icon: 'assets/emotions/anxious.svg' },
-    { label: '화가나요', icon: 'assets/emotions/angry.svg' },
-    { label: '답답해요', icon: 'assets/emotions/frustrated.svg' },
-    { label: '울적해요', icon: 'assets/emotions/sad.svg' },
-    { label: '행복해요', icon: 'assets/emotions/happy.svg' }
+    { label: '즐거워요', icon: 'assets/emotions/joy.svg', color: '#e8cae1' },
+    { label: '불안해요', icon: 'assets/emotions/anxious.svg', color: '#e47e61' },
+    { label: '화가나요', icon: 'assets/emotions/angry.svg', color: '#57ae63' },
+    { label: '답답해요', icon: 'assets/emotions/frustrated.svg', color: '#ef7c4c' },
+    { label: '울적해요', icon: 'assets/emotions/sad.svg', color: '#8dcdf1' },
+    { label: '행복해요', icon: 'assets/emotions/happy.svg', color: '#f2ef91' }
   ];
+  var MOOD_EMOTION_COLOR_BY_LABEL = {};
+  MOOD_GRID_EMOTIONS.forEach(function (e) { MOOD_EMOTION_COLOR_BY_LABEL[e.label] = e.color; });
 
   // 예전 공개 칩 이름(Breeze/Cherish/Lonley)이 비공개 기록에 그대로 남아있던 걸 새 감정 세트로
   // 옮긴다 — 가짜 데모 기록을 미리 채워 넣던 방식은 "관람객이 직접 기록해야 진짜 내 기록처럼
@@ -1401,15 +1405,22 @@
 
     for (var day = 1; day <= daysInMonth; day++) {
       var key = moodCalYear + '-' + pad(moodCalMonth + 1) + '-' + pad(day);
-      var hasEntry = !!entryMap[key];
+      var dayEntry = entryMap[key];
+      var hasEntry = !!dayEntry;
       if (hasEntry) monthEntryCount++;
       var isToday = key === todayKey;
       var cell = document.createElement('div');
       cell.textContent = String(day);
-      // 시안: 기록 있는 날 = 흰 50% 원, 오늘 = 브라운 45% 원(글자는 브라운 그대로)
+      // 기록 있는 날 = 그날 고른 감정의 아이콘 색으로 원을 채워서, 감정 6칸 그리드의 색과
+      // 달력의 원 색이 바로 매칭되게 한다(감정을 안 고르고 저장한 날은 예전처럼 흰 50%).
+      // 오늘은 배경을 덮어쓰지 않고 브라운 테두리 링만 더해서, 오늘 기록의 감정 색도 그대로
+      // 보이게 한다.
+      var emotionColor = hasEntry && dayEntry.emotion ? MOOD_EMOTION_COLOR_BY_LABEL[dayEntry.emotion] : null;
+      var bg = emotionColor || (hasEntry ? 'rgba(255,255,255,.5)' : 'transparent');
       cell.style.cssText = 'width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:50%;' +
         "font-family:'Playfair Display', serif; font-style:italic; font-weight:500; font-size:12.5px; color:var(--brown);" +
-        'background:' + (isToday ? 'rgba(102,59,44,.45)' : (hasEntry ? 'rgba(255,255,255,.5)' : 'transparent')) + ';';
+        'background:' + bg + ';' +
+        (isToday ? 'box-shadow:inset 0 0 0 2px var(--brown);' : '');
       gridEl.appendChild(cell);
     }
 
