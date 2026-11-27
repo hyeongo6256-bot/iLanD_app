@@ -179,6 +179,8 @@
     0%, 100% { transform: translateY(0); opacity: .55; }
     50%      { transform: translateY(-6px); opacity: 1; }
   }
+  .welcome-touch-hint { opacity: 0; }
+  .welcome-touch-hint.show { animation: swipeHint 1.8s ease-in-out infinite; }
 
   @keyframes mapDriftFromKorea {
     from { background-position-x: -1257px; }
@@ -382,7 +384,9 @@
   <!-- Step 1 — welcome -->
   <div class="screen" data-step="1" style="background:#f4aec1; color:#f3ede4; cursor:pointer; padding:0; overflow:hidden; position:relative;">
     <video id="welcome-video" src="assets/iland-intro.mp4" muted playsinline style="display:block; width:100%; height:100%; object-fit:cover; mix-blend-mode:screen;"></video>
-    <div style="position:absolute; left:0; right:0; bottom:calc(28px + env(safe-area-inset-bottom)); text-align:center; font-size:12px; color:#fff; letter-spacing:.06em; pointer-events:none;">화면을 터치해주세요</div>
+    <!-- 영상이 끝나기 전까진 숨겨뒀다가(opacity:0), 영상이 끝나면(ended) .show를 붙여서 그때부터
+         위아래로 자연스럽게 움직이기 시작한다 — 드래그 힌트(swipeHint)와 같은 모션 재사용. -->
+    <div id="welcome-touch-hint" class="welcome-touch-hint" style="position:absolute; left:0; right:0; bottom:calc(64px + env(safe-area-inset-bottom)); text-align:center; font-size:15px; color:#fff; letter-spacing:.06em; pointer-events:none;">화면을 터치해주세요</div>
   </div>
 
   <!-- Step 2 — coordinate dial (swipe up to continue) -->
@@ -740,6 +744,7 @@
       welcomeVideo.currentTime = 0;
       welcomeVideo.playbackRate = 1.35;
       welcomeVideo.play().catch(function () {});
+      welcomeTouchHint.classList.remove('show');
     } else {
       welcomeVideo.pause();
     }
@@ -811,6 +816,13 @@
   var welcomeVideo = document.getElementById('welcome-video');
   welcomeVideo.playbackRate = 1.35;
 
+  // 영상이 재생되는 동안은 숨겨뒀다가, 영상이 끝나야("ended") "화면을 터치해주세요" 힌트가
+  // 움직이기 시작한다 — 영상이 처음부터 다시 재생될 때(goTo(1)에서)는 다시 숨긴다.
+  var welcomeTouchHint = document.getElementById('welcome-touch-hint');
+  welcomeVideo.addEventListener('ended', function () {
+    welcomeTouchHint.classList.add('show');
+  });
+
   var dialBg = document.getElementById('dial-bg');
   var dialVideo = document.getElementById('dial-video');
   dialVideo.load(); // start buffering immediately so it's ready before step 2
@@ -822,7 +834,10 @@
   // dialBg/dialVideo가 막 위에서 초기화된 뒤에 호출해야 한다. 앱이 켜지자마자 바로
   // 전환하지 않고 0.3초 쉬었다가 welcome을 시작한다.
   setTimeout(function () {
-    goTo(1);
+    // NFC 화면(step 0)을 탭해서 사용자가 이미 welcome으로 넘어가 있을 수 있다 — 그 경우
+    // 여기서 또 goTo(1)을 부르면 이미 재생 중인 welcome 영상이 처음부터 다시 시작돼서
+    // "welcome이 두 번 반복되는" 것처럼 보인다. 아직 step 0일 때만 자동 전환한다.
+    if (step === 0) goTo(1);
   }, 300);
 
   // Pre-decode the dial background map while dial-bg is still display:none, so switching it
@@ -896,8 +911,10 @@
       // 저전력 모드에서는 muted+playsinline이어도 사용자 제스처 없는 autoplay가 막힌다
       // (이게 그동안 "탭해서 iLanD 앱 열기" 탭이 사실상 대신 해주던 일) — 영상이 아직 멈춰
       // 있는 상태에서 이 화면을 처음 탭하면, 다음 화면으로 넘기지 않고 그 탭으로 영상만
-      // 틔워준다. 이미 재생 중이면 평소대로 다음 화면으로 넘어간다.
-      if (n === 1 && welcomeVideo.paused) {
+      // 틔워준다. 이미 재생 중이면 평소대로 다음 화면으로 넘어간다. 영상이 끝까지 재생돼서
+      // 멈춘 경우(ended)도 paused는 true가 되지만, 이땐 "막혀서 못 틀어준 것"이 아니라
+      // "다 봤으니 터치해서 계속"이라는 뜻이므로 다음 화면으로 넘어가야 한다.
+      if (n === 1 && welcomeVideo.paused && !welcomeVideo.ended) {
         welcomeVideo.play().catch(function () {});
         return;
       }
