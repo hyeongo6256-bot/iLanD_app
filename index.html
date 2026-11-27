@@ -380,8 +380,9 @@
   </div>
 
   <!-- Step 1 — welcome -->
-  <div class="screen" data-step="1" style="background:#f4aec1; color:#f3ede4; cursor:pointer; padding:0; overflow:hidden;">
+  <div class="screen" data-step="1" style="background:#f4aec1; color:#f3ede4; cursor:pointer; padding:0; overflow:hidden; position:relative;">
     <video id="welcome-video" src="assets/iland-intro.mp4" muted playsinline style="display:block; width:100%; height:100%; object-fit:cover; mix-blend-mode:screen;"></video>
+    <div style="position:absolute; left:0; right:0; bottom:calc(28px + env(safe-area-inset-bottom)); text-align:center; font-size:12px; color:#fff; letter-spacing:.06em; pointer-events:none;">화면을 터치해주세요</div>
   </div>
 
   <!-- Step 2 — coordinate dial (swipe up to continue) -->
@@ -776,9 +777,36 @@
   }
 
   function scheduleAuto() {
-    // step 1 (welcome video) and step 2 (coordinate dial) both wait for
-    // the user (tap / swipe-up) — no auto-advance timers.
+    // step 1 (welcome video)은 사용자의 탭을 기다린다 — 자동 타이머 없음.
+    // step 2 이상(좌표 다이얼/정보입력/메인 탭)은 아래 유휴 타이머가 대신 돈다.
+    armIdleTimer();
   }
+
+  // --- 전시 키오스크용: welcome을 벗어난 뒤 일정 시간 조작이 없으면 자동으로 welcome
+  // 화면으로 복귀시켜, 관람객이 멈춘 채로 방치해도 다음 사람이 깨끗한 화면을 보게 한다.
+  // welcome(step1) 자체에는 걸지 않는다 — 이미 "화면을 터치해주세요" 문구로 기다리는 중이라
+  // 되돌아갈 더 앞 화면이 없다.
+  var IDLE_RESET_MS = 30000;
+  var idleTimer = null;
+  function armIdleTimer() {
+    clearTimeout(idleTimer);
+    if (step < 2) { idleTimer = null; return; }
+    idleTimer = setTimeout(function () {
+      if (step < 2) return;
+      // 되돌아간 화면이 이전 관람객이 열어둔 채팅창/모달/달력 모드로 남아있지 않게 정리.
+      closeChatThread();
+      deedModal.style.display = 'none';
+      moodSheetMode = 'write';
+      moodWriteView.style.display = '';
+      moodBrowseView.style.display = 'none';
+      moodTabWriteBtn.classList.add('active');
+      moodTabBrowseBtn.classList.remove('active');
+      goTo(1);
+    }, IDLE_RESET_MS);
+  }
+  ['touchstart', 'pointerdown', 'keydown', 'wheel'].forEach(function (evt) {
+    document.addEventListener(evt, armIdleTimer, { passive: true, capture: true });
+  });
 
   var welcomeVideo = document.getElementById('welcome-video');
   welcomeVideo.playbackRate = 1.35;
